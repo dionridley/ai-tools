@@ -18,21 +18,18 @@ claude-plugins/
 ├── project-mgmt-plugin/       # Main project management plugin
 │   ├── .claude-plugin/
 │   │   └── plugin.json        # Plugin manifest
-│   ├── commands/              # Remaining slash commands (.md files)
-│   │   ├── dr-plan.md         # Multi-mode: CREATE, REFINE, SUMMARY, QUESTION RESOLUTION
-│   │   └── dr-plan/           # Subfolder for mode-specific logic
-│   │       ├── summary.md
-│   │       └── questions.md
-│   ├── skills/                # Skill 2.0 directories
-│   │   ├── dr-init/           # Project structure initialization (invoked as /dr-init)
-│   │   ├── dr-research/       # Deep research with web search (invoked as /dr-research)
-│   │   └── dr-prd/            # PRD creation and refinement (invoked as /dr-prd)
-│   └── templates/             # Shared templates for remaining commands (e.g., plan-template.md)
+│   ├── agents/                # Subagents (plan-verifier.md)
+│   └── skills/                # Skill 2.0 directories
+│       ├── dr-init/           # Project structure initialization (invoked as /dr-init)
+│       ├── dr-research/       # Deep research with web search (invoked as /dr-research)
+│       ├── dr-prd/            # PRD creation and refinement (invoked as /dr-prd)
+│       ├── dr-plan/           # Implementation plans: CREATE, REFINE, SUMMARY, QUESTION RESOLUTION
+│       └── dr-ship/           # Ship a finished plan: verify → close out → commit → push → PR (invoked as /dr-ship)
 ├── engineering-tools/         # Engineering-tools plugin (includes frontend-design, react-19 skills)
 └── experimental/              # Experimental plugin (MVP builder)
 ```
 
-Note: `/dr-init` and `/dr-research` are implemented as Skills 2.0 with `disable-model-invocation: true` — they are invoked explicitly via their slash-command names, not auto-discovered by Claude. `/dr-plan` and `/dr-prd` are also Skills 2.0 but use `disable-model-invocation: false` paired with a **Trigger Validation** gate: the model invokes them only when the user writes the literal `/dr-plan` or `/dr-prd` token anywhere in their message (not only at the start), and the gate stops conversational drift from auto-firing them.
+Note: `/dr-init`, `/dr-research`, and `/dr-ship` are implemented as Skills 2.0 with `disable-model-invocation: true` — they are invoked explicitly via their slash-command names, not auto-discovered by Claude (`/dr-ship` especially, because it pushes and publishes). `/dr-plan` and `/dr-prd` are also Skills 2.0 but use `disable-model-invocation: false` paired with a **Trigger Validation** gate: the model invokes them only when the user writes the literal `/dr-plan` or `/dr-prd` token anywhere in their message (not only at the start), and the gate stops conversational drift from auto-firing them.
 
 ## Plugin Architecture
 
@@ -82,7 +79,7 @@ The main command detects mode from args and reads the appropriate subfolder file
 | Auto-discovery | N/A — always explicit | On by default; set `disable-model-invocation: true` to make the skill explicit-only (invoked via `/skill-name`) |
 | Use when | Simple one-shot workflow with a single set of instructions | Multi-phase or multi-mode workflow that benefits from progressive disclosure; or a workflow Claude should be able to auto-discover |
 
-The project-management plugin's `dr-init` and `dr-research` Skills use `disable-model-invocation: true` — they behave like slash commands from a user's perspective (invoked explicitly as `/dr-init`, `/dr-research`) but benefit from the Skill 2.0 directory structure and progressive-disclosure pattern internally. `dr-plan` and `dr-prd` use `disable-model-invocation: false` paired with a Trigger Validation gate, so the model invokes them only when the user includes the literal `/dr-plan` / `/dr-prd` token anywhere in the message — looser than a leading-only slash command, but still requiring the explicit token.
+The project-management plugin's `dr-init`, `dr-research`, and `dr-ship` Skills use `disable-model-invocation: true` — they behave like slash commands from a user's perspective (invoked explicitly as `/dr-init`, `/dr-research`, `/dr-ship`) but benefit from the Skill 2.0 directory structure and progressive-disclosure pattern internally. `dr-plan` and `dr-prd` use `disable-model-invocation: false` paired with a Trigger Validation gate, so the model invokes them only when the user includes the literal `/dr-plan` / `/dr-prd` token anywhere in the message — looser than a leading-only slash command, but still requiring the explicit token.
 
 ### Skill Structure
 

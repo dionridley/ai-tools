@@ -1,6 +1,6 @@
 {
   "name": "project-management",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Structured project management with research, PRDs, and implementation plans",
   "author": {
     "name": "Dion Ridley",
@@ -18,7 +18,8 @@
     "./skills/dr-research",
     "./skills/dr-init",
     "./skills/dr-prd",
-    "./skills/dr-plan"
+    "./skills/dr-plan",
+    "./skills/dr-ship"
   ],
   "agents": [
     "./agents/plan-verifier.md"

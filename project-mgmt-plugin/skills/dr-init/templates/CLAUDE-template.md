@@ -58,7 +58,7 @@ User-provided reference materials, external documentation, design specifications
 Structured research output per topic: canonical markdown files plus a portable HTML microsite view (`.html` siblings + bundled `assets/` — works offline, safe to share).
 
 ## Plan Management Workflow
-<!-- section: plan-management-workflow v2 -->
+<!-- section: plan-management-workflow v3 -->
 
 ### IMPORTANT: Plan Execution Rules
 
@@ -97,7 +97,7 @@ Structured research output per topic: canonical markdown files plus a portable H
 4. **Move to Active**: Move the plan file from `draft/` to `in_progress/` when ready to implement
 5. **Implement**: Work through plan phases systematically
 6. **Minor Adjustments** (as needed): `/dr-plan @_claude/plans/in_progress/001-plan.md [minor changes]` for small corrections
-7. **Complete**: Move the plan file from `in_progress/` to `completed/` when finished
+7. **Complete & Ship**: Run `/dr-ship` when the plan is finished — it verifies every checkbox, backfills the retro, moves the plan to `completed/`, commits, pushes, and opens a PR populated from the plan summary. (Moving the file manually still works if you prefer.)
 
 **Plan Numbering:**
 Plans are automatically numbered sequentially (001, 002, 003, ..., 999, 1000, ...) to track chronological order. The number is determined by scanning **all three folders** (draft/, in_progress/, completed/) to find the highest existing number, then incrementing by 1. The number stays with the plan when moved between folders.
@@ -105,7 +105,7 @@ Plans are automatically numbered sequentially (001, 002, 003, ..., 999, 1000, ..
 Example: If your completed/ folder has plans 001-045 and in_progress/ has 046-047, the next plan created will be 048, even if draft/ is empty.
 
 ## Available Commands
-<!-- section: available-commands v2 -->
+<!-- section: available-commands v3 -->
 
 This project uses the **project-management** plugin (dr- prefix) which provides:
 
@@ -113,6 +113,7 @@ This project uses the **project-management** plugin (dr- prefix) which provides:
 - `/dr-research [detailed prompt]` - Conduct research on a topic (Standard path, or Deep path with claim verification) producing markdown + a portable HTML view (supports multi-line prompts)
 - `/dr-prd [detailed feature description OR @prd-file [refinement]]` - Create or refine comprehensive PRD with extended thinking
 - `/dr-plan [detailed context OR @plan-file [refinement]]` - Create or refine implementation plan with extended thinking (dual-mode)
+- `/dr-ship [@plan-file] [--verify]` - Ship a finished plan: verify completion, backfill the retro, move to `completed/`, commit, push, and open a PR populated from the plan summary
 
 **Dual-Mode Refinement:**
 Both PRDs and plans can be refined using the same commands. Use `/dr-prd @_claude/prd/feature.md [changes]` to refine PRDs or `/dr-plan @_claude/plans/draft/plan.md [changes]` to refine plans. Both commands use extended thinking and show diff summaries. They automatically detect whether you're creating or refining based on the `@` file reference.

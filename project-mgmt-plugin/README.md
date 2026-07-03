@@ -10,6 +10,7 @@ A structured project management system for Claude Code that provides organized w
 - **Implementation Planning**: Detailed, phase-based plans with sequential numbering and tracking
 - **Iterative Plan Refinement**: Refine existing plans with extended thinking while preserving structure and number
 - **Plan Lifecycle**: Move plans through draft → in-progress → completed stages
+- **One-Command Shipping**: `/dr-ship` verifies a finished plan, backfills the retro, archives it, commits, pushes, and opens a PR populated from the plan summary
 - **Language Agnostic**: Works with any programming language or framework
 - **Git-Friendly**: All files are markdown for easy version control
 
@@ -368,6 +369,34 @@ When a PR URL is provided:
 
 The agent is a deliberate iteration surface. Common tuning dimensions: skepticism level (how readily `UNVERIFIED` is chosen over `PASS`), evidence thresholds (what counts as direct evidence vs. inference), and the scope boundary (keeping it out of architecture advice). Contributions welcome via PR.
 
+### `/dr-ship`
+
+Ships a finished plan end-to-end: verifies completion, closes the plan out, commits, pushes, and opens a GitHub PR populated from the plan summary. Explicit invocation only — it never auto-triggers, because it pushes and publishes.
+
+**Usage:**
+```bash
+# Auto-detect the plan in _claude/plans/in_progress/
+/dr-ship
+
+# Explicit plan file
+/dr-ship @_claude/plans/in_progress/003-database-migration.md
+
+# Add independent verification by the plan-verifier agent before closing out
+/dr-ship --verify
+```
+
+**What it does:**
+
+1. **Verifies the plan is done** — audits every Tasks / Verification / Phase Exit Gate / Success Criteria checkbox and unresolved `[AWAITING]` questions. Done plans only: there is no WIP mode. Items you declare unnecessary can be **waived** (`[WAIVED date: reason]` tag; the checkbox honestly stays unchecked). With `--verify`, the plan-verifier agent independently checks the final phase first.
+2. **Closes the plan out** (backstop for the plan's own Completion step) — backfills the Retro from the plan's accumulated notes and the session context (one optional "anything to add?" prompt), sets `Status: completed`, and moves the file to `completed/` so the archived plan rides in the same commit.
+3. **One flight-plan confirmation** — branch, staged files (`git add -A` default, adjustable), push target, and PR action in a single gate. If you're on `main`/`master` it stops and offers to create a branch first.
+4. **Commits, pushes, opens the PR** — the PR body is generated with the same format rules as `/dr-plan summary` (single source of truth). If an open PR already exists for the branch, it's updated instead.
+5. **Displays the squash-merge commit message** — always, at the end. Copy it into GitHub's merge box after reviewing the PR.
+
+**Graceful degradation:** no GitHub remote, missing/unauthenticated `gh`, or a closed PR never fail the ritual — commit and push still run, and the PR body is displayed for manual paste (with a one-click GitHub compare URL when applicable).
+
+**Cross-platform:** all git/gh operations use file-based message passing (`git commit -F`, `--body-file`) and POSIX-consistent commands — identical behavior on Windows, macOS, and Linux.
+
 ## Moving Plans Between Stages
 
 Plans can be moved between `draft/`, `in_progress/`, and `completed/` folders using:
@@ -471,14 +500,16 @@ your-project/
    - With a PR URL: updates the PR title and description directly
    - Without a PR URL: output is copyable markdown
 
-8. **Completion Phase**
+8. **Ship Phase**
    ```bash
-   mv _claude/plans/in_progress/[plan-file].md _claude/plans/completed/
+   /dr-ship
    ```
-   Or ask Claude to move the plan to completed.
-   - Archives completed plan
-   - Documents lessons learned
-   - Updates success metrics
+   - Verifies every checkbox in the plan is complete (waive what's genuinely not needed)
+   - Backfills the retro and archives the plan to `completed/`
+   - Commits, pushes, and opens a PR populated from the plan summary
+   - Hands back the squash-merge commit message for GitHub's merge box
+
+   Manual alternative: `mv _claude/plans/in_progress/[plan-file].md _claude/plans/completed/` and handle git yourself.
 
 ## Important Rules
 
@@ -542,8 +573,8 @@ Have 4 weeks for initial release with basic features.
 # Start implementation (move to in_progress)
 mv _claude/plans/draft/001-realtime-chat.md _claude/plans/in_progress/
 
-# When done (move to completed)
-mv _claude/plans/in_progress/001-realtime-chat.md _claude/plans/completed/
+# When done: verify, close out, commit, push, open the PR
+/dr-ship
 ```
 
 ### Example 2: Technical Spike / Investigation
@@ -572,6 +603,7 @@ then switch over production traffic with blue-green deployment strategy.
 6. **Idempotent Init**: Safe to run `/dr-init` multiple times - it won't duplicate files
 7. **PR Summaries**: Use `/dr-plan @plan.md summary` to generate PR descriptions, or add a PR URL to push directly to GitHub
 8. **Resolve Questions Early**: Use `/dr-plan @plan.md answer questions` to resolve blocking questions before implementation
+9. **Ship in One Command**: When a plan is finished, `/dr-ship` handles verification, retro, archiving, commit, push, and the PR in one pass
 
 ## Contributing
 

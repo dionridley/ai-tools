@@ -5,6 +5,28 @@ All notable changes to the Project Management Plugin will be documented in this 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0] - 2026-07-03
+
+New skill `/dr-ship`: the end-of-plan ritual as one pipeline — verify the plan is done, close it out, commit, push, open a PR populated from the plan summary, and hand back the squash-merge commit message.
+
+### Added
+
+- **`skills/dr-ship/`** (`SKILL.md` + `references/verify-and-close.md` + `references/git-and-pr.md`) — explicit-only (`disable-model-invocation: true`; it pushes and publishes, so it never fires from conversational drift). Flow:
+  - **Plan discovery** — auto-detects the single plan in `_claude/plans/in_progress/` (asks when there are several), or takes an explicit `@plan-file`. Non-/dr-plan-format files degrade to a best-effort audit or abort, user's choice.
+  - **Done audit** — done plans only, no WIP mode. Blocking: unchecked Tasks / Verification / Phase Exit Gate boxes, unchecked Success Criteria, unresolved `[AWAITING]` questions. Non-blocking: Assumptions, `[OPEN]` questions. Items the user declares unnecessary can be **waived** — the line gains a `[WAIVED YYYY-MM-DD: reason]` tag while the checkbox honestly stays `[ ]`.
+  - **`--verify` flag** — additionally spawns the `project-management:plan-verifier` agent on the final phase; its FAIL/UNVERIFIED verdicts are treated as blocking, quoted verbatim.
+  - **Close-out backstop** — if the executing agent didn't finish its Completion duties: backfill the Retro from plan-accumulated content + conversation context (one optional "anything to add?" prompt, no fabrication), set `Status: completed`, move the file to `completed/` via `git mv` (Read/Write fallback for untracked files) so the completed plan rides in the ship commit.
+  - **One flight-plan gate** — a single confirmation covering branch, staged file list (`git add -A` default, adjustable), push target, and PR action. Mandatory stop when the branch is `main`/`master`, with branch creation (`git switch -c`) offered inline.
+  - **Summary reuse** — reads `dr-plan/references/summary-mode.md` cross-skill and follows only its generation phase; the PR summary and commit-message formats have a single source of truth. The generated title+bullets message is written for the user's **squash-merge commit** and is always displayed at the end.
+  - **Ship + graceful degradation** — commit (`git commit -F` temp file), push (`-u` when no upstream), then `gh pr create --body-file` (or the summary-mode update flow when an open PR already exists). Non-GitHub remote / missing gh / closed PR degrade to displaying the PR body (plus a GitHub compare URL when applicable) — never to failing the ritual.
+  - **Cross-platform rules** — all git/gh via the Bash tool; multiline text reaches git/gh only via files (`-F` / `--body-file`, no heredocs, no multiline `-m`); temp files staged-around and deleted; native tools for all other filesystem work.
+
+### Changed
+
+- **`dr-plan/templates/plan-base.md`** — the Completion section gains step 3: suggest `/dr-ship` for commit/push/PR after the retro + move. Ownership is unchanged (backstop model): the executing agent still closes out when it can; `/dr-ship` verifies and backstops idempotently.
+- **`dr-init/templates/CLAUDE-template.md`** — `plan-management-workflow` section bumped v2 → v3 (workflow step 7 is now "Complete & Ship: run `/dr-ship`", manual move still noted); `available-commands` section bumped v2 → v3 (adds the `/dr-ship` entry). Existing projects get both updates offered on their next `/dr-init`.
+- **`plugin.json`** — `./skills/dr-ship` added to the skills array.
+
 ## [2.0.0] - 2026-07-01
 
 Major upgrade to `/dr-research`: portable HTML microsites per report, and a two-path quality model (Standard/Deep) with mandatory output discipline. Markdown remains canonical — `/dr-prd` and `/dr-plan` consumption of `@_claude/research/.../index.md` is unaffected. Existing reports keep working untouched; the new format applies to research created from this version on (a deep dive onto an old-format parent adds the HTML view additively).
