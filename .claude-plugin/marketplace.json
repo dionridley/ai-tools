@@ -9,7 +9,7 @@
       "name": "project-management",
       "source": "./project-mgmt-plugin",
       "description": "Structured project management with research, PRDs, and implementation plans",
-      "version": "1.10.0"
+      "version": "2.0.0"
     },
     {
       "name": "engineering-tools",

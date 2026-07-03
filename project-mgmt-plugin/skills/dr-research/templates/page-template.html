@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{TITLE}}</title>
+<!-- template: dr-research v1 -->
+<link rel="stylesheet" href="{{ASSETS}}/styles.css">
+<!-- FOUC guard: set palette + mode before first paint (URL param -> saved -> default) -->
+<script>
+  (function () {
+    var url = new URLSearchParams(location.search);
+    function pick(key, store, fb) {
+      var v = url.get(key);
+      if (v) { try { localStorage.setItem(store, v); } catch (e) {} return v; }
+      try { v = localStorage.getItem(store); } catch (e) {}
+      return v || fb;
+    }
+    var sysDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    document.documentElement.dataset.palette = pick('palette', 'dr-palette', 'b');
+    document.documentElement.dataset.mode = pick('mode', 'dr-mode', sysDark ? 'dark' : 'light');
+  })();
+</script>
+</head>
+<body>
+  <div class="controls" role="group" aria-label="Appearance">
+    <div class="picker" id="dr-picker">
+      <button data-palette="a" aria-pressed="false" title="Stone &amp; Teal"><span class="chip" style="background:linear-gradient(135deg,#f7f6f3 55%,#0f766e 55%)"></span></button>
+      <button data-palette="b" aria-pressed="false" title="Slate &amp; Amber"><span class="chip" style="background:linear-gradient(135deg,#f5f6f8 55%,#b45309 55%)"></span></button>
+      <button data-palette="c" aria-pressed="false" title="Paper &amp; Rust"><span class="chip" style="background:linear-gradient(135deg,#faf6f0 55%,#b5442d 55%)"></span></button>
+    </div>
+    <div class="sep"></div>
+    <button class="modebtn" id="dr-mode" title="Toggle light/dark" aria-label="Toggle light/dark">◐</button>
+  </div>
+
+  <div class="wrap">
+    <article id="content" class="doc"></article>
+    <footer class="doc-footer">{{FOOTER}}</footer>
+  </div>
+
+  <div id="zoom" aria-hidden="true"><div class="stage"></div><div class="hint">click anywhere or press Esc to close</div></div>
+
+  <!-- CONTENT: canonical markdown, inert (browser does not execute type="text/markdown") -->
+  <script type="text/markdown" id="dr-content-src">{{CONTENT_MARKDOWN}}</script>
+
+  <script src="{{ASSETS}}/vendor/marked.min.js"></script>
+  <script src="{{ASSETS}}/vendor/highlight.min.js"></script>
+  {{MERMAID_SCRIPT}}
+  <script src="{{ASSETS}}/render.js"></script>
+  <script src="{{ASSETS}}/theme.js"></script>
+</body>
+</html>

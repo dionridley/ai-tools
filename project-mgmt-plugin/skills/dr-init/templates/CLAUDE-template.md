@@ -55,7 +55,7 @@ Product Requirement Documents defining features, user stories, and requirements.
 User-provided reference materials, external documentation, design specifications.
 
 **`_claude/research/`**
-Structured research output with multiple markdown files per topic.
+Structured research output per topic: canonical markdown files plus a portable HTML microsite view (`.html` siblings + bundled `assets/` — works offline, safe to share).
 
 ## Plan Management Workflow
 <!-- section: plan-management-workflow v2 -->
@@ -105,12 +105,12 @@ Plans are automatically numbered sequentially (001, 002, 003, ..., 999, 1000, ..
 Example: If your completed/ folder has plans 001-045 and in_progress/ has 046-047, the next plan created will be 048, even if draft/ is empty.
 
 ## Available Commands
-<!-- section: available-commands v1 -->
+<!-- section: available-commands v2 -->
 
 This project uses the **project-management** plugin (dr- prefix) which provides:
 
 - `/dr-init` - Initialize or update project structure
-- `/dr-research [detailed prompt]` - Conduct deep research with extended thinking (supports multi-line prompts)
+- `/dr-research [detailed prompt]` - Conduct research on a topic (Standard path, or Deep path with claim verification) producing markdown + a portable HTML view (supports multi-line prompts)
 - `/dr-prd [detailed feature description OR @prd-file [refinement]]` - Create or refine comprehensive PRD with extended thinking
 - `/dr-plan [detailed context OR @plan-file [refinement]]` - Create or refine implementation plan with extended thinking (dual-mode)
 

@@ -6,31 +6,56 @@ This document guides how to structure research output files. Read this during Ph
 
 - **Prescribe quality, not rigid structure.** Every finding must have supporting evidence. Every claim must be traceable to a source. But the exact section headings and organization should adapt to the topic.
 - **Write for a developer who will act on this research.** Be specific, include code examples when relevant, and make the research actionable — not academic.
-- **Use Mermaid diagrams where they clarify.** Workflows, architecture, system interactions, comparisons, and dense technical concepts benefit from visual representation. See `mermaid-patterns.md` for patterns. Don't force diagrams where they don't add value.
-- **Flag uncertainty, not certainty.** Only call out findings based on limited sources, single blog posts, or potentially outdated information. High-confidence findings don't need markers — the reader assumes confidence by default.
+- **The discipline rules in SKILL.md Phase 3 are structural requirements.** Answer block, point-of-claim citations, measured-vs-estimated tags, mandatory Gaps, premise-level open question, adjective discipline, supersession, verdict ≤2 places. A report missing any of them is incomplete.
+- **Markdown is canonical.** Write clean GFM: plain tables, ```mermaid fences, `>` blockquotes for callouts, relative links to sibling `.md` files. The HTML layer adds all presentation (see "How markdown becomes HTML" below). Raw HTML in markdown is reserved for hand-authored SVG figures only (see diagrams.md).
+
+## File Defaults
+
+- **Default set:** `index.md` + `findings.md` + `resources.md`. Add `recommendations.md` for decision research only.
+- **Topic/artifact files** only when they carry a standalone artifact (scored comparison matrix, schema/DDL, runnable guide) or the user explicitly requested one.
+- **Each claim lives in exactly one place.** Other files link to it instead of restating it. findings.md must never become a summary of topic files, and no file re-narrates another.
+- **The verdict appears at most twice:** the index answer block and recommendations.md. findings.md presents evidence, not the verdict again.
+- **Backstop:** if de-duplicated findings would exceed ~1,500 lines, propose a split to the user rather than silently producing a monster or fragments.
 
 ## File Writing Order
 
-Write files in this order:
 1. `findings.md` — core analysis (written first because everything else depends on it)
-2. Topic-specific files — comparison matrices, implementation guides, etc. (if warranted)
+2. Topic/artifact files — only if planned and approved
 3. `resources.md` — bibliography (written after research is complete)
-4. `recommendations.md` — actionable next steps (only if warranted)
+4. `recommendations.md` — decision research only
 5. `index.md` — overview and navigation (written last so it reflects everything produced)
+6. `.html` siblings for every page (SKILL.md Phase 3.5)
+
+## The Answer Block
+
+index.md opens with the answer — before background, before methodology. Format it as a blockquote callout so the HTML view renders it as the highlighted box:
+
+```markdown
+> **Answer: [One-sentence verdict].** Confidence: [High/Medium/Low].
+> **Exceptions:** [the 1–2 conditions under which this flips — every crisp
+> answer carries its exceptions].
+> **Verification (Deep path):** rests on claims 1–2 Confirmed, claim 3
+> Single-source — see the [Claim Ledger](./findings.md#claim-ledger).
+```
+
+Rules:
+- The verdict sentence is bolded and answers the research question directly — "Use X", "Y is viable but not for Z", "No — the premise doesn't hold."
+- The confidence word must be consistent with the evidence. If the report flags its own core claims as unverified, the answer cannot say "clearly" or "definitively."
+- Exceptions are part of the answer, not a footnote. A 1-of-N failure case the reader might hit belongs here.
 
 ## index.md
 
-**Purpose:** The landing page for the research. Gives the reader a quick understanding of what was researched, what was found, and where to find details.
+**Purpose:** The landing page. Answer first, then the shortest path to the details.
 
-**Written last** so it accurately reflects everything that was produced.
+**Written last** so it accurately reflects everything produced.
 
 **Should include:**
+- The answer block (above) immediately after the header
 - Research question and scope (what was and wasn't researched)
-- 1-2 paragraph overview summarizing the key insight
-- Key takeaways (top 3-5 bullet points — the most important things the reader should know)
-- Visual concept map — encouraged when it helps show how findings relate to each other. Use a Mermaid mindmap, flowchart, or other diagram type that fits. Not required for every research output — use judgment on whether it adds value.
-- File navigation with brief descriptions of what each file contains
+- Key takeaways (top 3–5) — each an insight of the form "X, therefore Y", not a restated fact
+- File navigation with brief descriptions
 - Deep Dives section (only in parent research when deep-dive follow-ups exist)
+- **No concept map by default.** A diagram appears in index.md only if it passes the rubric in diagrams.md (TOC-mindmaps are banned — a diagram that re-lists the sections is decoration).
 
 **Example structure:**
 
@@ -38,77 +63,128 @@ Write files in this order:
 # Research: [Topic]
 
 **Date:** [YYYY-MM-DD]
-**Research Question:** [The specific question or area investigated]
+**Research Question:** [The specific question investigated]
 
-## Overview
+> **Answer: [Verdict].** Confidence: [word]. **Exceptions:** [conditions].
 
-[1-2 paragraphs summarizing the most important insight from this research.
-Not a list of everything found — the single most valuable thing the reader
-should take away.]
+## Scope
+
+[What was and wasn't researched — 2-3 lines]
 
 ## Key Takeaways
 
-1. **[Takeaway 1]** — [Brief explanation of why this matters]
-2. **[Takeaway 2]** — [Brief explanation]
-3. **[Takeaway 3]** — [Brief explanation]
-
-## Concept Overview
-
-[Mermaid diagram showing how the key concepts/findings relate — when it adds value]
+1. **[Insight]** — [why it matters / what to do because of it]
+2. **[Insight]** — [...]
+3. **[Insight]** — [...]
 
 ## Research Files
 
-- **[Findings](./findings.md)** — [Brief description of what's covered]
-- **[Topic-Specific File](./topic-file.md)** — [Why this file exists]
+- **[Findings](./findings.md)** — [What's covered]
 - **[Resources](./resources.md)** — Bibliography of all sources consulted
-- **[Recommendations](./recommendations.md)** — Actionable next steps
+- **[Recommendations](./recommendations.md)** — [Decision research only]
 
 ## Deep Dives
 
-- **[Deep Dive Topic](./deep-dives/slug-date/)** — [Date] — [Why this follow-up was done]
+- **[Deep Dive Title](./deep-dives/slug-date/index.md)** — [Date] — [Why this follow-up was done]
 ```
 
 ## findings.md
 
-**Purpose:** The core analytical document. This is where the real value of the research lives — thorough analysis with evidence, not just a summary of what was found.
+**Purpose:** The core analytical document — evidence and analysis, organized however fits the topic. It does NOT restate the verdict (that lives in index and recommendations).
 
 **Should include:**
-- Executive summary (2-3 sentences, the essence of findings)
-- Detailed findings organized by topic — use whatever structure fits the research naturally. Don't force a rigid "Finding 1, Finding 2" pattern if a different organization makes more sense.
-- For each finding: what was learned, why it matters, and evidence supporting it
-- Mermaid diagrams where they help explain workflows, architecture, interactions, or comparisons
-- Cross-cutting themes — patterns that span multiple findings
-- Gaps and limitations — what we still don't know, what wasn't researched, areas of uncertainty
+- Claim Ledger near the top (Deep path — format below)
+- Detailed findings organized by topic, each with: what was learned, why it matters, and the evidence
+- Community Signal section (library/framework evaluations — format below)
+- Cross-cutting themes when patterns span findings
+- **Gaps & Limitations — mandatory**
+- **Open Questions — mandatory, with ≥1 premise-level question**
 
 **Quality standards:**
-- Every substantive claim should be traceable to a source (inline link or reference to resources.md)
-- Findings should include analysis, not just facts — "what does this mean for us?"
-- Include code examples when they make a concept concrete
-- Use tables for structured comparisons (feature matrices, compatibility tables, etc.)
+- **Citation at point-of-claim:** every decision-bearing fact gets an inline link where it is asserted. "The docs confirm X ([source](url))" — not a bare assertion with the link quarantined in resources.md.
+- **Measured vs estimated:** any decision-bearing number carries a citation/measurement or an explicit `(estimated, not measured)` tag. "Sub-10ms at 10M rows" without a benchmark link is a defect.
+- Findings include analysis, not just facts — "what does this mean for us?"
+- Ground claims in the user's own codebase where applicable — name the file/symbol.
+- Code examples when they make a concept concrete; tables for structured comparisons.
 
-**Confidence flags (use sparingly):**
+### Claim Ledger (Deep path)
 
-Only flag findings where the reader should be skeptical. Don't mark high-confidence findings.
-
-Format for uncertain findings — use a blockquote callout:
+One row per load-bearing claim — the 3–6 claims where, if false, the verdict flips. The Verdict column values are exactly: `Confirmed`, `Single-source`, `Contested`, `Estimated`, `Unverified` (the HTML view auto-styles this column).
 
 ```markdown
-> **Note:** This finding is based on a single blog post from 2024. 
-> The library has had two major releases since then. Verify before 
-> relying on this for implementation decisions.
+## Claim Ledger
+
+| # | Claim | Verdict | Evidence |
+|---|-------|---------|----------|
+| 1 | [Library] supports [capability] as of v3.2 | Confirmed | [changelog](url); [maintainer comment](url) (independent) |
+| 2 | Lookup stays under ~10ms at 10M rows | Estimated | [docs on index behavior](url); no benchmark run — extrapolated |
+| 3 | [Framework] will keep LTS until 2027 | Single-source | [roadmap blog post](url) only; no second origin found |
 ```
 
-**Conflicting sources — cite inline:**
+- Evidence cells name the sources AND why they're independent (or why independence couldn't be established).
+- `Contested` rows link both sides and name the tiebreaker applied.
+- The index answer block references these verdicts by number.
 
-When sources disagree, document both sides and cite inline so the reader can evaluate:
+### Community Signal (library/framework evaluations)
+
+Raw project-health metrics live here **once**; comparison tables and prose reference this section instead of restating numbers:
 
 ```markdown
-> **Conflicting information:** [Official docs (2026-03)](https://...) 
-> state that runtime compilation was removed in v3.0, while 
-> [this blog post (2025-08)](https://...) describes runtime compilation 
-> as the recommended approach. The blog post appears to reference v2.x. 
-> The official docs are likely current, but verify which version you're 
-> targeting.
+## Community Signal
+
+| Signal | [Option A] | [Option B] |
+|--------|-----------|-----------|
+| Last release / cadence | [date, cadence](url) | ... |
+| License | [MIT](url-to-LICENSE) | ... |
+| Open/closed issue health | [ratio, responsiveness](url) | ... |
+| Bus factor | [N active maintainers](url) | ... |
+| Adoption (dated) | [downloads/stars as of YYYY-MM](url) | ... |
+```
+
+### Confidence flags
+
+Flag load-bearing claims with High/Medium/Low and a one-line reason. Use a blockquote callout for claims the reader should treat skeptically:
+
+```markdown
+> **Low confidence:** based on a single 2024 blog post; the library has had
+> two major releases since. Verify before relying on this.
+```
+
+Never pair certainty language with a flagged claim — "clearly the best option" cannot sit above "we did not prototype this."
+
+### Conflicting sources — cite inline
+
+```markdown
+> **Conflicting information:** [Official docs (2026-03)](https://...) state
+> that runtime compilation was removed in v3.0, while [this post (2025-08)](https://...)
+> describes it as recommended. The post references v2.x. Tiebreaker: recency +
+> authority — the docs win, but verify against your target version.
+```
+
+### Gaps & Limitations (mandatory)
+
+What was not verified, not prototyped, or not covered — and what that means:
+
+```markdown
+## Gaps & Limitations
+
+- We did NOT prototype [X] — the "[claim]" finding is extrapolated (see ledger #2)
+- [Source type] was unavailable ([npm endpoint 404'd]); adoption numbers are from [fallback]
+- [Area] was out of scope per the plan; it could change [which conclusion]
+```
+
+### Open Questions (mandatory, ≥1 premise-level)
+
+Tactical follow-ups are fine, but at least one question must challenge the premise:
+
+```markdown
+## Open Questions
+
+- [Tactical: which plan tier do we need for X?]
+- [Tactical: does Y work behind our proxy?]
+- **Premise:** [What would make this the wrong scope/product/approach entirely?
+  e.g., "If most usage is on managed hosting, is self-hosting research solving
+  the right problem?"]
 ```
 
 **Example structure:**
@@ -120,32 +196,33 @@ When sources disagree, document both sides and cite inline so the reader can eva
 
 [← Back to Index](./index.md)
 
-## Executive Summary
+## Claim Ledger        [Deep path]
 
-[2-3 sentences capturing the essence of what was found]
+[table]
 
 ## [Topic Area 1]
 
-[Analysis, evidence, code examples, diagrams as appropriate]
-
-## [Topic Area 2]
-
-[Analysis organized in whatever way fits this topic naturally]
+[Analysis, evidence with inline citations, code examples, diagrams that pass the rubric]
 
 ## [Topic Area N]
 
 [...]
 
+## Community Signal    [library evaluations]
+
+[table]
+
 ## Cross-Cutting Themes
 
 1. **[Theme]:** [How this pattern appears across multiple findings]
-2. **[Theme]:** [...]
 
-## Gaps and Limitations
+## Gaps & Limitations
 
-- [What we don't know and why it might matter]
-- [Limitations of the sources available]
-- [Areas that would benefit from deeper investigation]
+[mandatory]
+
+## Open Questions
+
+[mandatory, ≥1 premise-level]
 
 ## Related Documents
 
@@ -155,11 +232,9 @@ When sources disagree, document both sides and cite inline so the reader can eva
 
 ## resources.md
 
-**Purpose:** A bibliography of all sources consulted during research. A single reference point for where information came from.
+**Purpose:** Bibliography of all sources consulted. It is NOT the claim→source map — claims are cited inline where asserted; this file is for coverage and re-finding sources.
 
-**Always created.** Even flexible research needs a source list.
-
-**Use minimal grouping** for readability — enough structure to be useful, not so much that it feels forced. Group by type when natural:
+**Always created.** Use minimal grouping:
 
 ```markdown
 # Research Resources: [Topic]
@@ -175,11 +250,10 @@ When sources disagree, document both sides and cite inline so the reader can eva
 ## Articles & Blog Posts
 
 - [Resource title](URL) — Author/publication — Brief annotation
-- [Resource title](URL) — Brief annotation
 
 ## Repositories & Libraries
 
-- [Repository name](URL) — Stars, language — Brief annotation
+- [Repository name](URL) — Brief annotation
 
 ## Community Discussions
 
@@ -192,31 +266,21 @@ When sources disagree, document both sides and cite inline so the reader can eva
 ```
 
 **Guidelines:**
-- Every entry should have a brief annotation explaining its relevance — not just a bare URL
-- Don't force categories. If all sources are docs and blog posts, just use those two groups.
-- This is a bibliography, not a curated reading list. Include everything consulted, not just the "best" sources.
+- Every entry gets a brief annotation — not just a bare URL
+- Don't force categories that don't fit
+- Include everything consulted, not just the "best" sources
 
 ## recommendations.md
 
-**Purpose:** Actionable next steps when the research clearly supports them.
+**Purpose:** Actionable next steps. **Decision research only** — technology evaluations, architecture decisions, implementation choices. Skip for exploratory or knowledge-gathering research.
 
-**Conditional — only create this file when:**
-- The research is decision-oriented (technology evaluation, architecture decision)
-- The research is implementation-focused and there are clear steps to take
-- The findings naturally lead to "here's what you should do"
+This file is the verdict's second (and last) allowed appearance.
 
-**Do NOT create this file when:**
-- The research is purely exploratory ("what options exist?")
-- The research is knowledge-gathering without a clear action to take
-- Recommendations would feel forced or premature
-
-**Should include:**
-- Executive summary of top recommendations
-- Prioritized next steps with rationale (why this order?)
-- What to avoid — anti-patterns, common pitfalls
-- Implementation phases (when the research supports phased rollout)
-- Risks and mitigation strategies
-- Questions for further investigation
+**Must include for decision research:**
+- The recommendation with rationale
+- Prioritized next steps (why this order?)
+- What to avoid — anti-patterns, pitfalls
+- **Risk table with decision gates and testable exit criteria** — "what we're betting on" made falsifiable
 
 **Example structure:**
 
@@ -227,13 +291,9 @@ When sources disagree, document both sides and cite inline so the reader can eva
 
 [← Back to Index](./index.md)
 
-## Summary
+## Recommendation
 
-[Brief summary of the top recommendation and why it matters]
-
-## Recommended Approach
-
-[What to do and why — the primary recommendation with rationale]
+[What to do and why — consistent with the index answer block]
 
 ## Next Steps
 
@@ -241,51 +301,46 @@ When sources disagree, document both sides and cite inline so the reader can eva
 **Why:** [Rationale for this being first]
 **What:** [Specific actions]
 
-### Priority 2: [Action]
-**Why:** [Rationale]
-**What:** [Specific actions]
-
 ## What to Avoid
 
-- **[Anti-pattern]:** [Why to avoid and what to do instead]
-- **[Common pitfall]:** [How to prevent]
+- **[Anti-pattern]:** [Why, and what to do instead]
 
-## Risks
+## Risks & Decision Gates
 
-| Risk | Impact | Mitigation |
-|------|--------|------------|
-| [Risk] | [High/Med/Low] | [How to address] |
+| Risk | Impact | Gate / Exit Criterion |
+|------|--------|----------------------|
+| [What we're betting on] | [High/Med/Low] | [Testable: "if X still stutters with batching → switch to Y"] |
 
 ## Open Questions
 
-- [Question that would provide additional clarity if investigated]
-- [Question for the team to discuss]
-
-## Related Documents
-
-- [Index](./index.md) — Research overview
-- [Findings](./findings.md) — Core research findings
-- [Resources](./resources.md) — All sources consulted
+- [Question that would sharpen this decision if investigated]
 ```
 
-## Topic-Specific Files
+## Topic/Artifact Files
 
-**Purpose:** Additional files created when the research warrants dedicated deep dives on specific aspects.
+Created only when they carry a **standalone artifact** — something with its own shape that doesn't belong inline in findings:
 
-**These are proposed in the research plan** and approved by the user during Phase 1. They can also be suggested by the user when adjusting the plan.
-
-**Common examples:**
-- `comparison.md` — Side-by-side evaluation of multiple options (technology evaluations)
-- `implementation-guide.md` — Step-by-step integration guide (implementation research)
-- `architecture.md` — System design analysis with diagrams (architecture decisions)
-- `decision-record.md` — ADR-style document capturing the decision and rationale
-- `[technology-name]-guide.md` — Deep dive on a specific technology within the broader research
+- `comparison.md` — a scored matrix (scores + weights, not prose re-narration of findings)
+- `schema.md` — DDL/data model the user can apply
+- `setup-guide.md` — runnable step-by-step guide
+- `decision-record.md` — ADR-style capture
 
 **Guidelines:**
-- Name files descriptively — the filename should make its contents obvious
-- Each file should be self-contained enough to be useful on its own
-- Include navigation links back to index.md and to related files
-- Use whatever internal structure fits the content — these files are the most flexible
+- The artifact is the file. If a draft reads as commentary on findings.md, fold it back into findings.
+- Metrics and claims referenced by the artifact link back to where they live (findings/community signal) instead of restating them.
+- Include navigation links back to index.md.
+
+## Supersession
+
+When later work (a spike, a deep dive, new evidence) overturns a conclusion, **patch the claim where readers encounter it** — every file where it appears — either by correcting it in place or marking it:
+
+```markdown
+> **Superseded (2026-04-20):** the recommendation below was overturned by
+> [Deep Dive: Tunneling vs Port Flipping](./deep-dives/tunneling-vs-port-flipping-2026-04-20/index.md).
+> [One-line statement of the corrected conclusion.]
+```
+
+A note in the index alone is not enough — readers of findings.md or recommendations.md must hit the correction at the claim. Regenerate the `.html` for every file touched.
 
 ## Deep-Dive Output Structure
 
@@ -294,25 +349,25 @@ When research is a follow-up deep dive on existing research:
 **Directory structure:**
 ```
 _claude/research/[parent-slug]-[date]/
-├── index.md                              (updated with deep-dive link)
-├── findings.md
-├── resources.md
+├── index.md / index.html                 (updated with deep-dive link)
+├── findings.md / findings.html
+├── resources.md / resources.html
+├── assets/                               (shared by parent + deep dives)
 └── deep-dives/
     └── [deep-dive-slug]-[date]/
-        ├── index.md
-        ├── findings.md
-        ├── resources.md
-        └── [additional files as warranted]
+        ├── index.md / index.html         (assets via ../../assets)
+        ├── findings.md / findings.html
+        └── resources.md / resources.html
 ```
 
 **Deep-dive index.md additions:**
 - Link back to the parent research index: `[← Back to [Parent Title]](../../index.md)`
 - Reference the parent research title and date
 - Explain why this deep dive was done (what gap or question it addresses)
+- A "How This Differs" note and a "Sources NOT Used" list when they clarify scope
 - Don't rehash the parent research — focus on what's new
 
-**Deep-dive navigation pattern:**
-All files within a deep dive should include a link back to the parent research in their Related Documents section:
+**Deep-dive navigation pattern** — all files within a deep dive include:
 
 ```markdown
 ## Related Documents
@@ -322,9 +377,20 @@ All files within a deep dive should include a link back to the parent research i
 - [Findings](./findings.md) — Deep dive findings
 ```
 
-**Parent index.md update:**
-- Add or update a "Deep Dives" section
-- Link to the deep-dive's `index.md` file directly — not the directory. Directory links break in markdown viewers.
-  - Correct: `[Deep Dive Title](./deep-dives/slug-date/index.md)`
-  - Wrong: `[Deep Dive Title](./deep-dives/slug-date/)`
-- Include date and brief description of what the deep dive covers
+**Parent updates:**
+- Add or update a "Deep Dives" section in the parent index — link the deep dive's `index.md` file directly, never the directory (directory links break in markdown viewers)
+- **Apply the supersession rule** to any parent claims the deep dive overturned
+- Regenerate the `.html` of every parent file touched
+
+## How Markdown Becomes HTML
+
+The `.html` sibling embeds the page's markdown verbatim and renders it client-side (works offline over `file://`). Author the markdown knowing what the presentation layer does:
+
+- **Blockquotes become callout boxes** — this is why the answer block, confidence flags, and supersession markers use `>` blockquotes.
+- **Tables with a `Confidence`, `Priority`, or `Verdict` column** get those values styled as pills automatically. Use the exact verdict vocabulary so the styling maps correctly.
+- **```mermaid fences render as diagrams**; the first paragraph after the H1 renders as a lead; headings get anchor IDs and pages with ≥3 h2 sections get an in-page TOC.
+- **Links to sibling `.md` files are rewritten to `.html` in the browser** — always link to `.md` in markdown.
+- **Raw HTML passes through** — reserved for hand-authored SVG figures only (conventions in diagrams.md).
+- If content ever contains a literal `</script`, escape it as `<\/script` when generating the HTML (it's embedded in a script block).
+
+Generation procedure, placeholders, and asset copying: SKILL.md Phase 3.5.

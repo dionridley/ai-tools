@@ -5,6 +5,39 @@ All notable changes to the Project Management Plugin will be documented in this 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0] - 2026-07-01
+
+Major upgrade to `/dr-research`: portable HTML microsites per report, and a two-path quality model (Standard/Deep) with mandatory output discipline. Markdown remains canonical — `/dr-prd` and `/dr-plan` consumption of `@_claude/research/.../index.md` is unaffected. Existing reports keep working untouched; the new format applies to research created from this version on (a deep dive onto an old-format parent adds the HTML view additively).
+
+### Added
+
+- **HTML microsite generation (Phase 3.5 in `dr-research/SKILL.md`)** — every `.md` page gets a portable `.html` sibling rendered client-side (embedded markdown + marked/highlight.js/mermaid, classic scripts, works offline over `file://`). Each report folder carries its own frozen copy of `assets/` (styles, scripts, 5 bundled woff2 fonts), so old reports never break when the template evolves; the template is stamped `<!-- template: dr-research v1 -->` for staleness detection.
+  - **Theming:** 3 palettes (Stone & Teal / Slate & Amber default / Paper & Rust) × light/dark with an in-page picker, persisted to localStorage and carried across pages via `?palette=&mode=` URL params (file:// isolates storage per file); `prefers-color-scheme` default with an inline FOUC guard. Mermaid re-renders with theme-derived colors on palette/mode change.
+  - **Reading experience:** Atkinson Hyperlegible body (18px) / Source Serif 4 headings / JetBrains Mono code, 800px measure; auto-generated in-page TOC with scroll-spy on pages with ≥3 sections (wide viewports); lead-paragraph styling; blockquotes render as callouts; `Confidence`/`Priority`/`Verdict` table columns auto-style as pills.
+  - **Figures:** click-to-zoom overlay for all diagrams (Mermaid and SVG), `wide` breakout beyond the text column, horizontal-scroll fallback; hand-authored SVG conventions (`.dg` classes) theme automatically with the palette.
+  - **Skill assets:** `skills/dr-research/assets/template/` (styles.css, render.js, theme.js, fonts/, vendor/) + `skills/dr-research/templates/page-template.html` with `{{TITLE}}/{{ASSETS}}/{{FOOTER}}/{{MERMAID_SCRIPT}}/{{CONTENT_MARKDOWN}}` placeholders. `mermaid.min.js` (~2.5 MB) is copied into a report only when a page actually renders a Mermaid diagram.
+- **Deep research path** (user-requested, or suggested by the skill for decision-critical asks — user always decides):
+  - **Discovery exchange** before planning: the decision this research feeds, priorities/constraints, out-of-scope, and what the user already believes.
+  - **Collaborative question shaping** — key questions are the negotiable artifact: priority-ordered, disqualifiers first, each traceable to the decision.
+  - **Claim ledger** — at synthesis, the 3–6 load-bearing claims ("if false, the verdict flips") are verified: primary source → causally-independent second source → one adversarial search → recency gate. Per-claim verdicts (Confirmed / Single-source / Contested / Estimated / Unverified) recorded in a findings table and cited by the index answer block. More than 6 load-bearing claims = research question too broad, surfaced to the user.
+  - **Community Signal section** — standard for library/framework evaluations (maintenance cadence, license, issue health, bus factor, dated adoption numbers); metrics live once, comparisons reference them.
+- **Mandatory output discipline on BOTH paths** (`SKILL.md` Phase 3 + `references/output-formats.md`) — previously good-but-optional behaviors are now structural requirements: direct answer block first in index.md (verdict + confidence + exceptions); citation at point-of-claim for decision-bearing facts; `(estimated, not measured)` tags on unmeasured decision-bearing numbers; mandatory Gaps & Limitations; confidence flags on load-bearing claims; ≥1 premise-level open question; no certainty adjectives on self-flagged unverified claims; supersession rule (later work that overturns a conclusion patches it where readers encounter it); verdict stated at most twice; risk table + decision gates + testable exit criteria for decision research.
+- **`references/diagrams.md`** — replaces `mermaid-patterns.md`. Encodes the earn-your-place rubric (EARNS = flow/topology/sequence prose serializes poorly; DECORATION = re-linearizes the report's own argument; HARMFUL = fabricated precision), bans TOC-mindmaps and speculative Gantt charts, defaults the index to zero concept maps, and documents the dual representation model (markdown carries a Mermaid fence or prose; HTML shows rendered Mermaid or hand-authored themed SVG) plus SVG authoring conventions.
+
+### Changed
+
+- **Default file set collapsed** — `index.md` + `findings.md` + `resources.md`, plus `recommendations.md` only for decision research. Topic files only when they carry a standalone artifact (scored matrix, schema/DDL, runnable guide) or the user asks; findings.md must not summarize topic files; each claim single-sourced; verdict appears at most twice. Backstop: de-duplicated findings projected over ~1,500 lines proposes a split instead of silently producing one.
+- **`references/output-formats.md`** — rewritten: answer block format, claim ledger table format, Community Signal format, mandatory Gaps/Open Questions formats, supersession markers, file defaults, and a "How markdown becomes HTML" authoring section.
+- **`references/research-methodology.md`** — rewritten: the two paths and their triggers, discovery and question-shaping guidance, the claim verification protocol (independence test, adversarial search, recency gate, verdict vocabulary), premise questioning, and mandatory deep-dive reconciliation (supersession back-propagation to the parent).
+- **Exemplars** (`examples/exemplar-index.md`, `examples/exemplar-findings.md`) — updated to demonstrate the answer block, claim ledger, point-of-claim citations, estimated-tags, Confidence-column tables, mandatory Gaps/Open Questions with a premise-level question, one earning diagram, and no index concept map.
+- **Cross-page links** — canonical markdown links point at `.md` files; the HTML renderer rewrites relative `.md` hrefs to `.html` at view time.
+- **`dr-init/templates/CLAUDE-template.md`** — `_claude/research/` directory description now mentions the HTML microsite view; `available-commands` section marker bumped to v2 with the updated `/dr-research` description.
+- **`dr-research/SKILL.md` frontmatter** — `allowed-tools` gains scoped `Bash(cp:*)` and `Bash(mkdir:*)` for the per-report asset copy.
+
+### Removed
+
+- **`references/mermaid-patterns.md`** — replaced by `references/diagrams.md` (see Added).
+
 ## [1.10.0] - 2026-06-18
 
 ### Changed

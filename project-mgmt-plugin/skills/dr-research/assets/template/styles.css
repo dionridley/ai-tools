@@ -1,0 +1,162 @@
+/* ============================================================================
+   dr-research microsite — styles.css   (template v1)
+   Doc-type-agnostic: styles a themed shell + markdown rendered into .doc
+   Colors come from CSS variables; 3 palettes x light/dark.
+   ========================================================================== */
+
+:root {
+  --mono:'JetBrains Mono', ui-monospace, 'Cascadia Code', Consolas, monospace;
+  --sans:'Atkinson Hyperlegible', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --serif:'Source Serif 4', 'Iowan Old Style', Palatino, Georgia, serif;
+  --radius:14px;
+  --measure:800px;
+}
+
+/* ---- bundled fonts (relative to this stylesheet: assets/fonts/…) ---- */
+@font-face{font-family:'Atkinson Hyperlegible';font-weight:400;font-style:normal;src:url('fonts/atkinson-hyperlegible-latin-400-normal.woff2') format('woff2');font-display:swap;}
+@font-face{font-family:'Atkinson Hyperlegible';font-weight:400;font-style:italic;src:url('fonts/atkinson-hyperlegible-latin-400-italic.woff2') format('woff2');font-display:swap;}
+@font-face{font-family:'Atkinson Hyperlegible';font-weight:700;font-style:normal;src:url('fonts/atkinson-hyperlegible-latin-700-normal.woff2') format('woff2');font-display:swap;}
+@font-face{font-family:'Source Serif 4';font-weight:600;font-style:normal;src:url('fonts/source-serif-4-latin-600-normal.woff2') format('woff2');font-display:swap;}
+@font-face{font-family:'JetBrains Mono';font-weight:400;font-style:normal;src:url('fonts/jetbrains-mono-latin-400-normal.woff2') format('woff2');font-display:swap;}
+
+/* ---- palettes ---- */
+html[data-palette="a"]              { --bg:#f7f6f3; --surface:#ffffff; --surface-2:#efece6; --fg:#201c17; --muted:#6d675e; --border:#ddd7cd; --edge:#8a847b; --accent:#0f766e; --accent-soft:#d6ece9; --accent-fg:#0b544e; --code-bg:#f3f0ea; }
+html[data-palette="a"][data-mode="dark"] { --bg:#16140f; --surface:#201d17; --surface-2:#2a261f; --fg:#f2ede3; --muted:#a79f92; --border:#37322a; --edge:#8c857a; --accent:#2dd4bf; --accent-soft:#103f39; --accent-fg:#7ff0e2; --code-bg:#1b1813; }
+
+html[data-palette="b"]              { --bg:#f5f6f8; --surface:#ffffff; --surface-2:#eaecf0; --fg:#1a1d23; --muted:#626976; --border:#d6dae1; --edge:#8b93a0; --accent:#b45309; --accent-soft:#f8e6cf; --accent-fg:#8a3f07; --code-bg:#eef0f3; }
+html[data-palette="b"][data-mode="dark"] { --bg:#0f1216; --surface:#171b21; --surface-2:#1f242c; --fg:#e9edf3; --muted:#99a1af; --border:#2b313a; --edge:#79818f; --accent:#f59e0b; --accent-soft:#422a0d; --accent-fg:#fcd58a; --code-bg:#12161b; }
+
+html[data-palette="c"]              { --bg:#faf6f0; --surface:#fffdf9; --surface-2:#f1e9dd; --fg:#2a2018; --muted:#7a6b5b; --border:#e4d8c7; --edge:#9c8a76; --accent:#b5442d; --accent-soft:#f6dfd6; --accent-fg:#8f3320; --code-bg:#f3ebe0; }
+html[data-palette="c"][data-mode="dark"] { --bg:#17120d; --surface:#201911; --surface-2:#2a2118; --fg:#f3e9db; --muted:#ad9c88; --border:#392e22; --edge:#8f7d68; --accent:#e0714f; --accent-soft:#46251a; --accent-fg:#f2a488; --code-bg:#1b150e; }
+
+/* fallback (JS disabled: default to palette B light) */
+html:not([data-palette]) { --bg:#f5f6f8; --surface:#ffffff; --surface-2:#eaecf0; --fg:#1a1d23; --muted:#626976; --border:#d6dae1; --edge:#8b93a0; --accent:#b45309; --accent-soft:#f8e6cf; --accent-fg:#8a3f07; --code-bg:#eef0f3; }
+
+/* ---- base ---- */
+* { box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+body { margin:0; background:var(--bg); color:var(--fg); font-family:var(--sans); line-height:1.7;
+       transition:background .3s ease, color .3s ease; }
+.wrap { max-width:var(--measure); margin:0 auto; padding:56px 24px 120px; }
+
+/* ---- appearance controls (top-right) ---- */
+.controls { position:fixed; top:16px; right:16px; z-index:50; display:flex; align-items:center; gap:10px;
+            padding:7px 9px; background:var(--surface); border:1px solid var(--border); border-radius:999px;
+            box-shadow:0 4px 20px rgba(0,0,0,.12); }
+.controls .picker { display:flex; gap:5px; }
+.controls .picker button { width:24px; height:24px; border-radius:50%; cursor:pointer; padding:0; position:relative;
+            border:2px solid transparent; background:transparent; }
+.controls .picker button .chip { position:absolute; inset:2px; border-radius:50%; border:1px solid rgba(0,0,0,.15); }
+.controls .picker button[aria-pressed="true"] { border-color:var(--accent); }
+.controls .sep { width:1px; height:20px; background:var(--border); }
+.controls .modebtn { border:none; background:transparent; cursor:pointer; color:var(--fg); width:30px; height:26px;
+            border-radius:999px; font-size:15px; display:inline-flex; align-items:center; justify-content:center; }
+.controls .modebtn:hover { background:var(--surface-2); }
+
+/* ---- page header (from template, not markdown) ---- */
+.kicker { font-family:var(--mono); font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:var(--accent); margin:0 0 8px; }
+.pagemeta { font-family:var(--mono); font-size:12.5px; color:var(--muted); margin:0 0 8px; }
+.pagemeta b { color:var(--fg); font-weight:600; }
+.backlink { font-family:var(--mono); font-size:12.5px; color:var(--muted); text-decoration:none; display:inline-block; margin:0 0 20px; }
+.backlink:hover { color:var(--accent-fg); }
+
+/* ---- in-page TOC (auto-built by render.js when a page has >= 3 h2 sections;
+       shown only on viewports wide enough to keep clear of the 800px column) ---- */
+#toc { position:fixed; top:80px; left:max(24px, calc(50vw - var(--measure)/2 - 268px)); width:228px;
+       max-height:calc(100vh - 140px); overflow-y:auto; z-index:10; display:none;
+       font-size:13px; line-height:1.45; padding-right:6px; }
+@media (min-width:1360px) { #toc.ready { display:block; } }
+#toc .toc-title { font-family:var(--mono); font-size:11px; letter-spacing:.12em; text-transform:uppercase;
+       color:var(--muted); margin:0 0 10px; padding-left:12px; }
+#toc a { display:block; color:var(--muted); text-decoration:none; padding:3px 10px;
+       border-left:2px solid var(--border); transition:color .15s ease, border-color .15s ease; }
+#toc a:hover { color:var(--fg); }
+#toc a.h3 { padding-left:24px; font-size:12px; }
+#toc a.active { color:var(--accent-fg); border-left-color:var(--accent); }
+
+/* ---- rendered document (marked output lives in .doc) ---- */
+.doc h1 { font-family:var(--serif); font-weight:600; font-size:42px; line-height:1.12; letter-spacing:-.01em; margin:0 0 12px; }
+.doc h2 { font-family:var(--serif); font-weight:600; font-size:28px; margin:44px 0 12px; }
+.doc h3 { font-family:var(--serif); font-weight:600; font-size:21px; margin:28px 0 8px; }
+.doc h4 { font-family:var(--serif); font-weight:600; font-size:17px; margin:22px 0 6px; }
+.doc p { font-size:18px; margin:0 0 16px; }
+.doc a { color:var(--accent-fg); text-underline-offset:3px; }
+.doc strong { font-weight:700; }
+.doc ul, .doc ol { margin:0 0 16px; padding-left:24px; }
+.doc li { margin-bottom:6px; font-size:17px; }
+.doc hr { border:none; border-top:1px solid var(--border); margin:36px 0; }
+
+/* first paragraph after H1 reads as a lead */
+.doc > h1 + p { font-size:19.5px; color:var(--fg); border-left:3px solid var(--accent); padding-left:18px; margin:20px 0 28px; }
+
+/* blockquote -> callout (a plain markdown "> Note:" becomes the note box) */
+.doc blockquote { border-left:3px solid var(--accent); background:var(--accent-soft); margin:0 0 22px;
+                  padding:12px 16px; border-radius:0 9px 9px 0; }
+.doc blockquote p { margin:0 0 6px; font-size:15.5px; } .doc blockquote p:last-child { margin:0; }
+.doc blockquote strong { color:var(--accent-fg); }
+
+/* tables */
+.doc table { width:100%; border-collapse:collapse; margin:0 0 20px; font-size:15px; }
+.doc th, .doc td { text-align:left; padding:9px 12px; border-bottom:1px solid var(--border); vertical-align:top; }
+.doc thead th { color:var(--muted); font-size:11.5px; text-transform:uppercase; letter-spacing:.05em; font-weight:600; }
+.doc tbody tr:last-child td { border-bottom:none; }
+.pill { display:inline-block; background:var(--accent-soft); color:var(--accent-fg); padding:2px 9px; border-radius:999px;
+        font-size:11.5px; font-family:var(--mono); white-space:nowrap; }
+.pill.med { background:var(--surface-2); color:var(--muted); }
+.pill.low { background:var(--surface-2); color:var(--muted); opacity:.85; }
+
+/* code */
+.doc :not(pre) > code { font-family:var(--mono); background:var(--surface-2); padding:1px 6px; border-radius:5px; font-size:.84em; }
+.doc pre { background:var(--code-bg); border:1px solid var(--border); border-radius:10px; padding:14px 16px; overflow:auto; margin:0 0 20px; }
+.doc pre code { font-family:var(--mono); font-size:13px; color:var(--fg); background:none; padding:0; }
+/* theme-aware syntax highlighting (highlight.js token classes -> palette vars) */
+.hljs-keyword, .hljs-built_in, .hljs-literal, .hljs-selector-tag { color:var(--accent); }
+.hljs-string, .hljs-attr, .hljs-number, .hljs-symbol, .hljs-regexp { color:var(--accent-fg); }
+.hljs-comment, .hljs-quote { color:var(--muted); font-style:italic; }
+.hljs-title, .hljs-title.function_, .hljs-section, .hljs-name { color:var(--fg); font-weight:600; }
+.hljs-params, .hljs-variable, .hljs-property { color:var(--fg); }
+.hljs-meta, .hljs-tag { color:var(--muted); }
+
+/* figures + diagrams */
+.doc figure { margin:0 0 26px; }
+.doc figure .frame { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:22px; }
+.doc figure.zoomable .frame { cursor:zoom-in; }
+.doc figure.wide { width:min(1180px, calc(100vw - 40px)); margin-left:50%; transform:translateX(-50%); max-width:none; }
+.doc figure.scroll .frame { overflow-x:auto; }
+.doc figcaption { font-size:13px; color:var(--muted); margin-top:8px; }
+
+/* hand-authored SVG diagrams (use these classes so they theme automatically) */
+.dg { font-family:var(--mono); display:block; width:100%; height:auto; margin:0 auto; }
+.dg .box { fill:var(--surface); stroke:var(--border); stroke-width:1.5; }
+.dg .box-accent { fill:var(--accent-soft); stroke:var(--accent); stroke-width:1.5; }
+.dg .box-danger { fill:var(--surface-2); stroke:var(--edge); stroke-width:1.5; }
+.dg .lbl { fill:var(--fg); font-size:13px; font-weight:500; }
+.dg .lbl-sm { fill:var(--muted); font-size:11px; }
+.dg .edge { stroke:var(--edge); stroke-width:1.6; fill:none; }
+.dg .edge-dash { stroke:var(--edge); stroke-width:1.6; fill:none; stroke-dasharray:5 4; }
+.dg .arrowhead { fill:var(--edge); }
+.dg .pt { fill:var(--accent); } .dg .axis { stroke:var(--edge); stroke-width:1.4; }
+
+/* mermaid output wrapper (mermaid injects its own <svg> + inline colors, re-rendered by theme.js) */
+.doc .mermaid { display:flex; justify-content:center; }
+.doc .mermaid svg { max-width:100%; height:auto; }
+
+/* CSS "pipeline" component (for linear flows authored as raw HTML) */
+.pipe { display:flex; flex-wrap:wrap; gap:8px; }
+.pipe .step { flex:1 1 0; min-width:130px; background:var(--surface-2); border:1px solid var(--border);
+              border-left:4px solid var(--accent); border-radius:8px; padding:12px 14px; }
+.pipe .step .n { font-family:var(--mono); font-size:11px; color:var(--accent); }
+.pipe .step .t { font-weight:700; font-size:14px; margin-top:2px; }
+
+/* ---- click-to-zoom overlay ---- */
+#zoom { position:fixed; inset:0; z-index:100; display:none; align-items:center; justify-content:center;
+        background:rgba(10,12,16,.82); cursor:zoom-out; padding:24px; }
+#zoom.open { display:flex; }
+#zoom .stage { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:24px;
+               max-width:96vw; max-height:92vh; display:flex; align-items:center; justify-content:center; overflow:auto; }
+#zoom .stage svg { width:min(90vw, 1500px); height:auto; max-height:84vh; max-width:none; }
+#zoom .hint { position:fixed; bottom:18px; left:0; right:0; text-align:center; color:#cfd3da; font-family:var(--mono); font-size:12px; }
+
+/* footer */
+.doc-footer { margin-top:56px; padding-top:20px; border-top:1px solid var(--border); color:var(--muted);
+              font-size:12.5px; font-family:var(--mono); }

@@ -5,7 +5,7 @@ A structured project management system for Claude Code that provides organized w
 ## Features
 
 - **Organized Directory Structure**: Standardized `_claude/` folder with subdirectories for plans, PRDs, research, and documentation
-- **Research Workflow**: Deep research with extended thinking, organized into multi-file documentation
+- **Research Workflow**: Standard and Deep research paths with claim verification, producing canonical markdown plus a portable offline HTML microsite per report
 - **PRD Creation**: Comprehensive Product Requirements Documents with all critical sections
 - **Implementation Planning**: Detailed, phase-based plans with sequential numbering and tracking
 - **Iterative Plan Refinement**: Refine existing plans with extended thinking while preserving structure and number
@@ -80,7 +80,7 @@ Initializes or updates project with standard directory structure and CLAUDE.md f
   - `plans/completed/` - Completed plans
   - `prd/` - Product Requirements Documents
   - `resources/` - User-provided reference materials
-  - `research/` - Research documentation
+  - `research/` - Research documentation (markdown + portable HTML microsites)
 - Creates `.gitkeep` files in all leaf directories for git tracking
 - Generates or updates plugin-managed sections in `CLAUDE.md`
 - **Scope** — only manages plugin-specific sections (plan workflow, available commands, task completion protocol). For codebase-specific documentation (architecture, build/test/lint commands, coding conventions), run Claude Code's built-in `/init` alongside `/dr-init`
@@ -95,7 +95,7 @@ Initializes or updates project with standard directory structure and CLAUDE.md f
 
 ### `/dr-research`
 
-Conducts deep research with extended thinking and creates comprehensive multi-file documentation. As of v1.5.0, this is a **Skill 2.0** (`skills/dr-research/`) rather than a command — invocation is unchanged, internals are significantly upgraded.
+Conducts structured research and produces canonical markdown plus a **portable HTML microsite** view. As of v2.0.0 there are two research paths — **Standard** (fast, default) and **Deep** (adds discovery and claim verification) — sharing the same mandatory output discipline.
 
 **Usage:**
 ```bash
@@ -107,6 +107,11 @@ Conducts deep research with extended thinking and creates comprehensive multi-fi
 /dr-research
 ```
 Claude will ask for research details.
+
+**Deep path** (say so in the prompt, or accept the suggestion when the ask is decision-critical):
+```bash
+/dr-research deep research: should we migrate our auth to [provider]? ...
+```
 
 **Deep-dive follow-up** (reference an existing research directory):
 ```bash
@@ -125,24 +130,26 @@ Include case studies from major platforms and common pitfalls to avoid.
 
 **How it works:**
 
-1. **Plan approval** — Claude analyzes your prompt, identifies the research type and strategy, and presents a structured plan (key questions, sources to consult, planned output files). You approve or adjust before any research runs.
+1. **Path choice + plan approval** — Standard runs from your prompt; Deep starts with a short discovery exchange (what decision this feeds, priorities, out-of-scope, what you already believe) and presents priority-ordered questions with disqualifiers first. Either way you approve a structured plan before any research runs.
 
-2. **Research execution** — Claude runs the approved plan using parallel web searches where appropriate, with source triangulation and progressive depth. It works to completion without interrupting you except in rare cases (the research premise is wrong, or a discovery fundamentally changes direction).
+2. **Research execution** — Claude runs the approved plan using parallel web searches where appropriate, citing as it goes. On the Deep path it identifies the 3–6 load-bearing claims and verifies each one (primary source → independent second source → adversarial search → recency check). It works to completion without interrupting you except in rare cases (the research premise is wrong, or a discovery fundamentally changes direction).
 
-3. **Synthesis** — Claude writes the output files (findings first, index last), including Mermaid diagrams where they clarify workflows, architecture, or comparisons. Uncertain findings get a confidence flag; conflicting sources are documented inline with direct links.
+3. **Synthesis** — Mandatory discipline on both paths: the index opens with a direct answer block (verdict + confidence + exceptions); decision-bearing facts are cited where asserted; unmeasured numbers are tagged `(estimated, not measured)`; Gaps & Limitations and Open Questions (including at least one premise-level question) are required. Deep adds a claim ledger table with per-claim verdicts. Diagrams must earn their place (no TOC mindmaps, no speculative Gantt charts).
 
-4. **Summary** — A concise completion message with key findings, a "What surprised me" insight, suggested deep-dive topics (when warranted), and contextual follow-up actions.
+4. **HTML generation** — Every `.md` gets a `.html` sibling and the report folder gets its own frozen `assets/` copy. The microsite works offline over `file://`, with three color palettes, light/dark mode, an in-page TOC on long pages, and click-to-zoom diagrams. Markdown stays canonical — `/dr-prd` and `/dr-plan` keep consuming the `.md` files.
+
+5. **Summary** — A concise completion message with the answer, key findings, a "What surprised me" insight, suggested deep-dive topics (when warranted), and contextual follow-up actions.
 
 **Output structure:**
 
-Adaptive to the research type, but typically:
-- `index.md` — Overview, key takeaways, optional visual concept map, file navigation
-- `findings.md` — Core analysis organized by topic, with diagrams, confidence flags, cross-cutting themes, and gaps
-- `resources.md` — Bibliography of all sources consulted
-- `recommendations.md` — Actionable next steps (only when the research supports them)
-- Topic-specific files (e.g., `comparison.md`, `implementation-guide.md`, `architecture.md`) — created when warranted
+- `index.md` / `index.html` — Answer block, key takeaways, file navigation
+- `findings.md` / `findings.html` — Core analysis with point-of-claim citations, claim ledger (Deep), gaps, open questions
+- `resources.md` / `resources.html` — Bibliography of all sources consulted
+- `recommendations.md` / `recommendations.html` — Decision research only: recommendation, risk table, decision gates
+- `assets/` — The report's own copy of styles, scripts, and fonts (old reports never break when the template evolves)
+- Topic files only when they carry a standalone artifact (scored matrix, schema, runnable guide) or you ask for one
 
-**Deep-dive follow-ups** produce a `deep-dives/[slug]-[date]/` subfolder within the original research, with back-links to the parent and a "Deep Dives" section added to the parent's `index.md`.
+**Deep-dive follow-ups** produce a `deep-dives/[slug]-[date]/` subfolder within the original research, with back-links to the parent, a "Deep Dives" section added to the parent's `index.md`, and supersession patches when the deep dive overturns a parent conclusion.
 
 ### `/dr-prd`
 
