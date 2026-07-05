@@ -5,7 +5,23 @@ All notable changes to the Project Management Plugin will be documented in this 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.1.0] - 2026-07-03
+## [2.2.0] - 2026-07-05
+
+`/dr-ship` UX overhaul: the disjointed two-stage interaction (checkbox-audit prompts, then a flight plan crammed into AskUserQuestion text where markdown renders squished) is replaced by one read-only preflight → a deterministic **Ship Report** printed as normal output → one short gate question. Nothing touches the plan file or git until the gate approves, and a new **Ship anyway** escape hatch bulk-waives blocking items for a fast "just ship it" path.
+
+### Added
+
+- **Ship Report template** (`references/preflight.md` 1e) — a fixed-shape, code-fenced status panel shown before the gate: READINESS rows (Tasks / Success criteria / Verification / Open questions / Retro, plus Verifier with `--verify`) with ✅/⚠️/ℹ️ glyphs and `done/total` counts, SHIP PLAN rows (Branch / Stage / Push / PR), and a FILES list (predicted plan move first, porcelain entries capped at 10, no per-file commentary). Deterministic on purpose — identical shape every run.
+- **Ship anyway escape hatch** — when blocking items exist, the gate offers bulk-waiving them all with `[WAIVED YYYY-MM-DD: shipped via /dr-ship escape hatch]` (checkboxes honestly stay `[ ]`; verifier verdicts on `[x]` lines get the tag with the verdict quoted). Individually-reasoned waivers remain available via Adjust.
+
+### Changed
+
+- **Flow restructure** — `references/verify-and-close.md` + `references/git-and-pr.md` replaced by `references/preflight.md` (readiness audit, `--verify`, git state, main/master guard, Ship Report, gate — all read-only) and `references/ship.md` (waivers, retro, metadata, move, summary generation, commit, push, PR, output — all post-approval).
+- **Gate question shrunk to one line** — all state detail lives in the Ship Report above it; AskUserQuestion text never carries file lists, branch info, or PR actions again. Options adapt: clean run → Ship it / Adjust / Abort; blocking items → Ship anyway / Finish first / Adjust / Abort.
+- **Abort now leaves no trace** — close-out (retro, waivers, status, move) moved from before the confirmation to after it, replacing the old "close-out survives an abort" principle. Aborting at the gate leaves the repository exactly as /dr-ship found it.
+- **Retro question removed** — the retro backstop auto-drafts from plan content and conversation context with no "anything to add?" prompt; the thin-signal honesty rule is unchanged.
+
+
 
 New skill `/dr-ship`: the end-of-plan ritual as one pipeline — verify the plan is done, close it out, commit, push, open a PR populated from the plan summary, and hand back the squash-merge commit message.
 
