@@ -5,6 +5,23 @@ All notable changes to the Project Management Plugin will be documented in this 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.0] - 2026-07-05
+
+`/dr-research` microsite v2: reader-selectable page width (the fix for crushed wide tables), two new palettes, and a legibility pass on every small-text tier. The view-settings bar now spans the top of the document with width controls on the left and appearance controls on the right; every choice persists per reader and carries across pages.
+
+### Added
+
+- **Width chooser** (template v2) — four reader-selectable modes on every page: `800` (the old fixed measure), `1000`, **`Breakout` (new default)** — 860px prose with tables that need more room automatically expanding out to 1500px — and `Full Width` (up to 1800px, keeping the Contents rail by anchoring the column beside it instead of hiding it). Persisted to localStorage and propagated across pages via `?width=` like the palette.
+- **Two new palettes** — `Black & White` (pure grayscale, now first in the picker and the default) and `Mist & Indigo`; existing palettes re-lettered to a–e in display order. No-JS fallback now Black & White light.
+- **Scroll-safe tables** — render.js wraps every table in an overflow container, so no table can ever be crushed below its minimum width in any mode.
+- **Contrast audit** — all fg/bg pairs across the 10 palette variants now pass WCAG AA (4.5:1); Paper & Rust light's muted brown darkened to fix the one failure.
+
+### Changed
+
+- **Typography legibility pass** — table cells 15→17px, table headers 11.5→14px, callouts 15.5→16.5px, list items 17→18px (now matches paragraphs), code blocks 13→14px, TOC 13→14.5px, pills/footer/meta bumped ~1–1.5px.
+- **Unified view-settings bar** — palette picker and light/dark toggle moved out of the separate top-right pill into a single bar spanning the document column (width left, appearance right); the bar follows the column as the width changes. Document top padding increased so the title clears the bar.
+- **`figure.wide`** never renders narrower than the text column (matters in the wider modes).
+
 ## [2.2.0] - 2026-07-05
 
 `/dr-ship` UX overhaul: the disjointed two-stage interaction (checkbox-audit prompts, then a flight plan crammed into AskUserQuestion text where markdown renders squished) is replaced by one read-only preflight → a deterministic **Ship Report** printed as normal output → one short gate question. Nothing touches the plan file or git until the gate approves, and a new **Ship anyway** escape hatch bulk-waives blocking items for a fast "just ship it" path.
@@ -21,7 +38,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Abort now leaves no trace** — close-out (retro, waivers, status, move) moved from before the confirmation to after it, replacing the old "close-out survives an abort" principle. Aborting at the gate leaves the repository exactly as /dr-ship found it.
 - **Retro question removed** — the retro backstop auto-drafts from plan content and conversation context with no "anything to add?" prompt; the thin-signal honesty rule is unchanged.
 
-
+## [2.1.0] - 2026-07-03
 
 New skill `/dr-ship`: the end-of-plan ritual as one pipeline — verify the plan is done, close it out, commit, push, open a PR populated from the plan summary, and hand back the squash-merge commit message.
 

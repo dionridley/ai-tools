@@ -388,6 +388,7 @@ The `.html` sibling embeds the page's markdown verbatim and renders it client-si
 
 - **Blockquotes become callout boxes** — this is why the answer block, confidence flags, and supersession markers use `>` blockquotes.
 - **Tables with a `Confidence`, `Priority`, or `Verdict` column** get those values styled as pills automatically. Use the exact verdict vocabulary so the styling maps correctly.
+- **Wide tables are safe.** Every table gets a horizontal-scroll wrapper, and in the default width mode ("Breakout") tables wider than the prose column automatically expand beyond it. Readers can also switch the whole page to 800/1000/Full Width from the top bar. Don't contort a comparison into a narrow shape to fit a column — write the table the data needs.
 - **```mermaid fences render as diagrams**; the first paragraph after the H1 renders as a lead; headings get anchor IDs and pages with ≥3 h2 sections get an in-page TOC.
 - **Links to sibling `.md` files are rewritten to `.html` in the browser** — always link to `.md` in markdown.
 - **Raw HTML passes through** — reserved for hand-authored SVG figures only (conventions in diagrams.md).

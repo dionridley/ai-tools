@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{{TITLE}}</title>
-<!-- template: dr-research v1 -->
+<!-- template: dr-research v2 -->
 <link rel="stylesheet" href="{{ASSETS}}/styles.css">
-<!-- FOUC guard: set palette + mode before first paint (URL param -> saved -> default) -->
+<!-- FOUC guard: set palette + mode + width before first paint (URL param -> saved -> default) -->
 <script>
   (function () {
     var url = new URLSearchParams(location.search);
@@ -17,20 +17,34 @@
       return v || fb;
     }
     var sysDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-    document.documentElement.dataset.palette = pick('palette', 'dr-palette', 'b');
+    document.documentElement.dataset.palette = pick('palette', 'dr-palette', 'a');
     document.documentElement.dataset.mode = pick('mode', 'dr-mode', sysDark ? 'dark' : 'light');
+    document.documentElement.dataset.width = pick('width', 'dr-width', 'c');
   })();
 </script>
 </head>
 <body>
-  <div class="controls" role="group" aria-label="Appearance">
-    <div class="picker" id="dr-picker">
-      <button data-palette="a" aria-pressed="false" title="Stone &amp; Teal"><span class="chip" style="background:linear-gradient(135deg,#f7f6f3 55%,#0f766e 55%)"></span></button>
-      <button data-palette="b" aria-pressed="false" title="Slate &amp; Amber"><span class="chip" style="background:linear-gradient(135deg,#f5f6f8 55%,#b45309 55%)"></span></button>
-      <button data-palette="c" aria-pressed="false" title="Paper &amp; Rust"><span class="chip" style="background:linear-gradient(135deg,#faf6f0 55%,#b5442d 55%)"></span></button>
+  <div class="controls widthctl" role="group" aria-label="View settings">
+    <div class="wgroup">
+      <span class="wlabel">width</span>
+      <span class="wbtns" id="dr-width">
+        <button data-width="a" title="800px column">800</button>
+        <button data-width="b" title="1000px column">1000</button>
+        <button data-width="c" title="860px prose, wide tables break out">Breakout</button>
+        <button data-width="d" title="Fill the screen, keeps the contents rail">Full Width</button>
+      </span>
     </div>
-    <div class="sep"></div>
-    <button class="modebtn" id="dr-mode" title="Toggle light/dark" aria-label="Toggle light/dark">◐</button>
+    <div class="wgroup">
+      <div class="picker" id="dr-picker">
+        <button data-palette="a" aria-pressed="false" title="Black &amp; White"><span class="chip" style="background:linear-gradient(135deg,#fafafa 55%,#111111 55%)"></span></button>
+        <button data-palette="b" aria-pressed="false" title="Stone &amp; Teal"><span class="chip" style="background:linear-gradient(135deg,#f7f6f3 55%,#0f766e 55%)"></span></button>
+        <button data-palette="c" aria-pressed="false" title="Slate &amp; Amber"><span class="chip" style="background:linear-gradient(135deg,#f5f6f8 55%,#b45309 55%)"></span></button>
+        <button data-palette="d" aria-pressed="false" title="Paper &amp; Rust"><span class="chip" style="background:linear-gradient(135deg,#faf6f0 55%,#b5442d 55%)"></span></button>
+        <button data-palette="e" aria-pressed="false" title="Mist &amp; Indigo"><span class="chip" style="background:linear-gradient(135deg,#f6f5fa 55%,#4f46e5 55%)"></span></button>
+      </div>
+      <div class="sep"></div>
+      <button class="modebtn" id="dr-mode" title="Toggle light/dark" aria-label="Toggle light/dark">◐</button>
+    </div>
   </div>
 
   <div class="wrap">

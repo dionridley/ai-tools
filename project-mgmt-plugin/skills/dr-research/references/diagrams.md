@@ -152,7 +152,7 @@ Author inside a `<figure>` using the template's `.dg` classes so the diagram the
 
 **Layout behavior:**
 - Always set a `viewBox`; the SVG scales to the column width.
-- `<figure class="wide">` breaks out beyond the text column (up to ~1180px, capped to the viewport) for diagrams that need horizontal room.
+- `<figure class="wide">` breaks out beyond the text column (up to ~1180px, capped to the viewport, never narrower than the column) for diagrams that need horizontal room.
 - `<figure class="scroll">` adds horizontal scrolling as a fallback for intrinsically wide content.
 - Any figure containing an SVG (including rendered Mermaid) is click-to-zoom automatically — readers can enlarge; you don't need to shrink content to fit.
 - Add `<figcaption>` when the takeaway isn't obvious from the drawing.

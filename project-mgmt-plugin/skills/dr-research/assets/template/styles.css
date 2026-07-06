@@ -1,7 +1,8 @@
 /* ============================================================================
-   dr-research microsite — styles.css   (template v1)
+   dr-research microsite — styles.css   (template v2)
    Doc-type-agnostic: styles a themed shell + markdown rendered into .doc
-   Colors come from CSS variables; 3 palettes x light/dark.
+   Colors come from CSS variables; 5 palettes x light/dark.
+   Reader-selectable width modes (data-width on <html>); Breakout is default.
    ========================================================================== */
 
 :root {
@@ -19,27 +20,34 @@
 @font-face{font-family:'Source Serif 4';font-weight:600;font-style:normal;src:url('fonts/source-serif-4-latin-600-normal.woff2') format('woff2');font-display:swap;}
 @font-face{font-family:'JetBrains Mono';font-weight:400;font-style:normal;src:url('fonts/jetbrains-mono-latin-400-normal.woff2') format('woff2');font-display:swap;}
 
-/* ---- palettes ---- */
-html[data-palette="a"]              { --bg:#f7f6f3; --surface:#ffffff; --surface-2:#efece6; --fg:#201c17; --muted:#6d675e; --border:#ddd7cd; --edge:#8a847b; --accent:#0f766e; --accent-soft:#d6ece9; --accent-fg:#0b544e; --code-bg:#f3f0ea; }
-html[data-palette="a"][data-mode="dark"] { --bg:#16140f; --surface:#201d17; --surface-2:#2a261f; --fg:#f2ede3; --muted:#a79f92; --border:#37322a; --edge:#8c857a; --accent:#2dd4bf; --accent-soft:#103f39; --accent-fg:#7ff0e2; --code-bg:#1b1813; }
+/* ---- palettes (a=Black & White, b=Stone & Teal, c=Slate & Amber, d=Paper & Rust, e=Mist & Indigo)
+       All fg/bg pairs pass WCAG AA (4.5:1) — audited; keep it that way when tweaking ---- */
+html[data-palette="a"]              { --bg:#fafafa; --surface:#ffffff; --surface-2:#f0f0f0; --fg:#111111; --muted:#636363; --border:#e2e2e2; --edge:#8a8a8a; --accent:#111111; --accent-soft:#ececec; --accent-fg:#000000; --code-bg:#f4f4f4; }
+html[data-palette="a"][data-mode="dark"] { --bg:#0e0e0e; --surface:#171717; --surface-2:#222222; --fg:#f0f0f0; --muted:#9a9a9a; --border:#2e2e2e; --edge:#828282; --accent:#e6e6e6; --accent-soft:#262626; --accent-fg:#ffffff; --code-bg:#141414; }
 
-html[data-palette="b"]              { --bg:#f5f6f8; --surface:#ffffff; --surface-2:#eaecf0; --fg:#1a1d23; --muted:#626976; --border:#d6dae1; --edge:#8b93a0; --accent:#b45309; --accent-soft:#f8e6cf; --accent-fg:#8a3f07; --code-bg:#eef0f3; }
-html[data-palette="b"][data-mode="dark"] { --bg:#0f1216; --surface:#171b21; --surface-2:#1f242c; --fg:#e9edf3; --muted:#99a1af; --border:#2b313a; --edge:#79818f; --accent:#f59e0b; --accent-soft:#422a0d; --accent-fg:#fcd58a; --code-bg:#12161b; }
+html[data-palette="b"]              { --bg:#f7f6f3; --surface:#ffffff; --surface-2:#efece6; --fg:#201c17; --muted:#6d675e; --border:#ddd7cd; --edge:#8a847b; --accent:#0f766e; --accent-soft:#d6ece9; --accent-fg:#0b544e; --code-bg:#f3f0ea; }
+html[data-palette="b"][data-mode="dark"] { --bg:#16140f; --surface:#201d17; --surface-2:#2a261f; --fg:#f2ede3; --muted:#a79f92; --border:#37322a; --edge:#8c857a; --accent:#2dd4bf; --accent-soft:#103f39; --accent-fg:#7ff0e2; --code-bg:#1b1813; }
 
-html[data-palette="c"]              { --bg:#faf6f0; --surface:#fffdf9; --surface-2:#f1e9dd; --fg:#2a2018; --muted:#7a6b5b; --border:#e4d8c7; --edge:#9c8a76; --accent:#b5442d; --accent-soft:#f6dfd6; --accent-fg:#8f3320; --code-bg:#f3ebe0; }
-html[data-palette="c"][data-mode="dark"] { --bg:#17120d; --surface:#201911; --surface-2:#2a2118; --fg:#f3e9db; --muted:#ad9c88; --border:#392e22; --edge:#8f7d68; --accent:#e0714f; --accent-soft:#46251a; --accent-fg:#f2a488; --code-bg:#1b150e; }
+html[data-palette="c"]              { --bg:#f5f6f8; --surface:#ffffff; --surface-2:#eaecf0; --fg:#1a1d23; --muted:#626976; --border:#d6dae1; --edge:#8b93a0; --accent:#b45309; --accent-soft:#f8e6cf; --accent-fg:#8a3f07; --code-bg:#eef0f3; }
+html[data-palette="c"][data-mode="dark"] { --bg:#0f1216; --surface:#171b21; --surface-2:#1f242c; --fg:#e9edf3; --muted:#99a1af; --border:#2b313a; --edge:#79818f; --accent:#f59e0b; --accent-soft:#422a0d; --accent-fg:#fcd58a; --code-bg:#12161b; }
 
-/* fallback (JS disabled: default to palette B light) */
-html:not([data-palette]) { --bg:#f5f6f8; --surface:#ffffff; --surface-2:#eaecf0; --fg:#1a1d23; --muted:#626976; --border:#d6dae1; --edge:#8b93a0; --accent:#b45309; --accent-soft:#f8e6cf; --accent-fg:#8a3f07; --code-bg:#eef0f3; }
+html[data-palette="d"]              { --bg:#faf6f0; --surface:#fffdf9; --surface-2:#f1e9dd; --fg:#2a2018; --muted:#6f604f; --border:#e4d8c7; --edge:#9c8a76; --accent:#b5442d; --accent-soft:#f6dfd6; --accent-fg:#8f3320; --code-bg:#f3ebe0; }
+html[data-palette="d"][data-mode="dark"] { --bg:#17120d; --surface:#201911; --surface-2:#2a2118; --fg:#f3e9db; --muted:#ad9c88; --border:#392e22; --edge:#8f7d68; --accent:#e0714f; --accent-soft:#46251a; --accent-fg:#f2a488; --code-bg:#1b150e; }
+
+html[data-palette="e"]              { --bg:#f6f5fa; --surface:#ffffff; --surface-2:#eceaf4; --fg:#1c1a26; --muted:#67637a; --border:#d9d6e6; --edge:#8e8aa2; --accent:#4f46e5; --accent-soft:#e4e2fb; --accent-fg:#3730a3; --code-bg:#efedf6; }
+html[data-palette="e"][data-mode="dark"] { --bg:#121118; --surface:#1a1922; --surface-2:#242230; --fg:#ebe9f4; --muted:#a09cb4; --border:#322f42; --edge:#847f97; --accent:#818cf8; --accent-soft:#2b2860; --accent-fg:#aeb7fc; --code-bg:#16151d; }
+
+/* fallback (JS disabled: default to palette A light — black & white) */
+html:not([data-palette]) { --bg:#fafafa; --surface:#ffffff; --surface-2:#f0f0f0; --fg:#111111; --muted:#636363; --border:#e2e2e2; --edge:#8a8a8a; --accent:#111111; --accent-soft:#ececec; --accent-fg:#000000; --code-bg:#f4f4f4; }
 
 /* ---- base ---- */
 * { box-sizing:border-box; }
 html { scroll-behavior:smooth; }
 body { margin:0; background:var(--bg); color:var(--fg); font-family:var(--sans); line-height:1.7;
        transition:background .3s ease, color .3s ease; }
-.wrap { max-width:var(--measure); margin:0 auto; padding:56px 24px 120px; }
+.wrap { max-width:var(--measure); margin:0 auto; padding:104px 24px 120px; }
 
-/* ---- appearance controls (top-right) ---- */
+/* ---- appearance controls (base pill shared by the view-settings bar) ---- */
 .controls { position:fixed; top:16px; right:16px; z-index:50; display:flex; align-items:center; gap:10px;
             padding:7px 9px; background:var(--surface); border:1px solid var(--border); border-radius:999px;
             box-shadow:0 4px 20px rgba(0,0,0,.12); }
@@ -54,24 +62,24 @@ body { margin:0; background:var(--bg); color:var(--fg); font-family:var(--sans);
 .controls .modebtn:hover { background:var(--surface-2); }
 
 /* ---- page header (from template, not markdown) ---- */
-.kicker { font-family:var(--mono); font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:var(--accent); margin:0 0 8px; }
-.pagemeta { font-family:var(--mono); font-size:12.5px; color:var(--muted); margin:0 0 8px; }
+.kicker { font-family:var(--mono); font-size:13px; letter-spacing:.12em; text-transform:uppercase; color:var(--accent); margin:0 0 8px; }
+.pagemeta { font-family:var(--mono); font-size:13.5px; color:var(--muted); margin:0 0 8px; }
 .pagemeta b { color:var(--fg); font-weight:600; }
-.backlink { font-family:var(--mono); font-size:12.5px; color:var(--muted); text-decoration:none; display:inline-block; margin:0 0 20px; }
+.backlink { font-family:var(--mono); font-size:13.5px; color:var(--muted); text-decoration:none; display:inline-block; margin:0 0 20px; }
 .backlink:hover { color:var(--accent-fg); }
 
 /* ---- in-page TOC (auto-built by render.js when a page has >= 3 h2 sections;
-       shown only on viewports wide enough to keep clear of the 800px column) ---- */
+       shown only on viewports wide enough to keep clear of the column) ---- */
 #toc { position:fixed; top:80px; left:max(24px, calc(50vw - var(--measure)/2 - 268px)); width:228px;
        max-height:calc(100vh - 140px); overflow-y:auto; z-index:10; display:none;
-       font-size:13px; line-height:1.45; padding-right:6px; }
+       font-size:14.5px; line-height:1.5; padding-right:6px; }
 @media (min-width:1360px) { #toc.ready { display:block; } }
-#toc .toc-title { font-family:var(--mono); font-size:11px; letter-spacing:.12em; text-transform:uppercase;
+#toc .toc-title { font-family:var(--mono); font-size:12.5px; letter-spacing:.12em; text-transform:uppercase;
        color:var(--muted); margin:0 0 10px; padding-left:12px; }
 #toc a { display:block; color:var(--muted); text-decoration:none; padding:3px 10px;
        border-left:2px solid var(--border); transition:color .15s ease, border-color .15s ease; }
 #toc a:hover { color:var(--fg); }
-#toc a.h3 { padding-left:24px; font-size:12px; }
+#toc a.h3 { padding-left:24px; font-size:13.5px; }
 #toc a.active { color:var(--accent-fg); border-left-color:var(--accent); }
 
 /* ---- rendered document (marked output lives in .doc) ---- */
@@ -83,7 +91,7 @@ body { margin:0; background:var(--bg); color:var(--fg); font-family:var(--sans);
 .doc a { color:var(--accent-fg); text-underline-offset:3px; }
 .doc strong { font-weight:700; }
 .doc ul, .doc ol { margin:0 0 16px; padding-left:24px; }
-.doc li { margin-bottom:6px; font-size:17px; }
+.doc li { margin-bottom:6px; font-size:18px; }
 .doc hr { border:none; border-top:1px solid var(--border); margin:36px 0; }
 
 /* first paragraph after H1 reads as a lead */
@@ -92,23 +100,25 @@ body { margin:0; background:var(--bg); color:var(--fg); font-family:var(--sans);
 /* blockquote -> callout (a plain markdown "> Note:" becomes the note box) */
 .doc blockquote { border-left:3px solid var(--accent); background:var(--accent-soft); margin:0 0 22px;
                   padding:12px 16px; border-radius:0 9px 9px 0; }
-.doc blockquote p { margin:0 0 6px; font-size:15.5px; } .doc blockquote p:last-child { margin:0; }
+.doc blockquote p { margin:0 0 6px; font-size:16.5px; } .doc blockquote p:last-child { margin:0; }
 .doc blockquote strong { color:var(--accent-fg); }
 
-/* tables */
-.doc table { width:100%; border-collapse:collapse; margin:0 0 20px; font-size:15px; }
+/* tables (render.js wraps each in .tablewrap for horizontal-scroll safety) */
+.doc table { width:100%; border-collapse:collapse; margin:0 0 20px; font-size:17px; }
 .doc th, .doc td { text-align:left; padding:9px 12px; border-bottom:1px solid var(--border); vertical-align:top; }
-.doc thead th { color:var(--muted); font-size:11.5px; text-transform:uppercase; letter-spacing:.05em; font-weight:600; }
+.doc thead th { color:var(--muted); font-size:14px; text-transform:uppercase; letter-spacing:.05em; font-weight:600; }
 .doc tbody tr:last-child td { border-bottom:none; }
+.doc .tablewrap { overflow-x:auto; margin:0 0 20px; }
+.doc .tablewrap > table { margin:0; }
 .pill { display:inline-block; background:var(--accent-soft); color:var(--accent-fg); padding:2px 9px; border-radius:999px;
-        font-size:11.5px; font-family:var(--mono); white-space:nowrap; }
+        font-size:12.5px; font-family:var(--mono); white-space:nowrap; }
 .pill.med { background:var(--surface-2); color:var(--muted); }
 .pill.low { background:var(--surface-2); color:var(--muted); opacity:.85; }
 
 /* code */
-.doc :not(pre) > code { font-family:var(--mono); background:var(--surface-2); padding:1px 6px; border-radius:5px; font-size:.84em; }
+.doc :not(pre) > code { font-family:var(--mono); background:var(--surface-2); padding:1px 6px; border-radius:5px; font-size:.875em; }
 .doc pre { background:var(--code-bg); border:1px solid var(--border); border-radius:10px; padding:14px 16px; overflow:auto; margin:0 0 20px; }
-.doc pre code { font-family:var(--mono); font-size:13px; color:var(--fg); background:none; padding:0; }
+.doc pre code { font-family:var(--mono); font-size:14px; color:var(--fg); background:none; padding:0; }
 /* theme-aware syntax highlighting (highlight.js token classes -> palette vars) */
 .hljs-keyword, .hljs-built_in, .hljs-literal, .hljs-selector-tag { color:var(--accent); }
 .hljs-string, .hljs-attr, .hljs-number, .hljs-symbol, .hljs-regexp { color:var(--accent-fg); }
@@ -121,9 +131,9 @@ body { margin:0; background:var(--bg); color:var(--fg); font-family:var(--sans);
 .doc figure { margin:0 0 26px; }
 .doc figure .frame { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:22px; }
 .doc figure.zoomable .frame { cursor:zoom-in; }
-.doc figure.wide { width:min(1180px, calc(100vw - 40px)); margin-left:50%; transform:translateX(-50%); max-width:none; }
+.doc figure.wide { width:max(100%, min(1180px, calc(100vw - 40px))); margin-left:50%; transform:translateX(-50%); max-width:none; }
 .doc figure.scroll .frame { overflow-x:auto; }
-.doc figcaption { font-size:13px; color:var(--muted); margin-top:8px; }
+.doc figcaption { font-size:14px; color:var(--muted); margin-top:8px; }
 
 /* hand-authored SVG diagrams (use these classes so they theme automatically) */
 .dg { font-family:var(--mono); display:block; width:100%; height:auto; margin:0 auto; }
@@ -155,8 +165,59 @@ body { margin:0; background:var(--bg); color:var(--fg); font-family:var(--sans);
 #zoom .stage { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:24px;
                max-width:96vw; max-height:92vh; display:flex; align-items:center; justify-content:center; overflow:auto; }
 #zoom .stage svg { width:min(90vw, 1500px); height:auto; max-height:84vh; max-width:none; }
-#zoom .hint { position:fixed; bottom:18px; left:0; right:0; text-align:center; color:#cfd3da; font-family:var(--mono); font-size:12px; }
+#zoom .hint { position:fixed; bottom:18px; left:0; right:0; text-align:center; color:#cfd3da; font-family:var(--mono); font-size:13px; }
 
 /* footer */
 .doc-footer { margin-top:56px; padding-top:20px; border-top:1px solid var(--border); color:var(--muted);
-              font-size:12.5px; font-family:var(--mono); }
+              font-size:13.5px; font-family:var(--mono); }
+
+/* ============================================================================
+   Reader-selectable width modes (data-width on <html>, set by the FOUC guard
+   and the bar in theme.js; persisted like the palette)
+   a = 800px   b = 1000px
+   c = Breakout (default): 860px prose, wide tables break out to 1500px
+   d = Full Width: min(1800px, 94vw); keeps the TOC rail when it fits
+   ========================================================================== */
+html[data-width="b"] { --measure:1000px; }
+html[data-width="c"] { --measure:860px; }
+html[data-width="d"] { --measure:min(1800px, 94vw); }
+
+/* breakout: tables render.js flagged as wide escape the prose column
+   (same centering trick as figure.wide) */
+html[data-width="c"] .doc .tablewrap.breakout {
+  width:min(1500px, calc(100vw - 48px));
+  margin-left:50%; transform:translateX(-50%);
+}
+/* when the TOC rail is visible, cap the breakout so it clears the rail */
+@media (min-width:1441px) {
+  html[data-width="c"] .doc .tablewrap.breakout {
+    width:max(var(--measure), min(1500px, calc(100vw - 600px)));
+  }
+}
+
+/* keep the TOC rail clear of the wider columns (base shows it at >=1360px,
+   which is tuned for the 800px measure) */
+@media (max-width:1580px) { html[data-width="b"] #toc.ready { display:none; } }
+@media (max-width:1440px) { html[data-width="c"] #toc.ready { display:none; } }
+/* full width keeps the rail: when the viewport can show it (and the page built
+   one), the column anchors just right of it instead of centering — 300px left
+   gutter for the rail, 32px right margin. :has() fallback: centered layout. */
+@media (min-width:1360px) {
+  html[data-width="d"]:has(#toc.ready) { --measure:min(1800px, calc(100vw - 332px)); }
+  html[data-width="d"]:has(#toc.ready) .wrap { margin:0 32px 0 300px; }
+  html[data-width="d"]:has(#toc.ready) .widthctl { left:300px; transform:none; }
+  html[data-width="d"]:has(#toc.ready) #toc { left:24px; }
+}
+
+/* ---- unified view-settings bar: spans the document column and follows it as
+       the width changes; width controls left, appearance controls right ---- */
+.widthctl { position:fixed; top:16px; left:50%; right:auto; transform:translateX(-50%);
+  width:min(var(--measure), calc(100vw - 32px)); justify-content:space-between;
+  padding:7px 12px; font-family:var(--mono); }
+.widthctl .wgroup { display:flex; align-items:center; gap:10px; }
+.widthctl .wlabel { font-size:10px; line-height:1; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin-left:4px; }
+.widthctl .wbtns { display:flex; align-items:center; gap:2px; }
+.widthctl .wbtns button { border:none; background:transparent; cursor:pointer; color:var(--muted); font-family:var(--mono);
+  font-size:12px; padding:4px 10px; border-radius:999px; }
+.widthctl .wbtns button:hover { background:var(--surface-2); }
+.widthctl .wbtns button[aria-pressed="true"] { background:var(--accent-soft); color:var(--accent-fg); }

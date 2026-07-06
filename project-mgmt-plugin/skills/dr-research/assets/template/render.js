@@ -1,9 +1,9 @@
 /* ============================================================================
-   dr-research microsite — render.js   (template v1)
+   dr-research microsite — render.js   (template v2)
    Turns the embedded markdown into the themed document:
-   marked -> extract mermaid -> highlight -> auto-pill -> wrap figures
-   -> heading ids -> in-page TOC -> render mermaid -> wire click-to-zoom.
-   Re-renders mermaid on theme change.
+   marked -> extract mermaid -> highlight -> auto-pill -> wrap tables
+   -> wrap figures -> heading ids -> in-page TOC -> render mermaid
+   -> wire click-to-zoom. Re-renders mermaid on theme change.
    Classic script; no fetch, no ES modules (works on file://).
    ========================================================================== */
 (function () {
@@ -44,6 +44,31 @@
         if (!v) return;
         var cls = /med|single|estimat/i.test(v) ? ' med' : /low|unverified|contested/i.test(v) ? ' low' : '';
         cell.innerHTML = '<span class="pill' + cls + '">' + v + '</span>';
+      });
+    });
+  }
+
+  function wrapTables(root) {
+    // Scroll-safe wrapper for every table; tables whose natural (unwrapped)
+    // width wants more room than the prose column get flagged so the
+    // "Breakout" width mode can widen them (see styles.css .tablewrap.breakout).
+    if (!root) return;
+    root.querySelectorAll('table').forEach(function (t) {
+      if (t.parentElement && t.parentElement.classList.contains('tablewrap')) return;
+      var w = document.createElement('div');
+      w.className = 'tablewrap';
+      t.parentNode.insertBefore(w, t);
+      w.appendChild(t);
+    });
+    requestAnimationFrame(function () {
+      root.querySelectorAll('.tablewrap').forEach(function (w) {
+        var t = w.querySelector('table');
+        if (!t) return;
+        var prev = t.style.width;
+        t.style.width = 'max-content';
+        var natural = t.getBoundingClientRect().width;
+        t.style.width = prev;
+        w.classList.toggle('breakout', natural > 900);
       });
     });
   }
@@ -206,6 +231,7 @@
     });
   }
   autoPill(out);
+  wrapTables(out);
   wrapFigures(out);
   rewriteMdLinks(out);
   addHeadingIds(out);

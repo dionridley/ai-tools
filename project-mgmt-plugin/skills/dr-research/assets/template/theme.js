@@ -1,8 +1,9 @@
 /* ============================================================================
-   dr-research microsite — theme.js   (template v1)
-   Appearance controls: palette picker + light/dark, persisted to localStorage,
-   propagated across pages via ?palette=&mode= URL params (file:// has per-file
-   storage). Broadcasts 'dr:themechange' so render.js re-renders mermaid.
+   dr-research microsite — theme.js   (template v2)
+   View-settings bar: width mode + palette picker + light/dark, persisted to
+   localStorage, propagated across pages via ?width=&palette=&mode= URL params
+   (file:// has per-file storage). Broadcasts 'dr:themechange' so render.js
+   re-renders mermaid.
    ========================================================================== */
 (function () {
   var root = document.documentElement;
@@ -41,6 +42,26 @@
     });
   }
 
+  // ---- width mode ----
+  var widthCtl = document.getElementById('dr-width');
+  function syncWidth() {
+    if (!widthCtl) return;
+    var cur = root.dataset.width;
+    widthCtl.querySelectorAll('button').forEach(function (b) {
+      b.setAttribute('aria-pressed', String(b.dataset.width === cur));
+    });
+  }
+  if (widthCtl) {
+    widthCtl.querySelectorAll('button').forEach(function (b) {
+      b.addEventListener('click', function () {
+        root.dataset.width = b.dataset.width;
+        save('dr-width', b.dataset.width);
+        syncWidth();
+      });
+    });
+    syncWidth();
+  }
+
   // ---- cross-page continuity on file:// ----
   // Each file:// page is its own storage origin, so carry the active choices as
   // URL params on internal links; the next page's inline FOUC guard reads them.
@@ -52,6 +73,7 @@
         var u = new URL(a.href, location.href);
         u.searchParams.set('palette', root.dataset.palette);
         u.searchParams.set('mode', root.dataset.mode);
+        u.searchParams.set('width', root.dataset.width);
         a.setAttribute('href', u.pathname + '?' + u.searchParams.toString() + u.hash);
       } catch (e) {}
     });

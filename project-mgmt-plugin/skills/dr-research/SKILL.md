@@ -287,7 +287,7 @@ Created: _claude/research/[slug]-[date]/
   - [additional files with descriptions]
   - resources.md (bibliography — N sources)
   - HTML microsite: open index.html in a browser
-    (palette + light/dark picker top-right; works offline)
+    (width + palette + light/dark controls in the top bar; works offline)
 
 Answer: [the one-sentence verdict with its confidence word]
 
