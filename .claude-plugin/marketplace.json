@@ -1,5 +1,8 @@
 {
   "name": "dion-tools",
+  "metadata": {
+    "description": "Cross-harness AI agent tooling: project management (research, PRDs, plans, shipping), engineering skills, and experimental builders — served from shared bundles."
+  },
   "owner": {
     "name": "Dion Ridley",
     "email": "dridley@gmail.com"
@@ -9,19 +12,19 @@
       "name": "project-management",
       "source": "./bundles/project-management",
       "description": "Structured project management with research, PRDs, and implementation plans",
-      "version": "2.3.0"
+      "version": "2.4.0"
     },
     {
       "name": "engineering-tools",
       "source": "./bundles/engineering-tools",
       "description": "Skills and commands to assist with software engineering and coding tasks",
-      "version": "0.3.1"
+      "version": "0.4.0"
     },
     {
       "name": "experimental",
       "source": "./bundles/experimental",
       "description": "Work in Progress Tools — experimental capabilities under active development and testing",
-      "version": "0.6.0"
+      "version": "0.7.0"
     }
   ]
 }

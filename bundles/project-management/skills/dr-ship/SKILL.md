@@ -4,7 +4,7 @@ description: Close out a completed /dr-plan and ship it — verify all plan chec
 disable-model-invocation: true
 allowed-tools: Read, Write, Edit, Glob, Grep, AskUserQuestion, Agent, Bash(git status:*), Bash(git add:*), Bash(git commit:*), Bash(git push:*), Bash(git mv:*), Bash(git switch:*), Bash(git branch:*), Bash(git remote:*), Bash(git rev-parse:*), Bash(gh pr create:*), Bash(gh pr view:*), Bash(gh pr edit:*), Bash(gh auth status:*), Bash(rm:*)
 effort: medium
-argument-hint: [@plan-file] [--verify]
+argument-hint: "[@plan-file] [--verify]"
 ---
 
 # Ship a Completed Plan
