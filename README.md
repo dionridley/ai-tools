@@ -1,108 +1,113 @@
-# Claude Code Plugin Marketplace
+# AI Tools
 
-A collection of plugins that extend Claude Code's capabilities with specialized workflows and tools.
+Cross-harness AI agent tooling: one repo that serves as both a **Claude Code plugin marketplace** and a **Pi package**, built from shared, harness-neutral skill bundles. No skill file exists twice — each bundle under `bundles/` carries both harness manifests (`.claude-plugin/plugin.json` for Claude Code, `package.json` for Pi) over the same skills.
 
-## Available Plugins
+> This repo supersedes [`dionridley/claude-plugins`](https://github.com/dionridley/claude-plugins).
 
-| Plugin | Description |
-|--------|-------------|
-| [Project Management](./project-mgmt-plugin/README.md) | Structured project management with research, PRDs, and implementation plans |
-| [Engineering Tools](./engineering-tools/README.md) | Skills and commands to assist with software engineering and coding tasks |
-| [Experimental](./experimental/README.md) | Autonomous MVP builder — brainstorm, scaffold, and build web app prototypes with parallel AI agents |
+## Available Bundles
 
-## Installation
+| Bundle | Plugin name | Description |
+|--------|-------------|-------------|
+| [Project Management](./bundles/project-management/README.md) | `project-management` | Structured project management with research, PRDs, and implementation plans |
+| [Engineering Tools](./bundles/engineering-tools/README.md) | `engineering-tools` | Skills and commands to assist with software engineering and coding tasks |
+| [Experimental](./bundles/experimental/README.md) | `experimental` | Work in Progress Tools — experimental capabilities under active development and testing |
 
-### Option 1: Via Claude Code UI (Recommended)
+## Claude Code
 
-1. Open Claude Code and type `/plugins` to open the plugin manager
-2. Select **Add plugin...**
-3. Enter the marketplace URL: `dionridley/claude-plugins`
-4. Select which plugins to enable
-5. Enable **Auto-update** when prompted to receive new features automatically
+### Via the plugin manager UI
 
-### Option 2: Via Command Line
+1. Open Claude Code and type `/plugins`
+2. Add the marketplace: `dionridley/ai-tools`
+3. Enable the plugins you want
 
-#### Installing the Marketplace
-
-Install the entire marketplace to get access to all plugins:
+### Via the CLI
 
 ```bash
-claude plugins add dionridley/claude-plugins
+# Add the marketplace (URL, path, or GitHub repo)
+claude plugin marketplace add dionridley/ai-tools
+
+# Install plugins — all optional, pick what you use
+claude plugin install project-management@dion-tools
+claude plugin install engineering-tools@dion-tools
+claude plugin install experimental@dion-tools
 ```
 
-After installation, enable auto-update to receive new features and bug fixes automatically:
+Update and remove:
 
 ```bash
-claude plugins update dionridley/claude-plugins --auto-update
+claude plugin marketplace update dion-tools    # refresh the catalog
+claude plugin update project-management        # update one plugin
+claude plugin uninstall project-management     # remove one plugin
+claude plugin marketplace remove dion-tools    # remove the marketplace
 ```
 
-With auto-update enabled, plugins will be kept up to date each time Claude Code starts.
-
-#### Installing Individual Plugins
-
-If you only want specific plugins, you can install them individually by specifying the plugin name:
+### Verify
 
 ```bash
-# Install only the project management plugin
-claude plugins add dionridley/claude-plugins --plugin project-management
-
-# Install only the engineering tools plugin
-claude plugins add dionridley/claude-plugins --plugin engineering-tools
-
-# Install only the experimental (MVP builder) plugin
-claude plugins add dionridley/claude-plugins --plugin experimental
+claude plugin list
 ```
 
-## About Marketplaces
+With the project-management plugin enabled you should see skills like `/dr-init`, `/dr-research`, `/dr-prd`, `/dr-plan`, and `/dr-ship`. The experimental plugin provides `/mvp`.
 
-A marketplace is a curated collection of plugins maintained in a single repository. When you add a marketplace:
+## Pi
 
-- **All plugins are available**: Every plugin in the marketplace becomes available to Claude Code
-- **Single source**: Updates to any plugin come through the same repository
-- **Version coordination**: Plugin versions are managed together in the marketplace catalog
+The root `package.json` declares this repo as a Pi package — its `pi.skills` manifest globs `bundles/*/skills/*`, so one install brings in every bundle's skills.
 
-### Marketplace vs Individual Plugins
-
-| Approach | Pros | Cons |
-|----------|------|------|
-| **Full Marketplace** | Get all plugins at once; simpler updates | May include plugins you don't need |
-| **Individual Plugin** | Only install what you use | Must add each plugin separately |
-
-For most users, installing the full marketplace with auto-update enabled is the simplest approach.
-
-## Verifying Installation
-
-After installation, verify the plugins are available:
+### Full install
 
 ```bash
-# List installed plugins
-claude plugins list
-
-# Check available commands
-/help
+pi install git:github.com/dionridley/ai-tools
 ```
 
-For the project management plugin, you should see commands like `/dr-init`, `/dr-research`, `/dr-prd`, and `/dr-plan`. For the experimental plugin, you should see `/mvp`.
+Skills auto-discover by description; explicit invocation is `/skill:<name>` (e.g. `/skill:dr-plan`). Skills marked `disable-model-invocation: true` (`dr-init`, `dr-research`, `dr-ship`) load but are explicit-only — hidden from auto-discovery by design.
 
-## Updating Plugins
-
-If auto-update is not enabled, manually update plugins:
+Update installed packages:
 
 ```bash
-claude plugins update dionridley/claude-plugins
+pi update --all
 ```
 
-## Removing Plugins
+### Excluding a bundle (settings filter)
 
-To remove the marketplace and all its plugins:
+Filters layer on top of the manifest — they narrow what the install declared. To take everything except a bundle, use the object form of the `packages` entry in `~/.pi/agent/settings.json` (global) or `.pi/settings.json` (per project):
+
+```json
+{
+  "packages": [
+    {
+      "source": "git:github.com/dionridley/ai-tools",
+      "skills": ["!bundles/experimental/**"]
+    }
+  ]
+}
+```
+
+Filter syntax: globs select, `!pattern` excludes, `[]` loads none of that resource type, an omitted key loads all. `pi config` edits the same settings interactively (Tab switches global ↔ project). Bundle boundaries are directory boundaries, so filters read like plugin names.
+
+### Local development install
+
+A directory install is a live reference, not a copy — working-tree edits are visible in the next Pi session:
 
 ```bash
-claude plugins remove dionridley/claude-plugins
+# whole repo
+pi install /path/to/ai-tools
+
+# a single bundle (per-bundle manifests activate on direct installs)
+pi install /path/to/ai-tools/bundles/project-management
+```
+
+## Repository Layout
+
+```
+.claude-plugin/marketplace.json   # Claude catalog — sources point at ./bundles/*
+package.json                      # Pi catalog (private) — pi.skills globs bundles/*/skills/*
+bundles/<name>/                   # one bundle = one plugin: skills/, agents/, both manifests
+pi/ · claude/                     # cross-cutting harness-exclusive artifacts (absent until needed)
 ```
 
 ## Contributing
 
-Contributions are welcome! See [CLAUDE.md](./CLAUDE.md) for development guidelines.
+See [CLAUDE.md](./CLAUDE.md) for development guidelines, the repository structure, and the release ritual.
 
 ## License
 
