@@ -1,0 +1,8 @@
+{
+  "name": "ai-tools",
+  "private": true,
+  "keywords": ["pi-package"],
+  "pi": {
+    "skills": ["bundles/*/skills/*"]
+  }
+}

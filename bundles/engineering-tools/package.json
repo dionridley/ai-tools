@@ -1,0 +1,10 @@
+{
+  "name": "@dionridley/engineering-tools",
+  "version": "0.3.1",
+  "description": "Skills and commands to assist with software engineering and coding tasks",
+  "license": "MIT",
+  "keywords": ["pi-package"],
+  "pi": {
+    "skills": ["skills/*"]
+  }
+}
