@@ -1,25 +1,25 @@
 {
   "name": "dion-tools",
   "owner": {
-    "name": "Dev Team",
-    "email": "dev@example.com"
+    "name": "Dion Ridley",
+    "email": "dridley@gmail.com"
   },
   "plugins": [
     {
       "name": "project-management",
-      "source": "./project-mgmt-plugin",
+      "source": "./bundles/project-management",
       "description": "Structured project management with research, PRDs, and implementation plans",
       "version": "2.3.0"
     },
     {
       "name": "engineering-tools",
-      "source": "./engineering-tools",
+      "source": "./bundles/engineering-tools",
       "description": "Skills and commands to assist with software engineering and coding tasks",
       "version": "0.3.1"
     },
     {
       "name": "experimental",
-      "source": "./experimental",
+      "source": "./bundles/experimental",
       "description": "Work in Progress Tools — experimental capabilities under active development and testing",
       "version": "0.6.0"
     }
