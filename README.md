@@ -27,18 +27,18 @@ Cross-harness AI agent tooling: one repo that serves as both a **Claude Code plu
 claude plugin marketplace add dionridley/ai-tools
 
 # Install plugins — all optional, pick what you use
-claude plugin install project-management@dion-tools
-claude plugin install engineering-tools@dion-tools
-claude plugin install experimental@dion-tools
+claude plugin install project-management@ai-tools
+claude plugin install engineering-tools@ai-tools
+claude plugin install experimental@ai-tools
 ```
 
 Update and remove:
 
 ```bash
-claude plugin marketplace update dion-tools    # refresh the catalog
+claude plugin marketplace update ai-tools      # refresh the catalog
 claude plugin update project-management        # update one plugin
 claude plugin uninstall project-management     # remove one plugin
-claude plugin marketplace remove dion-tools    # remove the marketplace
+claude plugin marketplace remove ai-tools      # remove the marketplace
 ```
 
 ### Verify
