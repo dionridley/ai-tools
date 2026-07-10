@@ -5,6 +5,15 @@ All notable changes to the Experimental plugin will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.0] - 2026-07-10
+
+Skill portability (mvp's simple call sites): Agent Skills spec relative paths plus graceful-degradation notes. No behavior change on Claude Code. The deeper mvp port (subagent orchestration, background processes, worktree isolation) is a later portability phase.
+
+### Changed
+
+- **Relative paths per the Agent Skills spec** — all 14 `${CLAUDE_SKILL_DIR}` references across SKILL.md and references replaced with skill-root-relative paths; the mode router states the convention once.
+- **Capability-conditional prose** — "Structured Questions" convention added to Shared Conventions (structured tool if available, else plain text + options); TaskCreate/TaskUpdate progress mirroring marked optional with `.mvp/state.json` remaining canonical; `$ARGUMENTS` first-use note for harnesses that don't substitute.
+
 ## [0.7.0] - 2026-07-08
 
 Cross-harness repo restructure: the plugin is unchanged in name and behavior, but its home and packaging grew a second harness.

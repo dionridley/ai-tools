@@ -5,6 +5,22 @@ All notable changes to the Project Management Plugin will be documented in this 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.5.0] - 2026-07-10
+
+Skill portability, phases 1–3: the skills now follow the Agent Skills spec's relative-path rule and degrade gracefully on harnesses without Claude Code's tool set (target: Pi.dev). No behavior change on Claude Code — every conditional names the Claude tool as the primary path.
+
+### Changed
+
+- **Relative paths per the Agent Skills spec** — all `${CLAUDE_SKILL_DIR}` references (48 across the five skills) replaced with skill-root-relative paths; each routing SKILL.md states the convention once. dr-research's Bash asset-copy uses a `<skill-dir>` placeholder resolved to an absolute path before running (shell cwd is the project root, not the skill). dr-ship's cross-skill reference to dr-plan's summary-mode is now a sibling-relative path with the bundle coupling documented.
+- **Capability-conditional prose** — AskUserQuestion covered by a per-skill "structured questions, gracefully" principle (structured tool if available, else plain text + options); plan-verifier spawn instructions carry an inline-verification fallback for harnesses without subagents (dr-ship `--verify`, preflight, and the three rendered Exit Gate templates, kept word-identical); `$ARGUMENTS` first-use notes cover harnesses that don't substitute; `@file` expansion notes cover harnesses without it; branded prose reworded to "the agent"/"the harness" where Claude Code wasn't genuinely meant.
+- **dr-research declares its web-access requirement up front** — stops with a clear message (and a Pi remedy: `pi install npm:pi-web-access`) instead of answering from memory when the harness has no web tools.
+- **dr-prd AI-feature sections are provider-neutral** — model discovery question and example IDs no longer presume Anthropic; the exact-model-ID discipline rule is retained with provider-labeled examples.
+- **Trigger Validation gates** (dr-plan, dr-prd) note that the `/dr-plan` / `/dr-prd` token is a message-text convention, independent of the harness invocation mechanism (Pi: `/skill:dr-plan`).
+
+### Added
+
+- **dr-ship Operating Principle 11** — the `allowed-tools` command allowlist restated as binding prose (the complete git/gh/rm surface; bans history rewrites, force pushes, branch deletion, other subcommands) for harnesses that parse but do not enforce `allowed-tools`.
+
 ## [2.4.0] - 2026-07-08
 
 Cross-harness repo restructure: the plugin is unchanged in name and behavior, but its home and packaging grew a second harness.
