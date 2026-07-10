@@ -4,32 +4,42 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository Overview
 
-This is a Claude Code plugin marketplace repository containing reusable plugins that extend Claude Code's capabilities. The primary plugin is `project-mgmt-plugin` which provides structured project management workflows.
+This is a cross-harness tooling repository: one repo serving as both a Claude Code plugin marketplace and a Pi package, built from shared, harness-neutral bundles under `bundles/`. Each bundle is one plugin, carrying both harness manifests over the same skills. The primary bundle is `bundles/project-management/` (plugin name `project-management`), which provides structured project management workflows.
 
 ## Repository Structure
 
 ```
-claude-plugins/
+ai-tools/
 ├── .claude-plugin/
-│   └── marketplace.json       # Marketplace catalog configuration
-├── .claude/
-│   └── skills/
-│       └── skill-creator/     # Skill for creating new skills
-├── project-mgmt-plugin/       # Main project management plugin
-│   ├── .claude-plugin/
-│   │   └── plugin.json        # Plugin manifest
-│   ├── agents/                # Subagents (plan-verifier.md)
-│   └── skills/                # Skill 2.0 directories
-│       ├── dr-init/           # Project structure initialization (invoked as /dr-init)
-│       ├── dr-research/       # Deep research with web search (invoked as /dr-research)
-│       ├── dr-prd/            # PRD creation and refinement (invoked as /dr-prd)
-│       ├── dr-plan/           # Implementation plans: CREATE, REFINE, SUMMARY, QUESTION RESOLUTION
-│       └── dr-ship/           # Ship a finished plan: verify → close out → commit → push → PR (invoked as /dr-ship)
-├── engineering-tools/         # Engineering-tools plugin (includes frontend-design, react-19 skills)
-└── experimental/              # Experimental plugin (MVP builder)
+│   └── marketplace.json           # Claude catalog (root-forced); sources → ./bundles/*
+├── package.json                   # Pi catalog (root-forced, private): pi.skills → bundles/*/skills/*
+├── bundles/
+│   ├── project-management/        # Main project management bundle
+│   │   ├── .claude-plugin/
+│   │   │   └── plugin.json        # Claude bundle manifest (path required by Claude)
+│   │   ├── package.json           # Pi bundle manifest (inert in whole-repo installs)
+│   │   ├── agents/                # Subagents (plan-verifier.md)
+│   │   └── skills/                # Skill 2.0 directories
+│   │       ├── dr-init/           # Project structure initialization (invoked as /dr-init)
+│   │       ├── dr-research/       # Deep research with web search (invoked as /dr-research)
+│   │       ├── dr-prd/            # PRD creation and refinement (invoked as /dr-prd)
+│   │       ├── dr-plan/           # Implementation plans: CREATE, REFINE, SUMMARY, QUESTION RESOLUTION
+│   │       └── dr-ship/           # Ship a finished plan: verify → close out → commit → push → PR (invoked as /dr-ship)
+│   ├── engineering-tools/         # Same shape: skills/{frontend-design, react-19}
+│   └── experimental/              # Same shape: skills/{mvp}
+├── pi/                            # Cross-cutting Pi-only artifacts (extensions/, prompts/) — starts absent
+└── claude/                        # Cross-cutting Claude-only artifacts (hooks/ …) — starts absent
 ```
 
 Note: `/dr-init`, `/dr-research`, and `/dr-ship` are implemented as Skills 2.0 with `disable-model-invocation: true` — they are invoked explicitly via their slash-command names, not auto-discovered by Claude (`/dr-ship` especially, because it pushes and publishes). `/dr-plan` and `/dr-prd` are also Skills 2.0 but use `disable-model-invocation: false` paired with a **Trigger Validation** gate: the model invokes them only when the user writes the literal `/dr-plan` or `/dr-prd` token anywhere in their message (not only at the start), and the gate stops conversational drift from auto-firing them.
+
+## Cross-Harness Packaging
+
+Two root-forced catalogs anchor the repo; everything else lives in bundles:
+
+- **Root `package.json` is the Pi catalog** — the only manifest Pi reads on a whole-repo `pi install git:…`. It is `"private": true` (the root never publishes to npm) and its `pi.skills` glob (`bundles/*/skills/*`) must cover exactly the skill directories.
+- **Per-bundle `package.json` mirrors that bundle's `plugin.json`** — npm-scoped name (`@dionridley/<bundle>`), same version as the bundle's semver. These are inert during whole-repo installs and activate only for local-path installs or future npm publishing.
+- **Escape hatches:** root `pi/` and `claude/` hold cross-cutting harness-exclusive artifacts. Rule: *exclusivity determines which manifest references an artifact; ownership determines where it lives* — bundle-owned harness-specific artifacts stay inside their bundle. Both folders start absent; create them only with their first content.
 
 ## Plugin Architecture
 
@@ -150,19 +160,21 @@ Required fields:
 
 ## Version Management
 
-When releasing a new version for any plugin:
+When releasing a new version for any bundle:
 
-1. **Check both version files first:**
+1. **Check all three version declarations first:**
    - `.claude-plugin/marketplace.json` (parent marketplace catalog)
-   - `<plugin-folder>/.claude-plugin/plugin.json` (plugin manifest)
+   - `bundles/<name>/.claude-plugin/plugin.json` (Claude bundle manifest)
+   - `bundles/<name>/package.json` (Pi bundle manifest)
 
 2. **Determine the new version:**
-   - Find the higher of the two current versions
+   - Find the highest of the current versions (they should already agree)
    - Increment appropriately (patch/minor/major based on changes)
 
-3. **Update all three locations to the same version:**
+3. **Update all four locations to the same version:**
    - Update `version` field in plugin.json
-   - Update `version` field in the plugin's entry in marketplace.json
+   - Update `version` field in the bundle's package.json
+   - Update `version` field in the bundle's entry in marketplace.json
    - Add new entry to CHANGELOG.md
 
 4. **CHANGELOG.md format** (follows [Keep a Changelog](https://keepachangelog.com/)):
@@ -176,16 +188,19 @@ This ensures version consistency across the marketplace catalog, plugin manifest
 ## Key Files
 
 ### Repository-Level
-- `.claude-plugin/marketplace.json` - Marketplace catalog listing all plugins with versions
-- `.claude/skills/skill-creator/SKILL.md` - Guide for creating new skills
+- `.claude-plugin/marketplace.json` - Claude catalog listing all plugins with versions; sources point at `./bundles/*`
+- `package.json` - Pi catalog (private); `pi.skills` globs `bundles/*/skills/*`
 
-### Per-Plugin Files (each plugin folder contains these)
-Each plugin is a self-contained folder (e.g., `project-mgmt-plugin/`) with its own:
-- `.claude-plugin/plugin.json` - Plugin manifest with version, commands, skills
-- `README.md` - Documentation for that specific plugin
-- `CHANGELOG.md` - Version history for that specific plugin only
+### Per-Bundle Files (each bundle folder contains these)
+Each bundle is a self-contained folder (e.g., `bundles/project-management/`) with its own:
+- `.claude-plugin/plugin.json` - Claude plugin manifest with version, commands, skills
+- `package.json` - Pi bundle manifest mirroring plugin.json (`@dionridley/<bundle>`, same version)
+- `README.md` - Documentation for that specific bundle
+- `CHANGELOG.md` - Version history for that specific bundle only
 
-**Important**: When making changes to a plugin, update that plugin's own CHANGELOG.md - not a different plugin's changelog. Each plugin maintains independent version history.
+**Important**: When making changes to a bundle, update that bundle's own CHANGELOG.md - not a different bundle's changelog. Each bundle maintains independent version history.
 
-### Current Plugins
-- `project-mgmt-plugin/` - Project management with research, PRDs, and implementation plans
+### Current Bundles
+- `bundles/project-management/` - Project management with research, PRDs, and implementation plans
+- `bundles/engineering-tools/` - Frontend-design and React 19 skills
+- `bundles/experimental/` - Experimental capabilities (MVP builder)

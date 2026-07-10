@@ -1,10 +1,10 @@
 ---
 name: dr-plan
-description: Create or refine a detailed implementation plan file in `_claude/plans/` with per-phase acceptance criteria, verification gates, and safe refinement. Supports four modes: CREATE, REFINE, SUMMARY (PR summary, optional push to PR), and QUESTION RESOLUTION (interactive Q&A). Use when the user writes `/dr-plan` anywhere in their message, or explicitly asks to create, refine, or summarize a plan file under `_claude/plans/`. Do NOT use for general planning discussion, brainstorming, outlines, or task lists not destined for a file in `_claude/plans/`.
+description: "Create or refine a detailed implementation plan file in `_claude/plans/` with per-phase acceptance criteria, verification gates, and safe refinement. Supports four modes: CREATE, REFINE, SUMMARY (PR summary, optional push to PR), and QUESTION RESOLUTION (interactive Q&A). Use when the user writes `/dr-plan` anywhere in their message, or explicitly asks to create, refine, or summarize a plan file under `_claude/plans/`. Do NOT use for general planning discussion, brainstorming, outlines, or task lists not destined for a file in `_claude/plans/`."
 disable-model-invocation: false
 allowed-tools: Read Write Edit Glob Grep AskUserQuestion Bash(gh pr view:*) Bash(gh pr edit:*)
 effort: max
-argument-hint: [implementation context OR @plan-file [refinement|summary [pr-url]|answer questions]] [--no-confirm|--in-progress]
+argument-hint: "[implementation context OR @plan-file [refinement|summary [pr-url]|answer questions]] [--no-confirm|--in-progress]"
 ---
 
 # Create or Refine an Implementation Plan

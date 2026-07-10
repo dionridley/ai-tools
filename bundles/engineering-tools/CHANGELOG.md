@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2026-07-08
+
+Cross-harness repo restructure: the plugin is unchanged in name and behavior, but its home and packaging grew a second harness.
+
+### Changed
+
+- **Folder moved** to `bundles/engineering-tools/` as part of the ai-tools cross-harness restructure. Plugin name and skills are unchanged; file history preserved via `git mv`.
+
+### Added
+
+- **Pi package manifest** (`package.json`, `@dionridley/engineering-tools`) — the bundle is now consumable from the Pi coding agent as part of the repo package (`pi install git:github.com/dionridley/ai-tools`) or standalone via a local-path install. Inert for Claude Code.
+
 ## [0.3.1] - 2026-02-09
 
 ### Changed

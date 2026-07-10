@@ -1,0 +1,10 @@
+{
+  "name": "@dionridley/experimental",
+  "version": "0.7.0",
+  "description": "Work in Progress Tools — experimental capabilities under active development and testing",
+  "license": "MIT",
+  "keywords": ["pi-package"],
+  "pi": {
+    "skills": ["skills/*"]
+  }
+}

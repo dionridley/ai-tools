@@ -5,6 +5,22 @@ All notable changes to the Project Management Plugin will be documented in this 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.4.0] - 2026-07-08
+
+Cross-harness repo restructure: the plugin is unchanged in name and behavior, but its home and packaging grew a second harness.
+
+### Changed
+
+- **Folder moved** to `bundles/project-management/` (was `project-mgmt-plugin/`) as part of the ai-tools cross-harness restructure. Plugin name, skills, and agents are unchanged; file history preserved via `git mv`.
+
+### Added
+
+- **Pi package manifest** (`package.json`, `@dionridley/project-management`) — the bundle is now consumable from the Pi coding agent as part of the repo package (`pi install git:github.com/dionridley/ai-tools`) or standalone via a local-path install. Inert for Claude Code.
+
+### Fixed
+
+- **`argument-hint` frontmatter quoted** in dr-plan, dr-prd, and dr-ship — the unquoted `[...]` values were invalid YAML flow sequences flagged by `claude plugin validate` (strict parsers would drop all frontmatter, including dr-ship's `disable-model-invocation: true`). Behavior unchanged.
+
 ## [2.3.0] - 2026-07-05
 
 `/dr-research` microsite v2: reader-selectable page width (the fix for crushed wide tables), two new palettes, and a legibility pass on every small-text tier. The view-settings bar now spans the top of the document with width controls on the left and appearance controls on the right; every choice persists per reader and carries across pages.

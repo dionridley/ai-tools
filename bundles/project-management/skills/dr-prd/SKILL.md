@@ -4,7 +4,7 @@ description: Creates or refines a Product Requirement Document (PRD) under _clau
 disable-model-invocation: false
 allowed-tools: Read Write Edit Glob Grep AskUserQuestion
 effort: max
-argument-hint: [feature description OR @prd-file [refinement request]] [--no-confirm]
+argument-hint: "[feature description OR @prd-file [refinement request]] [--no-confirm]"
 ---
 
 # Create or Refine a Product Requirement Document
