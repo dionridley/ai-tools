@@ -6,7 +6,7 @@ Load this reference when the detected feature type is `ai-feature`. These sectio
 
 When the feature type is detected as `ai-feature`, add 1-3 of these follow-ups — pick the ones most relevant to what the user described:
 
-- **Model** — "Which model are you targeting? Opus / Sonnet / Haiku / something else? Are you open on model choice, or is it fixed?"
+- **Model** — "Which provider and model are you targeting (Anthropic, OpenAI, Google, an open-weights model, something else)? Are you open on model choice, or is it fixed?"
 - **Quality dimensions** — "What does 'good' output look like here? Accurate, concise, on-tone, safe, factual — which of these matter most?"
 - **Failure tolerance** — "What's the worst acceptable failure? A wrong answer, a hallucinated citation, a slow response, a refusal when it shouldn't refuse?"
 - **Latency/cost ceiling** — "Is there a latency or cost budget? (p95 response time, cost-per-query ceiling)"
@@ -26,8 +26,8 @@ Inject these in the order listed. They slot into the base template at the anchor
 ```markdown
 ## Model and Constraints
 
-- **Primary model:** [e.g., claude-opus-4-7]
-- **Fallback model:** [e.g., claude-sonnet-4-6 — or "none" if single-model]
+- **Primary model:** [`<exact-model-id>` — the provider's published identifier, e.g., `claude-opus-4-7`]
+- **Fallback model:** [`<exact-model-id>` — or "none" if single-model]
 - **Context window:** [required input size; note if approaching model limits]
 - **Streaming:** [Yes / No — impacts UX and latency perception]
 - **Fine-tuning / adaptation:** [None / Prompt-only / RAG / Fine-tuned — and why]
@@ -121,7 +121,7 @@ Breach policy: [What happens if a budget is exceeded? Block release / page on-ca
 - **Don't spec the full prompt if it's not yet drafted.** Placeholder is fine — the point of the PRD is to frame what the prompt must accomplish, not to commit to final wording.
 - **Only include dimensions that matter.** A summarization feature likely cares about accuracy, hallucination, and tone — not about refusal correctness. Trim to what's relevant.
 - **Regression thresholds are load-bearing.** Without them, eval scores drift downward across releases. Pick a real number.
-- **Use exact model IDs.** Reference the exact published model identifier (e.g., `claude-opus-4-7`, `claude-sonnet-4-6`, `claude-haiku-4-5-20251001`). Don't abbreviate, drop date suffixes, or guess a version — if you're unsure of the exact current ID, flag it as an Open Question rather than inventing one. The date suffix convention varies by model family; verify before writing.
+- **Use exact model IDs.** Reference the exact published model identifier from the chosen provider (e.g., Anthropic's `claude-opus-4-7` or `claude-haiku-4-5-20251001`; other providers have their own ID schemes). Don't abbreviate, drop date or version suffixes, or guess — if you're unsure of the exact current ID, flag it as an Open Question rather than inventing one. ID conventions vary by provider and model family; verify before writing.
 
 ## Integration with `/dr-plan`
 
