@@ -23,7 +23,7 @@ Do **not** display the audit as its own prose — the results feed the Ship Repo
 
 ## 1b. `--verify` (only when the flag was passed)
 
-Spawn the verifier via the Agent tool with `subagent_type="project-management:plan-verifier"`, passing the plan file path and the final phase number. Wait for its report.
+Spawn the verifier via the Agent tool with `subagent_type="project-management:plan-verifier"`, passing the plan file path and the final phase number. Wait for its report. If the harness cannot spawn subagents, run the verifier's checklist inline in a fresh, skeptical pass and record PASS/FAIL per item.
 
 - Every **FAIL** and **UNVERIFIED** verdict is an additional blocking item; keep the verdicts verbatim.
 - Do not soften or reinterpret the verdicts. Under-report beats over-report.

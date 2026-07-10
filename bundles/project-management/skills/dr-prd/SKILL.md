@@ -9,7 +9,7 @@ argument-hint: "[feature description OR @prd-file [refinement request]] [--no-co
 
 # Create or Refine a Product Requirement Document
 
-This skill has two modes. Detect the mode from `$ARGUMENTS` first, then route to the correct reference file.
+This skill has two modes. Detect the mode from `$ARGUMENTS` (the user's arguments — substituted here by Claude Code; on harnesses without substitution they arrive in the invoking message) first, then route to the correct reference file.
 
 ## Trigger Validation
 
@@ -17,6 +17,8 @@ Before mode detection, confirm this invocation is genuine and not conversational
 
 - **If the user's current message contains the literal token `/dr-prd`** (anywhere in the message, not only at the start) → proceed.
 - **Otherwise** → stop. Ask: *"Did you want to run /dr-prd, or should we keep discussing this inline?"* Only continue if they confirm.
+
+The `/dr-prd` token is a convention in the user's message text, not a harness invocation mechanism — apply this gate the same way regardless of how the skill was loaded (e.g., Pi's explicit invocation form is `/skill:dr-prd`).
 
 ## Mode Detection
 
@@ -50,6 +52,7 @@ These apply in both modes:
 4. **Cross-platform paths.** Always emit forward slashes. Works on Windows, macOS, and Linux.
 5. **Incorporate only user-provided research or context.** Do not proactively Glob `_claude/research/` or any other directory looking for material to inject. Accept explicit references (`@path/to/research.md`) and incorporate those.
 6. **Respect investment level.** This plugin has a small user base. Keep flows lean — don't add elaborate migration tooling, defensive UX, or speculative safeguards.
+7. **Structured questions, gracefully.** Where these instructions say `AskUserQuestion`, use the harness's structured question tool if one is available (`AskUserQuestion` in Claude Code); otherwise ask the same question in plain text, list the options, and wait for the user's reply.
 
 ## Completion Summary
 

@@ -297,7 +297,7 @@ fi
 
 ### Create visual task list for the phase
 
-When entering a new phase, use TaskCreate for each task in the phase to populate the Claude Code UI task list:
+When entering a new phase, use TaskCreate for each task in the phase to populate the harness task list (if task tools are available — Claude Code UI shows these natively):
 - Task name: `[Phase name] — [task name]`
 - Status: pending
 

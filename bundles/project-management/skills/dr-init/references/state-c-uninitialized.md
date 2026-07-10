@@ -2,7 +2,7 @@
 
 Use this flow when the project has an existing `CLAUDE.md` (with content) but no plugin marker and no `_claude/` directory. The plugin sections need to be appended to the existing file without disturbing what's already there.
 
-There's no conflict to resolve: the plugin-managed sections describe plugin-specific conventions (plan workflow, available commands, task completion protocol) that don't overlap with what the user or Claude's `/init` would typically write.
+There's no conflict to resolve: the plugin-managed sections describe plugin-specific conventions (plan workflow, available commands, task completion protocol) that don't overlap with what the user or a project-bootstrap command (like Claude Code's `/init`) would typically write.
 
 ## Steps
 

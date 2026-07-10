@@ -120,7 +120,7 @@ Read `templates/prd-base.md`. Apply the template-variant rules from Phase 3:
 - Replace placeholders:
   - `{{FEATURE_NAME}}` — human-readable name.
   - `{{CURRENT_DATE}}` — today's date from conversation context (`YYYY-MM-DD`).
-  - `{{AUTHOR}}` — `Claude Code` unless the user provided a name.
+  - `{{AUTHOR}}` — the authoring agent (e.g., `Claude Code`) unless the user provided a name.
   - `{{FEATURE_TYPE}}` — the confirmed type from Phase 3.
 
 ### Populate every included section thoughtfully

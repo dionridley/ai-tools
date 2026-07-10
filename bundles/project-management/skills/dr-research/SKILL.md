@@ -11,11 +11,13 @@ argument-hint: [research prompt — reference an existing research path for a de
 
 Conduct research on a topic and produce structured, high-quality documentation: canonical markdown plus a portable HTML microsite view.
 
+**Requires web access.** The research loop depends on web search and page fetching (`WebSearch`/`WebFetch` in Claude Code). If the harness provides no web tools, stop and tell the user this skill cannot run without them — name a remedy if one is known (Pi: `pi install npm:pi-web-access`) — rather than answering from memory.
+
 ## Phase 1: Understand & Plan
 
 ### Get the research prompt
 
-Use `$ARGUMENTS` as the research prompt. If `$ARGUMENTS` is empty, ask the user interactively:
+Use `$ARGUMENTS` (the user's arguments — substituted here by Claude Code; on harnesses without substitution they arrive in the invoking message) as the research prompt. If the prompt is empty, ask the user interactively:
 
 > What topic would you like me to research? Please provide as much detail as possible:
 > - Core questions you want answered

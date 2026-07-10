@@ -9,7 +9,7 @@ argument-hint: (no arguments — run in the project root)
 
 # Initialize Project-Management Plugin Structure
 
-This skill scaffolds or updates the project-management plugin layout in the current working directory. It operates on **plugin-managed content only** — project-specific documentation (architecture, build commands, etc.) is out of scope. Suggest Claude Code's built-in `/init` to the user for that.
+This skill scaffolds or updates the project-management plugin layout in the current working directory. It operates on **plugin-managed content only** — project-specific documentation (architecture, build commands, etc.) is out of scope. Suggest the harness's project-bootstrap command to the user for that (Claude Code: built-in `/init`).
 
 ## Phase 1: Detect Project State
 
@@ -53,7 +53,7 @@ For background on how plugin-managed section versioning works (relevant mainly t
 
 ## Phase 2: Execute the State Handler
 
-Follow the loaded reference file's instructions end-to-end. Each reference file covers:
+Follow the loaded reference file's instructions end-to-end. Where a reference file says `AskUserQuestion`, use the harness's structured question tool if one is available (`AskUserQuestion` in Claude Code); otherwise ask the same question in plain text, list the options, and wait for the user's reply. Each reference file covers:
 
 - Pre-flight git safety check (warn if CLAUDE.md has uncommitted changes before any write)
 - Any user confirmation needed
@@ -72,6 +72,6 @@ Keep the summary tight — the reference file's success message is the canonical
 
 ## Cross-Platform Notes
 
-This skill uses Claude Code's native tools (`Read`, `Write`, `Edit`, `Glob`) for all filesystem operations, which behave identically on Windows, macOS, and Linux. The only Bash permission is `git status` for the safety check, which is consistent across platforms.
+This skill uses the harness's native file tools (`Read`, `Write`, `Edit`, `Glob` in Claude Code) for all filesystem operations, which behave identically on Windows, macOS, and Linux. The only shell command used is `git status` for the safety check, which is consistent across platforms.
 
 Do not invoke `mkdir`, `touch`, `ls`, `wc`, `test`, or any other shell utility — all have native-tool equivalents documented in the reference files. Always emit paths with forward slashes (works on all three OSes).

@@ -88,7 +88,7 @@ The version number is how `/dr-init` detects users who have the old content and 
 - **Transparent** — users can read the markers to see which sections the plugin owns
 - **Testable by inspection** — no runtime, no script, just string matching
 
-The trade-off is that the approach relies on Claude's careful execution of the update logic rather than deterministic code. This is acceptable because:
+The trade-off is that the approach relies on the agent's careful execution of the update logic rather than deterministic code. This is acceptable because:
 - Updates are rare (only when template versions bump)
 - State B shows a diff preview before applying any changes (see `state-b-update.md`)
 - The user can always skip updates and handle them manually
