@@ -73,8 +73,8 @@ Store the chosen stack. Then immediately write permissions and restart — loadi
 **Write settings, save state, and pause for restart:**
 
 1. Read the appropriate baseline permissions file:
-   - **JS:** Read `${CLAUDE_SKILL_DIR}/references/settings/typescript.json`
-   - **Elixir:** Read `${CLAUDE_SKILL_DIR}/references/settings/elixir.json`
+   - **JS:** Read `references/settings/typescript.json`
+   - **Elixir:** Read `references/settings/elixir.json`
 
 2. Create the `.mvp/` directory structure and initialize git:
    ```bash
@@ -947,7 +947,7 @@ git add -A && git commit -m "mvp: initialize [project-name] with [stack]"
 
 ## Phase 7: Write Brainstorm Document
 
-1. Read the template: `${CLAUDE_SKILL_DIR}/templates/brainstorm-template.md`
+1. Read the template: `templates/brainstorm-template.md`
 2. Replace ALL `{{PLACEHOLDER}}` values with actual data from the brainstorm conversation
 3. Write to `.mvp/brainstorm.md`
 

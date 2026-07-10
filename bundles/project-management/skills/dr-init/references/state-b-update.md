@@ -18,7 +18,7 @@ Run these checks (parallel):
    - `_claude/research/`
    Note any missing directories.
 2. **`Read CLAUDE.md`** — already read during state detection, reuse that content.
-3. **`Read ${CLAUDE_SKILL_DIR}/templates/CLAUDE-template.md`** — the authoritative template to compare against.
+3. **`Read templates/CLAUDE-template.md`** (from the skill root) — the authoritative template to compare against.
 
 ### 2. Backfill missing directories (silent, no user prompt)
 
@@ -36,7 +36,7 @@ For each versioned section, note:
 - Current version from the template (e.g., `2`)
 - Full section body (from the `##` heading through to the next `##` heading or the `<!-- End of plugin-managed section -->` marker)
 
-See `${CLAUDE_SKILL_DIR}/references/section-versioning.md` for the versioning scheme.
+See `references/section-versioning.md` for the versioning scheme.
 
 ### 4. Categorize each section against the user's CLAUDE.md
 

@@ -29,16 +29,16 @@ If `$ARGUMENTS` is empty in CREATE mode, the clarifying phase will prompt the us
 
 ## Route
 
-Load exactly one of these reference files based on the detected mode and follow its instructions end-to-end:
+Load exactly one of these reference files based on the detected mode and follow its instructions end-to-end (paths are relative to this skill's directory, which the harness announces when the skill loads):
 
-- **CREATE** → Read `${CLAUDE_SKILL_DIR}/references/create-mode.md`.
-- **REFINE** → Read `${CLAUDE_SKILL_DIR}/references/refine-mode.md`.
+- **CREATE** → Read `references/create-mode.md`.
+- **REFINE** → Read `references/refine-mode.md`.
 
 Both modes also rely on shared references loaded on demand:
 
-- `${CLAUDE_SKILL_DIR}/references/template-variants.md` — Project-type detection and which sections to include/skip.
-- `${CLAUDE_SKILL_DIR}/references/ai-feature-sections.md` — Additional sections to inject for AI/LLM features (eval rubrics, model constraints, prompt specs, performance budgets, guardrails).
-- `${CLAUDE_SKILL_DIR}/templates/prd-base.md` — The base template used in CREATE mode.
+- `references/template-variants.md` — Project-type detection and which sections to include/skip.
+- `references/ai-feature-sections.md` — Additional sections to inject for AI/LLM features (eval rubrics, model constraints, prompt specs, performance budgets, guardrails).
+- `templates/prd-base.md` — The base template used in CREATE mode.
 
 ## Operating Principles
 

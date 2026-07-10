@@ -24,7 +24,7 @@ You are executing the SUMMARY mode of the `/mvp` skill. Your job is to generate 
 
 2. **Read the brainstorm file** at `.mvp/[state.project.brainstormFile]` for project vision and notes.
 
-3. **Read the HTML template** at `${CLAUDE_SKILL_DIR}/templates/summary-template.html`
+3. **Read the HTML template** at `templates/summary-template.html`
 
 ---
 
@@ -72,7 +72,7 @@ For each session in `analytics.sessionLog`:
 
 ## Phase 3: Generate HTML
 
-Take the template from `${CLAUDE_SKILL_DIR}/templates/summary-template.html` and replace all placeholder markers with computed data.
+Take the template from `templates/summary-template.html` and replace all placeholder markers with computed data.
 
 **CRITICAL**: The HTML must be completely self-contained:
 - All CSS must be inline (in `<style>` tags)

@@ -37,7 +37,7 @@ If not a git repo, skip this check silently.
 
 **Get the current date.** Use today's date from the conversation context, formatted as `YYYY-MM-DD`.
 
-**Read the template.** Read `${CLAUDE_SKILL_DIR}/templates/CLAUDE-template.md`.
+**Read the template.** Read `templates/CLAUDE-template.md`.
 
 **Extract the content to be appended.** From the template, skip the header HTML comment block, the `# CLAUDE.md` heading, and the intro paragraph. Keep everything from `## Project Structure` onward (including the `<!-- End of plugin-managed section -->` marker at the bottom).
 

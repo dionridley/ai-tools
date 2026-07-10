@@ -113,4 +113,4 @@ One `AskUserQuestion`, one question. The question text is **one line** — all d
 - **Adjust** — as above, plus individually-reasoned waivers: the user names items and reasons; note them for ship.md, re-run the audit arithmetic, re-print the report, ask again.
 - **Abort** — stop. No files have been changed (a branch created at 1d, if any, remains — it is empty).
 
-On Ship it / Ship anyway → Read `${CLAUDE_SKILL_DIR}/references/ship.md` and execute it end-to-end.
+On Ship it / Ship anyway → Read `references/ship.md` and execute it end-to-end.

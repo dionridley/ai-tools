@@ -43,13 +43,13 @@ Run these checks (parallel where possible):
 
 ### Route
 
-Load the reference file that corresponds to the detected state:
+Load the reference file that corresponds to the detected state (paths are relative to this skill's directory, which the harness announces when the skill loads):
 
-- **State A** → Read `${CLAUDE_SKILL_DIR}/references/state-a-fresh.md`
-- **State B** → Read `${CLAUDE_SKILL_DIR}/references/state-b-update.md`
-- **State C** → Read `${CLAUDE_SKILL_DIR}/references/state-c-uninitialized.md`
+- **State A** → Read `references/state-a-fresh.md`
+- **State B** → Read `references/state-b-update.md`
+- **State C** → Read `references/state-c-uninitialized.md`
 
-For background on how plugin-managed section versioning works (relevant mainly to State B), also read `${CLAUDE_SKILL_DIR}/references/section-versioning.md`.
+For background on how plugin-managed section versioning works (relevant mainly to State B), also read `references/section-versioning.md`.
 
 ## Phase 2: Execute the State Handler
 

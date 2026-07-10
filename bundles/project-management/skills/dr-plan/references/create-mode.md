@@ -32,7 +32,7 @@ Determine the starting context using this precedence:
 
 ## Phase 2: Detect Plan Type (Overlay Signals)
 
-Load `${CLAUDE_SKILL_DIR}/references/template-variants.md` for detection rules and overlay composition.
+Load `references/template-variants.md` for detection rules and overlay composition.
 
 The default plan type is **`standard-feature`** and it is used **silently**. Overlays only apply when detection signals are present.
 
@@ -193,11 +193,11 @@ Leave the `Spawn plan-verifier` and `Apply verification report` tasks out entire
 
 ### Load the base
 
-Read `${CLAUDE_SKILL_DIR}/templates/plan-base.md`.
+Read `templates/plan-base.md`.
 
 ### Apply the overlay (if any)
 
-If an overlay was confirmed in Phase 2, read its file from `${CLAUDE_SKILL_DIR}/templates/plan-[type].md` and apply per that overlay's "Rendering note for CREATE mode" section. Overlays additively describe sections to add, replace, or omit.
+If an overlay was confirmed in Phase 2, read its file from `templates/plan-[type].md` and apply per that overlay's "Rendering note for CREATE mode" section. Overlays additively describe sections to add, replace, or omit.
 
 ### Fill placeholders
 

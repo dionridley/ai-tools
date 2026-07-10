@@ -22,19 +22,19 @@ Detect the mode from the user's arguments and delegate to the appropriate refere
 
 **Arguments:** $ARGUMENTS
 
-**Route to the correct mode:**
+**Route to the correct mode** (paths are relative to this skill's directory, which the harness announces when the skill loads)**:**
 
 1. If arguments are empty, whitespace-only, or start with "start":
-   - Read `${CLAUDE_SKILL_DIR}/references/start.md` and follow those instructions
+   - Read `references/start.md` and follow those instructions
 
 2. If arguments start with "build":
-   - Read `${CLAUDE_SKILL_DIR}/references/build.md` and follow those instructions
+   - Read `references/build.md` and follow those instructions
 
 3. If arguments start with "status":
-   - Read `${CLAUDE_SKILL_DIR}/references/status.md` and follow those instructions
+   - Read `references/status.md` and follow those instructions
 
 4. If arguments start with "summary":
-   - Read `${CLAUDE_SKILL_DIR}/references/summary.md` and follow those instructions
+   - Read `references/summary.md` and follow those instructions
 
 5. If no recognized mode, show usage help:
    ```

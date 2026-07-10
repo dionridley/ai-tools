@@ -34,21 +34,21 @@ When a user passes `@file.md`, Claude Code auto-expands the file content into th
 
 ## Route
 
-Load exactly one of these reference files based on the detected mode and follow its instructions end-to-end:
+Load exactly one of these reference files based on the detected mode and follow its instructions end-to-end (paths are relative to this skill's directory, which the harness announces when the skill loads):
 
-- **CREATE** → Read `${CLAUDE_SKILL_DIR}/references/create-mode.md`.
-- **REFINE** → Read `${CLAUDE_SKILL_DIR}/references/refine-mode.md`.
-- **SUMMARY** → Read `${CLAUDE_SKILL_DIR}/references/summary-mode.md`.
-- **QUESTION RESOLUTION** → Read `${CLAUDE_SKILL_DIR}/references/questions-mode.md`.
+- **CREATE** → Read `references/create-mode.md`.
+- **REFINE** → Read `references/refine-mode.md`.
+- **SUMMARY** → Read `references/summary-mode.md`.
+- **QUESTION RESOLUTION** → Read `references/questions-mode.md`.
 
 Shared references loaded on demand:
 
-- `${CLAUDE_SKILL_DIR}/references/template-variants.md` — Plan-type detection (silent default + announce-and-confirm overlays) and overlay composition rules.
-- `${CLAUDE_SKILL_DIR}/templates/plan-base.md` — Standard-feature baseline template used in CREATE mode.
-- `${CLAUDE_SKILL_DIR}/templates/plan-ai-feature.md` — Overlay for AI/LLM features (eval rubric, model/prompt selection, AI-specific criteria).
-- `${CLAUDE_SKILL_DIR}/templates/plan-migration.md` — Overlay for migrations/infra/refactor (Rollback Plan, Verify-in-Prod phase, Entry Preconditions).
-- `${CLAUDE_SKILL_DIR}/templates/plan-bug-fix.md` — Overlay for bug fixes (collapsed phases, no Dependencies).
-- `${CLAUDE_SKILL_DIR}/templates/plan-spike.md` — Overlay for spikes (Questions to Answer, relaxed DoD, time-box).
+- `references/template-variants.md` — Plan-type detection (silent default + announce-and-confirm overlays) and overlay composition rules.
+- `templates/plan-base.md` — Standard-feature baseline template used in CREATE mode.
+- `templates/plan-ai-feature.md` — Overlay for AI/LLM features (eval rubric, model/prompt selection, AI-specific criteria).
+- `templates/plan-migration.md` — Overlay for migrations/infra/refactor (Rollback Plan, Verify-in-Prod phase, Entry Preconditions).
+- `templates/plan-bug-fix.md` — Overlay for bug fixes (collapsed phases, no Dependencies).
+- `templates/plan-spike.md` — Overlay for spikes (Questions to Answer, relaxed DoD, time-box).
 
 ## Operating Principles
 

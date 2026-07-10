@@ -33,12 +33,12 @@ Inspect `$ARGUMENTS`:
 
 ## Route
 
-Work through the phases in order. Load each reference file when its phase begins and follow it end-to-end:
+Work through the phases in order. Load each reference file when its phase begins and follow it end-to-end (paths are relative to this skill's directory, which the harness announces when the skill loads):
 
-- **Phase 1 — Preflight, Ship Report, gate** → Read `${CLAUDE_SKILL_DIR}/references/preflight.md`. Read-only: readiness audit (+ `--verify`), git state, the deterministic Ship Report display, and the single confirmation question.
-- **Phases 2–5 — Close out, generate, ship, output** → Read `${CLAUDE_SKILL_DIR}/references/ship.md`. Runs only after the gate approves.
+- **Phase 1 — Preflight, Ship Report, gate** → Read `references/preflight.md`. Read-only: readiness audit (+ `--verify`), git state, the deterministic Ship Report display, and the single confirmation question.
+- **Phases 2–5 — Close out, generate, ship, output** → Read `references/ship.md`. Runs only after the gate approves.
 
-Phase 3 (generation) has no reference of its own: `ship.md` directs you to Read `${CLAUDE_SKILL_DIR}/../dr-plan/references/summary-mode.md` and follow **only** its "Phase 4: Generate the PR Summary and Commit Message" section. That file is the single source of truth for the summary and commit-message formats — do not restate or improvise the format rules.
+Phase 3 (generation) has no reference of its own: `ship.md` directs you to Read `../dr-plan/references/summary-mode.md` and follow **only** its "Phase 4: Generate the PR Summary and Commit Message" section. That file is the single source of truth for the summary and commit-message formats — do not restate or improvise the format rules. (This reference crosses into the sibling `dr-plan` skill — both ship together in the `project-management` bundle; a standalone copy of `dr-ship` alone will not resolve it.)
 
 ## Operating Principles
 

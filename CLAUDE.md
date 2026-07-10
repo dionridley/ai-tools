@@ -61,7 +61,7 @@ Instructions for Claude to execute...
 
 Key patterns:
 - `<command-args>` tag contains user arguments at runtime
-- `${CLAUDE_PLUGIN_ROOT}` resolves to the plugin's root directory
+- `${CLAUDE_PLUGIN_ROOT}` resolves to the plugin's root directory (Claude Code commands only — skill content uses relative paths instead; see Skill Structure)
 - `@file.md` references auto-expand file content into context (path disappears from args)
 - Workaround: `@file.md keyword` keeps "keyword" in args while expanding file
 
@@ -85,7 +85,7 @@ The main command detects mode from args and reads the appropriate subfolder file
 |--------|---------------|-------|
 | Structure | Single .md file | Directory with `SKILL.md` + optional `references/`, `templates/`, `scripts/`, `examples/` |
 | Arguments | Supports `<command-args>` tag | Uses `$ARGUMENTS` in SKILL.md |
-| Progressive disclosure | Single file loads fully | `SKILL.md` routes; reference files load on demand via `${CLAUDE_SKILL_DIR}/...` |
+| Progressive disclosure | Single file loads fully | `SKILL.md` routes; reference files load on demand via paths relative to the skill root (Agent Skills spec) |
 | Auto-discovery | N/A — always explicit | On by default; set `disable-model-invocation: true` to make the skill explicit-only (invoked via `/skill-name`) |
 | Use when | Simple one-shot workflow with a single set of instructions | Multi-phase or multi-mode workflow that benefits from progressive disclosure; or a workflow Claude should be able to auto-discover |
 
@@ -102,6 +102,8 @@ skill-name/
 ```
 
 SKILL.md frontmatter must have `name` and `description` fields. The description is the primary trigger mechanism.
+
+File references inside a skill are **relative to the skill root** per the Agent Skills spec (agentskills.io) — the harness announces the skill's base directory when the skill loads. Do not use `${CLAUDE_SKILL_DIR}` / `${CLAUDE_PLUGIN_ROOT}` in skill content. Bash commands that embed skill paths must resolve them to absolute paths against the announced base directory before running (the shell's cwd is the project root, not the skill directory).
 
 ## Development Workflow
 
@@ -128,7 +130,6 @@ commands
 Templates in `templates/` use placeholder patterns that commands fill in:
 - `[YYYY-MM-DD]` - Current date
 - `[Plan Name]` - Generated from context
-- `${CLAUDE_PLUGIN_ROOT}` - Plugin root path (runtime)
 
 ### Template Section Versioning
 
