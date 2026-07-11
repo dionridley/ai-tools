@@ -77,6 +77,8 @@ Plans are numbered sequentially across ALL three folders.
 5. Format: zero-padded to 3 digits if ≤ 999 (`001`, `042`, `999`); no padding if > 999 (`1000`, `1001`).
 6. If no plans exist anywhere → start at `001`.
 
+If `_claude/plans/` exists and `_project/plans/` does not, the project predates the 3.0.0 directory rename — tell the user and suggest `/dr-init` (which offers the `git mv _claude _project` migration), then use the old `_claude/` paths for this run.
+
 Concurrent-create edge cases (two plans ending up with the same number) are acceptable — the slugs differ and nothing downstream breaks.
 
 ## Phase 4: Analyze the Implementation (Extended Thinking)

@@ -109,6 +109,8 @@ Target: `_project/prd/[slug].md`.
 
 `Write` creates parent directories automatically — do not shell out to `mkdir`. If `_project/prd/` does not already exist, note in the completion summary that the user can run `/dr-init` for a full project scaffold, but don't block.
 
+If `_claude/prd/` exists and `_project/` does not, the project predates the 3.0.0 directory rename — tell the user and suggest `/dr-init` (which offers the `git mv _claude _project` migration), then write to the old `_claude/` paths for this run.
+
 Use `Glob` to check whether the target path already exists. If it does, ask the user whether to overwrite, use a different slug, or switch to REFINE mode.
 
 ### Load and populate the template

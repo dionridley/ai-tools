@@ -210,6 +210,7 @@ The Write tool creates parent directories automatically — decide the target pa
   - Create the slug from the topic: lowercase, hyphens for spaces, remove special characters
   - Use the current date from the conversation context (YYYY-MM-DD)
   - Use Glob to check whether `_project/research/` already exists. If it doesn't, inform the user they can run `/dr-init` for full project setup, but proceed — the first Write will create it.
+  - If `_claude/research/` exists and `_project/` does not, the project predates the 3.0.0 directory rename — tell the user and suggest `/dr-init` (which offers the `git mv _claude _project` migration), then write to the old `_claude/` paths for this run.
 - **Deep dive:** `_project/research/[parent-slug]-[date]/deep-dives/[deep-dive-slug]-[date]/`
 
 ### Write the files

@@ -29,6 +29,8 @@ Inspect `$ARGUMENTS` (the user's arguments — substituted here by Claude Code; 
    - **Exactly one** → that's the plan. Read it.
    - **Multiple** → `AskUserQuestion`: which plan is being shipped?
    - **Zero** → off the happy path. Ask how to proceed (options: user points at a plan file; abort). This skill does not run without a plan.
+
+   If `_claude/plans/` exists and `_project/plans/` does not, the project predates the 3.0.0 directory rename — tell the user, suggest `/dr-init` (which offers the `git mv _claude _project` migration), and use the old `_claude/` paths for this run.
 3. **Format sanity check** — the file must look like a /dr-plan artifact: `## Metadata`, `## Implementation Plan` (or phase headings with Tasks/Verification checkboxes), `## Success Criteria`. If it doesn't match, tell the user what's missing and ask whether to proceed best-effort (audit whatever checkboxes exist; skip retro/move if there's no Retro section or the file isn't under `_project/plans/in_progress/`) or abort.
 
 ## Route
