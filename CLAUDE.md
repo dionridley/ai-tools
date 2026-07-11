@@ -133,7 +133,7 @@ Templates in `templates/` use placeholder patterns that commands fill in:
 
 ### Template Section Versioning
 
-The `CLAUDE-template.md` uses section version markers to track content changes. This allows `/dr-init` to detect outdated sections in existing projects and offer to update them.
+The `AGENTS-template.md` (dr-init's canonical generated artifact since 3.0.0; formerly `CLAUDE-template.md`) uses section version markers to track content changes. This allows `/dr-init` to detect outdated sections in existing projects and offer to update them. The generated CLAUDE.md is a thin pointer to AGENTS.md (from `templates/CLAUDE-pointer.md`) and is not version-tracked.
 
 **Marker format:** Place an HTML comment immediately after the `##` heading:
 ```markdown
@@ -144,10 +144,10 @@ Section content here...
 ```
 
 **Rules:**
-- When **modifying content** in a versioned section of `CLAUDE-template.md`, **bump the version number** (e.g., `v1` → `v2`)
+- When **modifying content** in a versioned section of `AGENTS-template.md`, **bump the version number** (e.g., `v1` → `v2`)
 - When **adding a new section** that should be tracked, add a version marker starting at `v1`
 - The marker slug must be lowercase kebab-case matching the section purpose
-- `/dr-init` reads these markers from the template and compares them against the user's CLAUDE.md to detect outdated or missing sections
+- `/dr-init` reads these markers from the template and compares them against the user's AGENTS.md (or a legacy pre-3.0.0 CLAUDE.md pending conversion) to detect outdated or missing sections
 - Sections without markers are not version-tracked (e.g., `## Project Structure`, `## Development Principles`)
 
 ## Plugin Manifest (plugin.json)

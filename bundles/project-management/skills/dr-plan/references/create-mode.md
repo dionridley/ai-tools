@@ -101,8 +101,8 @@ If an assumption is so load-bearing that getting it wrong invalidates the whole 
 
 The DoD block in the plan's header references concrete project commands. Populate them by reading config in this precedence order:
 
-1. `CLAUDE.md` at repo root — look for Build/Test/Lint/Typecheck sections.
-2. `AGENTS.md` at repo root — same purpose, different convention.
+1. `AGENTS.md` at repo root — look for Build/Test/Lint/Typecheck sections (the canonical file in projects initialized by /dr-init 3.0.0+).
+2. `CLAUDE.md` at repo root — same purpose, Claude Code convention (in 3.0.0+ projects it's a thin pointer to AGENTS.md).
 3. `package.json` — scripts section (`test`, `lint`, `typecheck`, `check`).
 4. `Cargo.toml` — implies `cargo test`, `cargo clippy`, `cargo check`.
 5. `go.mod` — implies `go test ./...`, `go vet ./...`.

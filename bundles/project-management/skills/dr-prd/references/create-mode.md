@@ -201,4 +201,4 @@ Next steps:
 
 If `_project/prd/` did not exist before this write, add a one-line note:
 
-> Note: Created `_project/prd/` on the fly. Run `/dr-init` if you'd like the full project scaffolding (`_project/plans/`, `_project/research/`, etc.) plus a versioned CLAUDE.md.
+> Note: Created `_project/prd/` on the fly. Run `/dr-init` if you'd like the full project scaffolding (`_project/plans/`, `_project/research/`, etc.) plus a versioned AGENTS.md and its CLAUDE.md pointer.

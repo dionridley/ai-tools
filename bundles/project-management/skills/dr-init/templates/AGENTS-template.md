@@ -1,23 +1,24 @@
 <!--
-  Plugin: project-management v1.0.0
+  Plugin: project-management
   Template generated: {{CURRENT_DATE}}
 
   This file is yours to customize for your project.
 
   Project-specific documentation (architecture, build/test/lint commands,
   coding conventions, etc.) is NOT the responsibility of this plugin.
-  We recommend running Claude Code's built-in `/init` to have Claude scan
-  your codebase and add that content to this file. It will integrate
-  cleanly alongside the plugin-managed sections below.
+  We recommend running your harness's project-bootstrap command (Claude
+  Code: the built-in `/init`) to scan your codebase and add that content
+  to this file. It will integrate cleanly alongside the plugin-managed
+  sections below.
 
   Sections managed by the plugin have version markers (e.g. <!-- section: name v1 -->).
   Running /dr-init will check these markers and offer to update outdated sections.
   Content outside the plugin-managed sections is never modified by /dr-init.
 -->
 
-# CLAUDE.md
+# AGENTS.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to coding agents when working with code in this repository. It is the canonical instruction file for this project — the generated CLAUDE.md is a pointer here.
 
 ## Project Structure
 

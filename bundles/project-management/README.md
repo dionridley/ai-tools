@@ -66,7 +66,7 @@ See the [marketplace README](../README.md#installation) for installation instruc
 
 ### `/dr-init`
 
-Initializes or updates project with standard directory structure and CLAUDE.md file. As of v1.6.0, this is a **Skill 2.0** (`skills/dr-init/`) rather than a command — invocation is unchanged, internals are significantly upgraded.
+Initializes or updates project with the standard directory structure, a canonical AGENTS.md, and a CLAUDE.md pointer. As of v1.6.0, this is a **Skill 2.0** (`skills/dr-init/`) rather than a command — invocation is unchanged, internals are significantly upgraded.
 
 **Usage:**
 ```bash
@@ -83,14 +83,14 @@ Initializes or updates project with standard directory structure and CLAUDE.md f
   - `resources/` - User-provided reference materials
   - `research/` - Research documentation (markdown + portable HTML microsites)
 - Creates `.gitkeep` files in all leaf directories for git tracking
-- Generates or updates plugin-managed sections in `CLAUDE.md`
+- Generates **AGENTS.md** (the canonical agent-guidance file carrying the versioned plugin sections) and **CLAUDE.md** as a thin pointer to it — the same content serves Claude Code and any harness that reads AGENTS.md
 - **Scope** — only manages plugin-specific sections (plan workflow, available commands, task completion protocol). For codebase-specific documentation (architecture, build/test/lint commands, coding conventions), run Claude Code's built-in `/init` alongside `/dr-init`
 - **Three detection states**:
-  - *Fresh* — no `CLAUDE.md` and no `_project/`: scaffolds both from scratch
-  - *Already initialized* — plugin version marker present: verifies structure, compares section versions, offers a diff-preview of any outdated or missing sections before updating
-  - *Has CLAUDE.md, no plugin structure* — shows a full preview of what will be appended and asks before writing
-- **Diff preview** before any update to an existing `CLAUDE.md`
-- **Git safety preflight** — warns if `CLAUDE.md` has uncommitted changes before modifying it. The skill never runs git commands that modify state; commits are your responsibility
+  - *Fresh* — no `AGENTS.md` and no `CLAUDE.md`: scaffolds everything from scratch
+  - *Already initialized* — plugin marker present: verifies structure, compares section versions, offers a diff-preview of any outdated or missing sections before updating. A marker in CLAUDE.md with no AGENTS.md identifies a pre-3.0.0 project — /dr-init offers the conversion to AGENTS.md + pointer, and the `_claude/` → `_project/` directory rename
+  - *Has guidance files, no plugin structure* — shows a full preview of what will be appended and asks before writing
+- **Diff preview** before any update to existing files
+- **Git safety preflight** — warns if `AGENTS.md`/`CLAUDE.md` has uncommitted changes before modifying it. The skill never runs state-modifying git commands except the user-approved `git mv _claude _project` migration; commits are your responsibility
 - **Cross-platform** — uses native Claude Code tools (`Read`/`Write`/`Edit`/`Glob`) for all filesystem operations; works identically on Windows, macOS, and Linux
 - **Idempotent** - safe to run multiple times
 
@@ -325,7 +325,7 @@ When a PR URL is provided:
 - Automatically assigns sequential plan number (001, 002, 003, etc.) by scanning ALL plan folders.
 - If PRD referenced via `@_project/prd/[file].md`, the expanded PRD drives the plan's shape.
 - **Detects plan type with silent default** — `standard-feature` applied silently; four overlays (`ai-feature`, `migration/infra/refactor`, `bug-fix`, `spike`) only announce-and-confirm when detection signals are present (keywords, repo signals, or PRD feature type).
-- **Populates Definition of Done** from project config files (`CLAUDE.md`, `AGENTS.md`, `package.json`, `Cargo.toml`, etc.) — the test/lint/typecheck commands every phase must satisfy.
+- **Populates Definition of Done** from project config files (`AGENTS.md`, `CLAUDE.md`, `package.json`, `Cargo.toml`, etc.) — the test/lint/typecheck commands every phase must satisfy.
 - **Structures every phase with four blocks:** Tasks / Verification (commands with expected output) / Acceptance Criteria (testable outcomes) / Phase Exit Gate (DoD check + optional verifier + agent self-review).
 - **Annotates Phase Exit Gates adaptively** — each phase carries a `<!-- verifier-recommendation: yes|no -->` comment based on risk/complexity. Spawn-verifier tasks render only when the recommendation is yes (or when Verification Policy is set to `Always`).
 - **Emits autonomous completion instructions** — every plan has `## Completion` and `## Retro` sections at the bottom. After the final Phase Exit Gate passes, the executing agent writes the retro and moves the file from `in_progress/` to `completed/` without prompting.
@@ -431,7 +431,8 @@ your-project/
 │   │   └── .gitkeep
 │   └── research/          # Research documentation
 │       └── .gitkeep
-└── CLAUDE.md              # Project management guidelines
+├── AGENTS.md              # Canonical agent guidance (plugin-managed sections)
+└── CLAUDE.md              # Thin pointer to AGENTS.md for Claude Code
 ```
 
 ## Workflow
@@ -686,23 +687,24 @@ If folders are truly missing, the command should have created them. Try running 
 ```
 This will recreate any missing directories and `.gitkeep` files.
 
-### CLAUDE.md was modified unexpectedly
+### AGENTS.md or CLAUDE.md was modified unexpectedly
 
-**Problem**: CLAUDE.md contents changed after running commands.
+**Problem**: AGENTS.md or CLAUDE.md contents changed after running commands.
 
-**Clarification**: `/dr-init` is the only part of this plugin that ever writes to `CLAUDE.md`, and it always shows a preview and asks for confirmation before writing. It modifies `CLAUDE.md` in three cases, all user-approved:
-1. **Fresh scaffold** — creates the file from the plugin template when none exists
-2. **Section update** — rewrites plugin-managed sections when their version markers are outdated (diff shown first)
-3. **Append** — adds plugin-managed sections to the end of an existing `CLAUDE.md` that has no plugin structure yet (full preview shown first)
+**Clarification**: `/dr-init` is the only part of this plugin that ever writes to `AGENTS.md` or `CLAUDE.md`, and it always shows a preview and asks for confirmation before writing. It modifies them in four cases, all user-approved:
+1. **Fresh scaffold** — creates AGENTS.md from the plugin template and CLAUDE.md as its pointer when neither exists
+2. **Section update** — rewrites plugin-managed sections in AGENTS.md when their version markers are outdated (diff shown first)
+3. **Append** — adds plugin-managed sections to an existing AGENTS.md (plus the pointer note to CLAUDE.md) when no plugin structure exists yet (full preview shown first)
+4. **Legacy conversion** — moves the plugin sections out of a pre-3.0.0 CLAUDE.md into AGENTS.md, leaving a pointer behind (diff shown first)
 
-If `CLAUDE.md` changed without you running `/dr-init`, check `git log -- CLAUDE.md` — a different tool, editor, or user likely made the change.
+If either file changed without you running `/dr-init`, check `git log -- AGENTS.md CLAUDE.md` — a different tool, editor, or user likely made the change.
 
 ## Support
 
 For issues, questions, or suggestions:
 - File an issue on the repository
 - Check existing documentation in this README
-- Review the CLAUDE.md file created by `/dr-init`
+- Review the AGENTS.md file created by `/dr-init`
 
 ---
 
