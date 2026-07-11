@@ -9,7 +9,7 @@ argument-hint: "[implementation context OR @plan-file [refinement|summary [pr-ur
 
 # Create or Refine an Implementation Plan
 
-This skill has four modes. Detect the mode from `$ARGUMENTS` first, then route to the correct reference file.
+This skill has four modes. Detect the mode from `$ARGUMENTS` (the user's arguments — substituted here by Claude Code; on harnesses without substitution they arrive in the invoking message) first, then route to the correct reference file.
 
 ## Trigger Validation
 
@@ -18,6 +18,8 @@ Before mode detection, confirm this invocation is genuine and not conversational
 - **If the user's current message contains the literal token `/dr-plan`** → proceed.
 - **If the user explicitly asked to create, refine, or summarize a plan file under `_claude/plans/` in this message** → proceed.
 - **Otherwise** → stop. Ask: *"Did you want to run /dr-plan, or should we keep discussing this inline?"* Only continue if they confirm.
+
+The `/dr-plan` token is a convention in the user's message text, not a harness invocation mechanism — apply this gate the same way regardless of how the skill was loaded (e.g., Pi's explicit invocation form is `/skill:dr-plan`).
 
 ## Mode Detection
 
@@ -30,25 +32,25 @@ Inspect `$ARGUMENTS`:
 
 If `$ARGUMENTS` is empty in CREATE mode, the clarifying phase will prompt the user for implementation context before proceeding.
 
-When a user passes `@file.md`, Claude Code auto-expands the file content into the conversation and removes the `@path` token from `$ARGUMENTS`. The text that follows (`summary`, `answer questions`, a refinement request, etc.) remains. Mode detection should look at both the content of `$ARGUMENTS` and whether plan content has been expanded into the conversation.
+When a user passes `@file.md`, Claude Code auto-expands the file content into the conversation and removes the `@path` token from `$ARGUMENTS`. The text that follows (`summary`, `answer questions`, a refinement request, etc.) remains. Mode detection should look at both the content of `$ARGUMENTS` and whether plan content has been expanded into the conversation. (On harnesses without `@` expansion, Read the referenced file yourself and treat the remaining text as the arguments.)
 
 ## Route
 
-Load exactly one of these reference files based on the detected mode and follow its instructions end-to-end:
+Load exactly one of these reference files based on the detected mode and follow its instructions end-to-end (paths are relative to this skill's directory, which the harness announces when the skill loads):
 
-- **CREATE** → Read `${CLAUDE_SKILL_DIR}/references/create-mode.md`.
-- **REFINE** → Read `${CLAUDE_SKILL_DIR}/references/refine-mode.md`.
-- **SUMMARY** → Read `${CLAUDE_SKILL_DIR}/references/summary-mode.md`.
-- **QUESTION RESOLUTION** → Read `${CLAUDE_SKILL_DIR}/references/questions-mode.md`.
+- **CREATE** → Read `references/create-mode.md`.
+- **REFINE** → Read `references/refine-mode.md`.
+- **SUMMARY** → Read `references/summary-mode.md`.
+- **QUESTION RESOLUTION** → Read `references/questions-mode.md`.
 
 Shared references loaded on demand:
 
-- `${CLAUDE_SKILL_DIR}/references/template-variants.md` — Plan-type detection (silent default + announce-and-confirm overlays) and overlay composition rules.
-- `${CLAUDE_SKILL_DIR}/templates/plan-base.md` — Standard-feature baseline template used in CREATE mode.
-- `${CLAUDE_SKILL_DIR}/templates/plan-ai-feature.md` — Overlay for AI/LLM features (eval rubric, model/prompt selection, AI-specific criteria).
-- `${CLAUDE_SKILL_DIR}/templates/plan-migration.md` — Overlay for migrations/infra/refactor (Rollback Plan, Verify-in-Prod phase, Entry Preconditions).
-- `${CLAUDE_SKILL_DIR}/templates/plan-bug-fix.md` — Overlay for bug fixes (collapsed phases, no Dependencies).
-- `${CLAUDE_SKILL_DIR}/templates/plan-spike.md` — Overlay for spikes (Questions to Answer, relaxed DoD, time-box).
+- `references/template-variants.md` — Plan-type detection (silent default + announce-and-confirm overlays) and overlay composition rules.
+- `templates/plan-base.md` — Standard-feature baseline template used in CREATE mode.
+- `templates/plan-ai-feature.md` — Overlay for AI/LLM features (eval rubric, model/prompt selection, AI-specific criteria).
+- `templates/plan-migration.md` — Overlay for migrations/infra/refactor (Rollback Plan, Verify-in-Prod phase, Entry Preconditions).
+- `templates/plan-bug-fix.md` — Overlay for bug fixes (collapsed phases, no Dependencies).
+- `templates/plan-spike.md` — Overlay for spikes (Questions to Answer, relaxed DoD, time-box).
 
 ## Operating Principles
 
@@ -61,6 +63,7 @@ These apply in every mode:
 5. **Incorporate only user-provided research or context.** Do not proactively Glob `_claude/research/` or any other directory looking for material to inject. Accept explicit references (`@path/to/research.md`, `@_claude/prd/[file].md`) and incorporate those.
 6. **Respect investment level.** This plugin has a small user base. Keep flows lean — don't add elaborate migration tooling, defensive UX, or speculative safeguards.
 7. **Autonomous execution by default.** Plans are designed to execute to completion without user intervention unless something genuinely goes wrong. Phase Exit Gates are the executing agent's self-discipline encoded in the artifact — not user checkpoints. Retry failing gates up to 2 times (3 total attempts) before escalating.
+8. **Structured questions, gracefully.** Where these instructions say `AskUserQuestion`, use the harness's structured question tool if one is available (`AskUserQuestion` in Claude Code); otherwise ask the same question in plain text, list the options, and wait for the user's reply.
 
 ## Completion Summary
 

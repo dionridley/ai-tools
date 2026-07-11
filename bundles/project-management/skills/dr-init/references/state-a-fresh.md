@@ -12,7 +12,7 @@ Use today's date from the conversation context, formatted as `YYYY-MM-DD`. Do no
 
 ### 2. Read the template
 
-Read `${CLAUDE_SKILL_DIR}/templates/CLAUDE-template.md` into memory.
+Read `templates/CLAUDE-template.md` into memory.
 
 ### 3. Substitute placeholders
 

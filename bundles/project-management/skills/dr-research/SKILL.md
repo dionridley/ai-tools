@@ -11,11 +11,13 @@ argument-hint: [research prompt — reference an existing research path for a de
 
 Conduct research on a topic and produce structured, high-quality documentation: canonical markdown plus a portable HTML microsite view.
 
+**Requires web access.** The research loop depends on web search and page fetching (`WebSearch`/`WebFetch` in Claude Code). If the harness provides no web tools, stop and tell the user this skill cannot run without them — name a remedy if one is known (Pi: `pi install npm:pi-web-access`) — rather than answering from memory.
+
 ## Phase 1: Understand & Plan
 
 ### Get the research prompt
 
-Use `$ARGUMENTS` as the research prompt. If `$ARGUMENTS` is empty, ask the user interactively:
+Use `$ARGUMENTS` (the user's arguments — substituted here by Claude Code; on harnesses without substitution they arrive in the invoking message) as the research prompt. If the prompt is empty, ask the user interactively:
 
 > What topic would you like me to research? Please provide as much detail as possible:
 > - Core questions you want answered
@@ -52,7 +54,7 @@ Use the answers to shape the research questions. On the Deep path, **the key que
 
 ### Plan the research
 
-Read `${CLAUDE_SKILL_DIR}/references/research-methodology.md` for research types, strategies, path details, and verification mechanics.
+Read `references/research-methodology.md` for research types, strategies, path details, and verification mechanics. (File paths in this skill are relative to the skill's directory, which the harness announces when the skill loads — resolve them against it, not the shell working directory.)
 
 1. Identify the **research type** from the user's prompt
 2. Select the appropriate **research strategy** (funnel, adversarial, temporal, multi-stakeholder). If not clear, ask the user. If the user suggests a strategy in their prompt, follow their lead.
@@ -136,7 +138,7 @@ Execute the approved research plan.
 
 ### Conflicting sources
 
-When sources disagree: document both perspectives, analyze which seems more credible and why, and cite both inline with links so the user can evaluate. Name the tiebreaker you applied. See `${CLAUDE_SKILL_DIR}/references/research-methodology.md` for the detailed approach.
+When sources disagree: document both perspectives, analyze which seems more credible and why, and cite both inline with links so the user can evaluate. Name the tiebreaker you applied. See `references/research-methodology.md` for the detailed approach.
 
 ### Deep path only: verify the load-bearing claims
 
@@ -163,7 +165,7 @@ Maximum 1-2 interruptions in exceptional cases. Zero in most research runs. The 
 
 ## Phase 3: Synthesis & Output
 
-Read `${CLAUDE_SKILL_DIR}/references/output-formats.md` for file contents, quality standards, and formats (answer block, claim ledger table, gaps section). For annotated examples, see `${CLAUDE_SKILL_DIR}/examples/exemplar-index.md` and `${CLAUDE_SKILL_DIR}/examples/exemplar-findings.md`.
+Read `references/output-formats.md` for file contents, quality standards, and formats (answer block, claim ledger table, gaps section). For annotated examples, see `examples/exemplar-index.md` and `examples/exemplar-findings.md`.
 
 ### Output discipline — mandatory on BOTH paths
 
@@ -188,7 +190,7 @@ These are structural requirements, not suggestions:
 
 ### Diagrams
 
-Apply the rubric from `${CLAUDE_SKILL_DIR}/references/diagrams.md` — default is **no diagram**:
+Apply the rubric from `references/diagrams.md` — default is **no diagram**:
 
 - A diagram **EARNS** its place when it shows structure prose serializes poorly: data flow, interaction sequence, topology, process isolation — best of all, drawn against the user's actual system.
 - It is **DECORATION** when it re-linearizes the report's own argument. Table-of-contents mindmaps are banned; the index gets no concept map by default.
@@ -235,29 +237,29 @@ Every `.md` page gets a portable `.html` sibling. The report folder carries its 
 
 ### Copy the assets (new research only)
 
-Copy the template assets into the report root using Bash with **absolute paths** (resolve `${CLAUDE_SKILL_DIR}` to its actual path):
+Copy the template assets into the report root using Bash with **absolute paths**. `<skill-dir>` below is this skill's root directory — substitute its absolute path (announced by the harness when the skill loads) before running; a bare relative path would resolve against the shell's working directory, not the skill:
 
 ```bash
 mkdir -p "<report-dir>/assets/vendor"
-cp -r "${CLAUDE_SKILL_DIR}/assets/template/fonts" "<report-dir>/assets/"
-cp "${CLAUDE_SKILL_DIR}/assets/template/styles.css" \
-   "${CLAUDE_SKILL_DIR}/assets/template/render.js" \
-   "${CLAUDE_SKILL_DIR}/assets/template/theme.js" "<report-dir>/assets/"
-cp "${CLAUDE_SKILL_DIR}/assets/template/vendor/marked.min.js" \
-   "${CLAUDE_SKILL_DIR}/assets/template/vendor/highlight.min.js" "<report-dir>/assets/vendor/"
+cp -r "<skill-dir>/assets/template/fonts" "<report-dir>/assets/"
+cp "<skill-dir>/assets/template/styles.css" \
+   "<skill-dir>/assets/template/render.js" \
+   "<skill-dir>/assets/template/theme.js" "<report-dir>/assets/"
+cp "<skill-dir>/assets/template/vendor/marked.min.js" \
+   "<skill-dir>/assets/template/vendor/highlight.min.js" "<report-dir>/assets/vendor/"
 ```
 
 **mermaid.min.js is large (~2.5 MB) — copy it only if at least one page in the report renders a Mermaid diagram:**
 
 ```bash
-cp "${CLAUDE_SKILL_DIR}/assets/template/vendor/mermaid.min.js" "<report-dir>/assets/vendor/"
+cp "<skill-dir>/assets/template/vendor/mermaid.min.js" "<report-dir>/assets/vendor/"
 ```
 
 Deep-dives do **not** get their own assets — their pages reference the parent's via `../../assets`. If the deep dive introduces the report's first Mermaid diagram, copy `mermaid.min.js` into the **parent's** `assets/vendor/`. If the parent predates the HTML format (no `assets/` folder), copy the full assets to the parent root and generate `.html` for the parent's pages too — additive only; the parent's markdown content doesn't change beyond the standard index update.
 
 ### Generate each page
 
-For every `.md` file in the report: Read `${CLAUDE_SKILL_DIR}/templates/page-template.html` once, then for each page replace the placeholders and Write the result next to the `.md` (same name, `.html` extension):
+For every `.md` file in the report: Read `templates/page-template.html` once, then for each page replace the placeholders and Write the result next to the `.md` (same name, `.html` extension):
 
 | Placeholder | Value |
 |---|---|

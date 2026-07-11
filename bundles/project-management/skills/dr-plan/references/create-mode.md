@@ -28,11 +28,11 @@ Determine the starting context using this precedence:
 ### Check for flags and PRD reference
 
 - **`--in-progress` flag** — if present, the plan will be created in `_claude/plans/in_progress/` instead of `_claude/plans/draft/`.
-- **PRD reference** (`@_claude/prd/[file].md`) — when the user includes one, the content is auto-expanded into the conversation by Claude Code. The `@path` token itself is removed from `$ARGUMENTS` after expansion. Use the expanded PRD content as input to the plan. Store the PRD path for the `Related PRD` metadata field.
+- **PRD reference** (`@_claude/prd/[file].md`) — when the user includes one, the content is auto-expanded into the conversation by Claude Code. The `@path` token itself is removed from `$ARGUMENTS` after expansion. (On harnesses without `@` expansion, Read the referenced file yourself.) Use the expanded PRD content as input to the plan. Store the PRD path for the `Related PRD` metadata field.
 
 ## Phase 2: Detect Plan Type (Overlay Signals)
 
-Load `${CLAUDE_SKILL_DIR}/references/template-variants.md` for detection rules and overlay composition.
+Load `references/template-variants.md` for detection rules and overlay composition.
 
 The default plan type is **`standard-feature`** and it is used **silently**. Overlays only apply when detection signals are present.
 
@@ -171,7 +171,7 @@ Based on the recommendation and the Verification Policy (`Adaptive` by default):
 <!-- verifier-recommendation: yes — [reasoning] -->
 
 - [ ] Run Definition of Done commands (see plan header). All must pass.
-- [ ] **Spawn plan-verifier.** Invoke `subagent_type="project-management:plan-verifier"` with the plan file path and phase number. Wait for its report.
+- [ ] **Spawn plan-verifier.** Invoke `subagent_type="project-management:plan-verifier"` with the plan file path and phase number. Wait for its report. If the harness cannot spawn subagents, run this phase's Verification checklist yourself in a fresh, skeptical pass and record PASS/FAIL per item.
 - [ ] **Apply verification report.** Flip `[x]` only for tasks the verifier reports as PASS. Keep `[ ]` for FAIL and UNVERIFIED with a note referencing the verifier's reasoning.
 - [ ] **Agent self-review.** Re-read Tasks above, confirm the verifier's recommendations are reflected, note any UNVERIFIEDs that need follow-up in future phases or the Retro.
 ```
@@ -193,11 +193,11 @@ Leave the `Spawn plan-verifier` and `Apply verification report` tasks out entire
 
 ### Load the base
 
-Read `${CLAUDE_SKILL_DIR}/templates/plan-base.md`.
+Read `templates/plan-base.md`.
 
 ### Apply the overlay (if any)
 
-If an overlay was confirmed in Phase 2, read its file from `${CLAUDE_SKILL_DIR}/templates/plan-[type].md` and apply per that overlay's "Rendering note for CREATE mode" section. Overlays additively describe sections to add, replace, or omit.
+If an overlay was confirmed in Phase 2, read its file from `templates/plan-[type].md` and apply per that overlay's "Rendering note for CREATE mode" section. Overlays additively describe sections to add, replace, or omit.
 
 ### Fill placeholders
 

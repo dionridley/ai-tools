@@ -17,10 +17,10 @@ It ships **done plans only**. There is no WIP mode — partial or end-of-day pus
 
 ## Arguments
 
-Inspect `$ARGUMENTS`:
+Inspect `$ARGUMENTS` (the user's arguments — substituted here by Claude Code; on harnesses without substitution they arrive in the invoking message):
 
-- **`@plan-file`** — explicit plan reference (Claude Code auto-expands the content and removes the token). Overrides auto-discovery.
-- **`--verify`** — in addition to the checkbox audit, spawn the `project-management:plan-verifier` agent on the final phase for independent, evidence-based verification.
+- **`@plan-file`** — explicit plan reference (Claude Code auto-expands the content and removes the token; on harnesses without `@` expansion, Read the referenced file yourself). Overrides auto-discovery.
+- **`--verify`** — in addition to the checkbox audit, spawn the `project-management:plan-verifier` agent on the final phase for independent, evidence-based verification. If the harness cannot spawn subagents, run the verifier's checklist inline in a fresh, skeptical pass instead.
 
 ## Phase 0: Locate the Plan
 
@@ -33,12 +33,12 @@ Inspect `$ARGUMENTS`:
 
 ## Route
 
-Work through the phases in order. Load each reference file when its phase begins and follow it end-to-end:
+Work through the phases in order. Load each reference file when its phase begins and follow it end-to-end (paths are relative to this skill's directory, which the harness announces when the skill loads):
 
-- **Phase 1 — Preflight, Ship Report, gate** → Read `${CLAUDE_SKILL_DIR}/references/preflight.md`. Read-only: readiness audit (+ `--verify`), git state, the deterministic Ship Report display, and the single confirmation question.
-- **Phases 2–5 — Close out, generate, ship, output** → Read `${CLAUDE_SKILL_DIR}/references/ship.md`. Runs only after the gate approves.
+- **Phase 1 — Preflight, Ship Report, gate** → Read `references/preflight.md`. Read-only: readiness audit (+ `--verify`), git state, the deterministic Ship Report display, and the single confirmation question.
+- **Phases 2–5 — Close out, generate, ship, output** → Read `references/ship.md`. Runs only after the gate approves.
 
-Phase 3 (generation) has no reference of its own: `ship.md` directs you to Read `${CLAUDE_SKILL_DIR}/../dr-plan/references/summary-mode.md` and follow **only** its "Phase 4: Generate the PR Summary and Commit Message" section. That file is the single source of truth for the summary and commit-message formats — do not restate or improvise the format rules.
+Phase 3 (generation) has no reference of its own: `ship.md` directs you to Read `../dr-plan/references/summary-mode.md` and follow **only** its "Phase 4: Generate the PR Summary and Commit Message" section. That file is the single source of truth for the summary and commit-message formats — do not restate or improvise the format rules. (This reference crosses into the sibling `dr-plan` skill — both ship together in the `project-management` bundle; a standalone copy of `dr-ship` alone will not resolve it.)
 
 ## Operating Principles
 
@@ -51,6 +51,8 @@ Phase 3 (generation) has no reference of its own: `ship.md` directs you to Read 
 7. **Abort leaves no trace.** Preflight is read-only; nothing — waiver tags, retro, status, move — is written before the gate approves. (Branch creation from the main/master guard is the one exception.)
 8. **Best-effort, not all-or-nothing.** A missing PR path (non-GitHub remote, no `gh`, closed PR) degrades to displaying the artifacts, never to failing the whole ritual.
 9. **Respect investment level.** Small user base — keep flows lean; no speculative safeguards.
+10. **Structured questions, gracefully.** Where these instructions say `AskUserQuestion`, use the harness's structured question tool if one is available (`AskUserQuestion` in Claude Code); otherwise ask the same question in plain text, list the options, and wait for the user's reply.
+11. **The command allowlist is binding prose, not just frontmatter.** This skill's complete shell surface is: `git status`, `git add`, `git commit`, `git push`, `git mv`, `git switch`, `git branch`, `git remote`, `git rev-parse`, `gh pr create`, `gh pr view`, `gh pr edit`, `gh auth status`, and `rm` (only on this skill's own temp files and the untracked-plan move fallback). The `allowed-tools` frontmatter enforces this in Claude Code; on harnesses that don't enforce it, treat this list as a hard rule — run nothing outside it: no history rewrites, no force pushes, no branch deletion, no other git/gh subcommands.
 
 ## Completion Summary
 

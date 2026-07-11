@@ -154,7 +154,7 @@ end
 
 ### Code Patterns Reference
 
-For screen-building agents in `core` and `polish` phases, also load `${CLAUDE_SKILL_DIR}/references/conventions/elixir-patterns.md` which contains:
+For screen-building agents in `core` and `polish` phases, also load `references/conventions/elixir-patterns.md` which contains:
 - Standard LiveView pattern
 - Standard Context pattern
 - ExUnit and LiveView test patterns

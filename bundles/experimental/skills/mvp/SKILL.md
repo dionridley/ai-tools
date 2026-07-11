@@ -20,21 +20,21 @@ Override with /effort medium if preferred.
 
 Detect the mode from the user's arguments and delegate to the appropriate reference file.
 
-**Arguments:** $ARGUMENTS
+**Arguments:** $ARGUMENTS (substituted by Claude Code; on harnesses without substitution, read the arguments from the invoking message)
 
-**Route to the correct mode:**
+**Route to the correct mode** (paths are relative to this skill's directory, which the harness announces when the skill loads)**:**
 
 1. If arguments are empty, whitespace-only, or start with "start":
-   - Read `${CLAUDE_SKILL_DIR}/references/start.md` and follow those instructions
+   - Read `references/start.md` and follow those instructions
 
 2. If arguments start with "build":
-   - Read `${CLAUDE_SKILL_DIR}/references/build.md` and follow those instructions
+   - Read `references/build.md` and follow those instructions
 
 3. If arguments start with "status":
-   - Read `${CLAUDE_SKILL_DIR}/references/status.md` and follow those instructions
+   - Read `references/status.md` and follow those instructions
 
 4. If arguments start with "summary":
-   - Read `${CLAUDE_SKILL_DIR}/references/summary.md` and follow those instructions
+   - Read `references/summary.md` and follow those instructions
 
 5. If no recognized mode, show usage help:
    ```
@@ -55,6 +55,10 @@ Detect the mode from the user's arguments and delegate to the appropriate refere
 ## Shared Conventions
 
 All modes inherit these conventions. Mode-specific reference files build on top of them.
+
+### Structured Questions
+
+Where these instructions say `AskUserQuestion`, use the harness's structured question tool if one is available (`AskUserQuestion` in Claude Code); otherwise ask the same question in plain text, list the options, and wait for the user's reply.
 
 ### State Directory
 
@@ -133,7 +137,7 @@ The main agent (not subagents) ALWAYS handles:
 
 ### Task Progress Tracking
 
-Use TaskCreate and TaskUpdate to provide real-time visual progress in the Claude Code UI. This complements the `.mvp/state.json` system which persists across sessions.
+Use TaskCreate and TaskUpdate (if the harness provides task-list tools — Claude Code does) to mirror real-time visual progress in the harness UI. This complements the `.mvp/state.json` system, which is canonical and persists across sessions; without task tools, `state.json` alone is sufficient.
 
 - Create tasks at the start of each build phase
 - Update task status as work progresses (in_progress, completed)

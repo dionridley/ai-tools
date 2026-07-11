@@ -2,7 +2,7 @@
 
 Use this flow when the project has an existing `CLAUDE.md` (with content) but no plugin marker and no `_claude/` directory. The plugin sections need to be appended to the existing file without disturbing what's already there.
 
-There's no conflict to resolve: the plugin-managed sections describe plugin-specific conventions (plan workflow, available commands, task completion protocol) that don't overlap with what the user or Claude's `/init` would typically write.
+There's no conflict to resolve: the plugin-managed sections describe plugin-specific conventions (plan workflow, available commands, task completion protocol) that don't overlap with what the user or a project-bootstrap command (like Claude Code's `/init`) would typically write.
 
 ## Steps
 
@@ -37,7 +37,7 @@ If not a git repo, skip this check silently.
 
 **Get the current date.** Use today's date from the conversation context, formatted as `YYYY-MM-DD`.
 
-**Read the template.** Read `${CLAUDE_SKILL_DIR}/templates/CLAUDE-template.md`.
+**Read the template.** Read `templates/CLAUDE-template.md`.
 
 **Extract the content to be appended.** From the template, skip the header HTML comment block, the `# CLAUDE.md` heading, and the intro paragraph. Keep everything from `## Project Structure` onward (including the `<!-- End of plugin-managed section -->` marker at the bottom).
 

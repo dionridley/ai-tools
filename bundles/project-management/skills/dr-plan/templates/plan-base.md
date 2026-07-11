@@ -101,7 +101,7 @@ Every Phase Exit Gate must confirm these before flipping any `[x]` in the phase:
 <!-- verifier-recommendation: {{YES_OR_NO}} — {{REASONING}} -->
 
 - [ ] Run Definition of Done commands (see plan header). All must pass.
-- [ ] **Spawn plan-verifier.** Invoke `subagent_type="project-management:plan-verifier"` with the plan file path and phase number. Wait for its report. *(Only present when Verification Policy is Always, or Adaptive + this phase's recommendation is yes.)*
+- [ ] **Spawn plan-verifier.** Invoke `subagent_type="project-management:plan-verifier"` with the plan file path and phase number. Wait for its report. If the harness cannot spawn subagents, run this phase's Verification checklist yourself in a fresh, skeptical pass and record PASS/FAIL per item. *(Only present when Verification Policy is Always, or Adaptive + this phase's recommendation is yes.)*
 - [ ] **Apply verification report.** Flip `[x]` only for tasks the verifier reports as PASS. Keep `[ ]` for FAIL and UNVERIFIED with a short note referencing the verifier's reasoning. *(Paired with Spawn.)*
 - [ ] **Agent self-review.** Re-read Tasks above. Flip `[x]` only for tasks whose Verification passed. Any failing or skipped task stays `[ ]` with a short note explaining why. Under-report beats over-report.
 

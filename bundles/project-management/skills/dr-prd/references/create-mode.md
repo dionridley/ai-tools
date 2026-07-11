@@ -47,7 +47,7 @@ For question 4, prefer **inference + confirmation** over a cold ask. If the desc
 
 Based on answers, pick 1-3 follow-ups that sharpen the riskiest or thinnest area. Examples:
 
-- User mentions summarization, generation, classification, agents, or chat → route to AI-feature follow-ups (see `${CLAUDE_SKILL_DIR}/references/ai-feature-sections.md`, Clarifying Questions section).
+- User mentions summarization, generation, classification, agents, or chat → route to AI-feature follow-ups (see `references/ai-feature-sections.md`, Clarifying Questions section).
 - User gave a vague metric ("engagement goes up") → push for a specific measurement.
 - User named a user type but not their context → ask when/where they use the feature.
 - User hasn't mentioned constraints → ask about integration points, existing systems, platform.
@@ -78,7 +78,7 @@ Only surface this if there's a genuinely unresolved area. If everything is clear
 
 ## Phase 3: Confirm Feature Type and Template Variant
 
-Read `${CLAUDE_SKILL_DIR}/references/template-variants.md` for the section-inclusion rules per feature type.
+Read `references/template-variants.md` for the section-inclusion rules per feature type.
 
 State the detected feature type back to the user plus which sections the draft will include/skip:
 
@@ -113,14 +113,14 @@ Use `Glob` to check whether the target path already exists. If it does, ask the 
 
 ### Load and populate the template
 
-Read `${CLAUDE_SKILL_DIR}/templates/prd-base.md`. Apply the template-variant rules from Phase 3:
+Read `templates/prd-base.md`. Apply the template-variant rules from Phase 3:
 
 - Remove sections that don't apply (per `template-variants.md`).
-- For AI/LLM features, inject the sections described in `${CLAUDE_SKILL_DIR}/references/ai-feature-sections.md` at the appropriate anchor points.
+- For AI/LLM features, inject the sections described in `references/ai-feature-sections.md` at the appropriate anchor points.
 - Replace placeholders:
   - `{{FEATURE_NAME}}` — human-readable name.
   - `{{CURRENT_DATE}}` — today's date from conversation context (`YYYY-MM-DD`).
-  - `{{AUTHOR}}` — `Claude Code` unless the user provided a name.
+  - `{{AUTHOR}}` — the authoring agent (e.g., `Claude Code`) unless the user provided a name.
   - `{{FEATURE_TYPE}}` — the confirmed type from Phase 3.
 
 ### Populate every included section thoughtfully

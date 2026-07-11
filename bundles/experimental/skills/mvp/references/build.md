@@ -151,8 +151,8 @@ The project root is your current working directory for the entire session. You M
 
 Based on `state.project.stack`:
 
-- **Elixir:** Read `${CLAUDE_SKILL_DIR}/references/conventions/elixir.md`
-- **JS:** Read `${CLAUDE_SKILL_DIR}/references/conventions/typescript.md`
+- **Elixir:** Read `references/conventions/elixir.md`
+- **JS:** Read `references/conventions/typescript.md`
 
 Store the **"Mandatory Rules for Every Agent"** block from that file. You will inject it into EVERY subagent prompt for the remainder of this session under a `## [Stack] Conventions — MANDATORY` section.
 
@@ -297,7 +297,7 @@ fi
 
 ### Create visual task list for the phase
 
-When entering a new phase, use TaskCreate for each task in the phase to populate the Claude Code UI task list:
+When entering a new phase, use TaskCreate for each task in the phase to populate the harness task list (if task tools are available — Claude Code UI shows these natively):
 - Task name: `[Phase name] — [task name]`
 - Status: pending
 
@@ -475,7 +475,7 @@ Before dispatching any agents:
 1. Read `.mvp/research/design-brief.md` — you will include an excerpt in every agent prompt
 2. Read the core feature tasks from the brainstorm document
 3. For Elixir: read all context module files in `lib/[slug]/` — extract function signatures to include in agent prompts
-4. For Elixir: read `${CLAUDE_SKILL_DIR}/references/conventions/elixir-patterns.md` — include relevant patterns in screen-building agent prompts
+4. For Elixir: read `references/conventions/elixir-patterns.md` — include relevant patterns in screen-building agent prompts
 
 **Agent dispatch rules:**
 - Maximum 3 concurrent agents
@@ -570,7 +570,7 @@ If Playwright MCP is not available (tools not present):
 Parallelizable by screen (each screen is independent).
 
 - Include design brief excerpt in each agent prompt
-- For Elixir: include relevant patterns from `${CLAUDE_SKILL_DIR}/references/conventions/elixir-patterns.md` in screen-building agent prompts
+- For Elixir: include relevant patterns from `references/conventions/elixir-patterns.md` in screen-building agent prompts
 - One agent per remaining screen
 - One additional agent for global responsive/accessibility polish if needed
 - **Run per-screen browser tests** (same as `core` phase) for every new screen built in this phase — use the same browser test agent template including empty state and error path steps

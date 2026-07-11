@@ -36,7 +36,7 @@ Execute exactly the move the approved Ship Report showed. If the report showed n
 
 ## Phase 3: Generate the summary + commit message
 
-Read `${CLAUDE_SKILL_DIR}/../dr-plan/references/summary-mode.md` and follow **only** its section "Phase 4: Generate the PR Summary and Commit Message" — analyze the closed-out plan (re-Read the file at its completed/ path; it now includes the retro, waiver tags, and final checkbox state) and draft:
+Read `../dr-plan/references/summary-mode.md` (in the sibling `dr-plan` skill, relative to this skill's root) and follow **only** its section "Phase 4: Generate the PR Summary and Commit Message" — analyze the closed-out plan (re-Read the file at its completed/ path; it now includes the retro, waiver tags, and final checkbox state) and draft:
 
 1. The **PR summary** (creative reviewer-facing format per summary-mode rules).
 2. The **commit message** — title (3–6 words, imperative) + up to 20 `*` bullets. Its primary purpose is the user's **squash-merge commit** on GitHub; it also serves as this branch commit's message.

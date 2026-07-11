@@ -23,7 +23,7 @@ Do **not** display the audit as its own prose — the results feed the Ship Repo
 
 ## 1b. `--verify` (only when the flag was passed)
 
-Spawn the verifier via the Agent tool with `subagent_type="project-management:plan-verifier"`, passing the plan file path and the final phase number. Wait for its report.
+Spawn the verifier via the Agent tool with `subagent_type="project-management:plan-verifier"`, passing the plan file path and the final phase number. Wait for its report. If the harness cannot spawn subagents, run the verifier's checklist inline in a fresh, skeptical pass and record PASS/FAIL per item.
 
 - Every **FAIL** and **UNVERIFIED** verdict is an additional blocking item; keep the verdicts verbatim.
 - Do not soften or reinterpret the verdicts. Under-report beats over-report.
@@ -113,4 +113,4 @@ One `AskUserQuestion`, one question. The question text is **one line** — all d
 - **Adjust** — as above, plus individually-reasoned waivers: the user names items and reasons; note them for ship.md, re-run the audit arithmetic, re-print the report, ask again.
 - **Abort** — stop. No files have been changed (a branch created at 1d, if any, remains — it is empty).
 
-On Ship it / Ship anyway → Read `${CLAUDE_SKILL_DIR}/references/ship.md` and execute it end-to-end.
+On Ship it / Ship anyway → Read `references/ship.md` and execute it end-to-end.

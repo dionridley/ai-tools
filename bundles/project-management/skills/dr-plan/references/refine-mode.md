@@ -186,7 +186,7 @@ Major structural changes to in-progress plans can invalidate completed work.
 Recommendations:
   1. Move the plan back to draft for major redesign:
      mv _claude/plans/in_progress/[filename].md _claude/plans/draft/
-     (Or ask Claude to move it.)
+     (Or ask the agent to move it.)
   2. Or create a new plan for the new approach: /dr-plan [new context]
   3. Or continue with minor adjustments only.
 ```
@@ -246,7 +246,7 @@ Next steps:
   [If in draft/:]
   3. When ready, move to in_progress:
      mv _claude/plans/draft/[filename].md _claude/plans/in_progress/
-     (Or ask Claude.)
+     (Or ask the agent.)
 ```
 
 If structural migration was applied, add one extra line before "Next steps":
