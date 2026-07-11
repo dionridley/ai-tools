@@ -25,11 +25,11 @@ Inspect `$ARGUMENTS` (the user's arguments — substituted here by Claude Code; 
 ## Phase 0: Locate the Plan
 
 1. If a plan was passed via `@plan-file`, use it (the expanded content is already in the conversation; note its path for the move step).
-2. Otherwise `Glob _claude/plans/in_progress/*.md`:
+2. Otherwise `Glob _project/plans/in_progress/*.md`:
    - **Exactly one** → that's the plan. Read it.
    - **Multiple** → `AskUserQuestion`: which plan is being shipped?
    - **Zero** → off the happy path. Ask how to proceed (options: user points at a plan file; abort). This skill does not run without a plan.
-3. **Format sanity check** — the file must look like a /dr-plan artifact: `## Metadata`, `## Implementation Plan` (or phase headings with Tasks/Verification checkboxes), `## Success Criteria`. If it doesn't match, tell the user what's missing and ask whether to proceed best-effort (audit whatever checkboxes exist; skip retro/move if there's no Retro section or the file isn't under `_claude/plans/in_progress/`) or abort.
+3. **Format sanity check** — the file must look like a /dr-plan artifact: `## Metadata`, `## Implementation Plan` (or phase headings with Tasks/Verification checkboxes), `## Success Criteria`. If it doesn't match, tell the user what's missing and ask whether to proceed best-effort (audit whatever checkboxes exist; skip retro/move if there's no Retro section or the file isn't under `_project/plans/in_progress/`) or abort.
 
 ## Route
 

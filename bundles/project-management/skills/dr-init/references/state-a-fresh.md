@@ -1,6 +1,6 @@
 # State A — Fresh Project
 
-Use this flow when the project has no CLAUDE.md (or it's empty) AND no `_claude/` directory. You're building the plugin structure from scratch.
+Use this flow when the project has no CLAUDE.md (or it's empty) AND no `_project/` directory. You're building the plugin structure from scratch.
 
 No git-safety check is needed — there's nothing to overwrite.
 
@@ -26,13 +26,13 @@ Issue these operations **in parallel** (single message, multiple `Write` tool ca
 
 | Path | Content |
 |------|---------|
-| `_claude/docs/.gitkeep` | *(empty)* |
-| `_claude/plans/draft/.gitkeep` | *(empty)* |
-| `_claude/plans/in_progress/.gitkeep` | *(empty)* |
-| `_claude/plans/completed/.gitkeep` | *(empty)* |
-| `_claude/prd/.gitkeep` | *(empty)* |
-| `_claude/resources/.gitkeep` | *(empty)* |
-| `_claude/research/.gitkeep` | *(empty)* |
+| `_project/docs/.gitkeep` | *(empty)* |
+| `_project/plans/draft/.gitkeep` | *(empty)* |
+| `_project/plans/in_progress/.gitkeep` | *(empty)* |
+| `_project/plans/completed/.gitkeep` | *(empty)* |
+| `_project/prd/.gitkeep` | *(empty)* |
+| `_project/resources/.gitkeep` | *(empty)* |
+| `_project/research/.gitkeep` | *(empty)* |
 | `CLAUDE.md` | *(processed template from step 3)* |
 
 All paths use forward slashes. All `.gitkeep` files are empty — `Write` accepts an empty string.
@@ -43,13 +43,13 @@ All paths use forward slashes. All `.gitkeep` files are empty — `Write` accept
 ✅ Project structure initialized
 
 Created:
-  _claude/docs/
-  _claude/plans/draft/
-  _claude/plans/in_progress/
-  _claude/plans/completed/
-  _claude/prd/
-  _claude/resources/
-  _claude/research/
+  _project/docs/
+  _project/plans/draft/
+  _project/plans/in_progress/
+  _project/plans/completed/
+  _project/prd/
+  _project/resources/
+  _project/research/
   CLAUDE.md
 
 💡 Tip: Run /init next if you'd like Claude to scan your codebase and

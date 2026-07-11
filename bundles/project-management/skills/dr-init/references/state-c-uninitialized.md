@@ -1,6 +1,6 @@
 # State C — CLAUDE.md Exists, No Plugin Structure
 
-Use this flow when the project has an existing `CLAUDE.md` (with content) but no plugin marker and no `_claude/` directory. The plugin sections need to be appended to the existing file without disturbing what's already there.
+Use this flow when the project has an existing `CLAUDE.md` (with content) but no plugin marker and no `_project/` directory. The plugin sections need to be appended to the existing file without disturbing what's already there.
 
 There's no conflict to resolve: the plugin-managed sections describe plugin-specific conventions (plan workflow, available commands, task completion protocol) that don't overlap with what the user or a project-bootstrap command (like Claude Code's `/init`) would typically write.
 
@@ -80,7 +80,7 @@ Display the preview so the user can see exactly what will be appended:
 
 Your existing CLAUDE.md content will be preserved exactly as-is.
 The following content will be **appended to the end** of your CLAUDE.md,
-and the `_claude/` directory structure will be created.
+and the `_project/` directory structure will be created.
 
 **Here's exactly what will be added to CLAUDE.md:**
 
@@ -114,13 +114,13 @@ and the `_claude/` directory structure will be created.
 ```
 
 **Directories to be created:**
-  _claude/docs/
-  _claude/plans/draft/
-  _claude/plans/in_progress/
-  _claude/plans/completed/
-  _claude/prd/
-  _claude/resources/
-  _claude/research/
+  _project/docs/
+  _project/plans/draft/
+  _project/plans/in_progress/
+  _project/plans/completed/
+  _project/prd/
+  _project/resources/
+  _project/research/
 ~~~
 
 In the actual render, replace the `<...>` placeholders with the real content assembled in step 2 — the user should see every line that will be inserted.
@@ -130,7 +130,7 @@ Then use AskUserQuestion:
 > **Question:** Apply these changes?
 >
 > **Options:**
-> - **Proceed** — append plugin sections to CLAUDE.md and create the `_claude/` directories
+> - **Proceed** — append plugin sections to CLAUDE.md and create the `_project/` directories
 > - **Cancel** — don't make any changes
 
 ### 4. Handle the user's choice
@@ -143,13 +143,13 @@ Then use AskUserQuestion:
 
 **Create the 7 `.gitkeep` files** in parallel (same as State A):
 
-- `_claude/docs/.gitkeep`
-- `_claude/plans/draft/.gitkeep`
-- `_claude/plans/in_progress/.gitkeep`
-- `_claude/plans/completed/.gitkeep`
-- `_claude/prd/.gitkeep`
-- `_claude/resources/.gitkeep`
-- `_claude/research/.gitkeep`
+- `_project/docs/.gitkeep`
+- `_project/plans/draft/.gitkeep`
+- `_project/plans/in_progress/.gitkeep`
+- `_project/plans/completed/.gitkeep`
+- `_project/prd/.gitkeep`
+- `_project/resources/.gitkeep`
+- `_project/research/.gitkeep`
 
 Parent directories are created automatically.
 
@@ -159,13 +159,13 @@ Parent directories are created automatically.
 ✅ Plugin structure added
 
 Created:
-  _claude/docs/
-  _claude/plans/draft/
-  _claude/plans/in_progress/
-  _claude/plans/completed/
-  _claude/prd/
-  _claude/resources/
-  _claude/research/
+  _project/docs/
+  _project/plans/draft/
+  _project/plans/in_progress/
+  _project/plans/completed/
+  _project/prd/
+  _project/resources/
+  _project/research/
 
 Updated CLAUDE.md:
   - Preserved all existing content

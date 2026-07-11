@@ -209,7 +209,7 @@ Use parallel WebSearch and WebFetch calls where it makes sense for efficiency:
 
 ### How to Detect
 
-- **Strong signal (deep dive):** User provides a file or directory path to existing research in `_claude/research/`. This is the key identifier. Load the existing research context.
+- **Strong signal (deep dive):** User provides a file or directory path to existing research in `_project/research/`. This is the key identifier. Load the existing research context.
 - **Weak signal (new research):** User uses phrases like "deep dive" or "go further into" without referencing an existing research path. Treat as new research with thorough depth.
 - **Combined signal (deep dive):** User references an existing research path AND uses follow-up language. This is a deep-dive follow-up.
 

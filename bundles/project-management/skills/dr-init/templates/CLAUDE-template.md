@@ -24,7 +24,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 This project follows a structured approach to planning, documentation, and implementation.
 
 ```
-_claude/
+_project/
 ├── docs/              # Technical documentation and architecture
 ├── plans/             # Implementation plans
 │   ├── draft/         #   — being developed or refined
@@ -39,22 +39,22 @@ _claude/
 
 ### Directory Purposes
 
-**`_claude/docs/`**
+**`_project/docs/`**
 Technical documentation, architecture decisions, API specifications, and development notes.
 
-**`_claude/plans/`**
+**`_project/plans/`**
 Implementation plans following a structured template. Plans move through stages:
 - **draft/** - Plans being refined, NOT ready for implementation
 - **in_progress/** - Plans currently being actively worked on
 - **completed/** - Finished plans for historical reference
 
-**`_claude/prd/`**
+**`_project/prd/`**
 Product Requirement Documents defining features, user stories, and requirements.
 
-**`_claude/resources/`**
+**`_project/resources/`**
 User-provided reference materials, external documentation, design specifications.
 
-**`_claude/research/`**
+**`_project/research/`**
 Structured research output per topic: canonical markdown files plus a portable HTML microsite view (`.html` siblings + bundled `assets/` — works offline, safe to share).
 
 ## Plan Management Workflow
@@ -91,12 +91,12 @@ Structured research output per topic: canonical markdown files plus a portable H
 
 1. **Create Plan**: `/dr-plan [detailed context]` creates numbered plan in `draft/` (e.g., `001-plan-name.md`)
 2. **Review**: Examine the plan to identify any improvements or missing details
-3. **Refine** (optional but recommended): `/dr-plan @_claude/plans/draft/001-plan.md [refinement request]` to enhance with extended thinking
+3. **Refine** (optional but recommended): `/dr-plan @_project/plans/draft/001-plan.md [refinement request]` to enhance with extended thinking
    - Can be repeated multiple times
    - Shows diff summary before applying
 4. **Move to Active**: Move the plan file from `draft/` to `in_progress/` when ready to implement
 5. **Implement**: Work through plan phases systematically
-6. **Minor Adjustments** (as needed): `/dr-plan @_claude/plans/in_progress/001-plan.md [minor changes]` for small corrections
+6. **Minor Adjustments** (as needed): `/dr-plan @_project/plans/in_progress/001-plan.md [minor changes]` for small corrections
 7. **Complete & Ship**: Run `/dr-ship` when the plan is finished — it verifies every checkbox, backfills the retro, moves the plan to `completed/`, commits, pushes, and opens a PR populated from the plan summary. (Moving the file manually still works if you prefer.)
 
 **Plan Numbering:**
@@ -116,7 +116,7 @@ This project uses the **project-management** plugin (dr- prefix) which provides:
 - `/dr-ship [@plan-file] [--verify]` - Ship a finished plan: verify completion, backfill the retro, move to `completed/`, commit, push, and open a PR populated from the plan summary
 
 **Dual-Mode Refinement:**
-Both PRDs and plans can be refined using the same commands. Use `/dr-prd @_claude/prd/feature.md [changes]` to refine PRDs or `/dr-plan @_claude/plans/draft/plan.md [changes]` to refine plans. Both commands use extended thinking and show diff summaries. They automatically detect whether you're creating or refining based on the `@` file reference.
+Both PRDs and plans can be refined using the same commands. Use `/dr-prd @_project/prd/feature.md [changes]` to refine PRDs or `/dr-plan @_project/plans/draft/plan.md [changes]` to refine plans. Both commands use extended thinking and show diff summaries. They automatically detect whether you're creating or refining based on the `@` file reference.
 
 **IMPORTANT - Date Handling:**
 When creating any document with dates or timestamps, ALWAYS check the system environment for the current date/time. NEVER use hardcoded or assumed dates.

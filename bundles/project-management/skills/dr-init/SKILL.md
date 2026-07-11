@@ -1,6 +1,6 @@
 ---
 name: dr-init
-description: Initializes or updates a project with the project-management plugin structure. Creates _claude/ directories and a versioned CLAUDE.md on fresh projects, verifies and updates outdated plugin-managed sections on existing projects, or appends plugin sections to an existing CLAUDE.md. Use when setting up the plugin in a new project or when plugin template sections have been updated.
+description: Initializes or updates a project with the project-management plugin structure. Creates _project/ directories and a versioned CLAUDE.md on fresh projects, verifies and updates outdated plugin-managed sections on existing projects, or appends plugin sections to an existing CLAUDE.md. Use when setting up the plugin in a new project or when plugin template sections have been updated.
 disable-model-invocation: true
 allowed-tools: Read Write Edit Glob Bash(git status:*)
 effort: medium
@@ -23,22 +23,22 @@ Run these checks (parallel where possible):
    - File-not-found error → no CLAUDE.md
    - File has content → inspect for plugin marker
    - File exists but is empty or whitespace-only → treat as no CLAUDE.md
-2. **`Glob _claude/**`** — Handle two outcomes:
-   - Empty result → no `_claude/` directory (or it exists but is empty)
-   - Non-empty result → `_claude/` directory exists with content
+2. **`Glob _project/**`** — Handle two outcomes:
+   - Empty result → no `_project/` directory (or it exists but is empty)
+   - Non-empty result → `_project/` directory exists with content
 3. **Plugin marker check** — If CLAUDE.md has content, check whether it contains the substring `<!-- Plugin: project-management` near the top of the file
 
 ### Classify
 
-| State | CLAUDE.md | `_claude/` | Plugin marker in CLAUDE.md |
+| State | CLAUDE.md | `_project/` | Plugin marker in CLAUDE.md |
 |-------|-----------|-----------|---------------------------|
 | **A — Fresh** | Missing or empty | Missing | — |
 | **B — Already Initialized** | Has content | Present (any content) | Present |
 | **C — Uninitialized** | Has content | Missing | Absent |
 
 **Edge cases:**
-- CLAUDE.md present with marker, but `_claude/` missing → State B (missing dirs will be backfilled)
-- CLAUDE.md missing, `_claude/` present → State A (user likely deleted CLAUDE.md, recreate it)
+- CLAUDE.md present with marker, but `_project/` missing → State B (missing dirs will be backfilled)
+- CLAUDE.md missing, `_project/` present → State A (user likely deleted CLAUDE.md, recreate it)
 - Both missing → State A (fresh)
 
 ### Route

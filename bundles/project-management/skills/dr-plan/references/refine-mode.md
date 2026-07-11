@@ -9,7 +9,7 @@ The flow is: parse → validate → detect generation → status gate → back u
 `$ARGUMENTS` has this shape:
 
 ```
-@_claude/plans/[folder]/[NNN]-[slug].md [natural-language refinement request] [--no-confirm]
+@_project/plans/[folder]/[NNN]-[slug].md [natural-language refinement request] [--no-confirm]
 ```
 
 Parse:
@@ -22,11 +22,11 @@ The file content has been auto-expanded into the conversation via the `@` refere
 
 ## Phase 2: Validate the Target
 
-1. **Verify the path shape.** Must match `_claude/plans/(draft|in_progress|completed)/NNN-[slug].md`.
+1. **Verify the path shape.** Must match `_project/plans/(draft|in_progress|completed)/NNN-[slug].md`.
 
 2. **Read the file** (fresh, to confirm it exists at that path). If it doesn't exist:
 
-   Use `Glob` with pattern `_claude/plans/**/*.md` to list available plans grouped by folder:
+   Use `Glob` with pattern `_project/plans/**/*.md` to list available plans grouped by folder:
 
    ```
    ❌ Plan file not found: [path]
@@ -39,7 +39,7 @@ The file content has been auto-expanded into the conversation via the `@` refere
      completed/:
        - [list]
 
-   Usage: /dr-plan @_claude/plans/[folder]/[NNN]-[slug].md [refinement request]
+   Usage: /dr-plan @_project/plans/[folder]/[NNN]-[slug].md [refinement request]
    ```
 
    Then stop.
@@ -66,7 +66,7 @@ Store this as `is_old_template` — used in Phase 7.
 
 Branch on `Status` (derive from folder path if metadata is missing):
 
-- **completed** (file is in `_claude/plans/completed/`) — refuse immediately:
+- **completed** (file is in `_project/plans/completed/`) — refuse immediately:
 
   ```
   ❌ Cannot refine completed plan
@@ -83,13 +83,13 @@ Branch on `Status` (derive from folder path if metadata is missing):
 
   Do not proceed.
 
-- **in_progress** (`_claude/plans/in_progress/`) — note that Phase 8 must show an in-progress banner if changes turn out to be major.
+- **in_progress** (`_project/plans/in_progress/`) — note that Phase 8 must show an in-progress banner if changes turn out to be major.
 
-- **draft** (`_claude/plans/draft/`) — no special warning.
+- **draft** (`_project/plans/draft/`) — no special warning.
 
 ## Phase 5: Create a Backup
 
-Use `Read` on the existing plan and `Write` to `_claude/plans/[folder]/.[filename].backup` with the same content. No Bash `cp` — native `Read` + `Write` is cross-platform. Overwrite any existing backup (single-level — keep only the most recent).
+Use `Read` on the existing plan and `Write` to `_project/plans/[folder]/.[filename].backup` with the same content. No Bash `cp` — native `Read` + `Write` is cross-platform. Overwrite any existing backup (single-level — keep only the most recent).
 
 ## Phase 6: Old-Template Handling
 
@@ -185,7 +185,7 @@ Major structural changes to in-progress plans can invalidate completed work.
 
 Recommendations:
   1. Move the plan back to draft for major redesign:
-     mv _claude/plans/in_progress/[filename].md _claude/plans/draft/
+     mv _project/plans/in_progress/[filename].md _project/plans/draft/
      (Or ask the agent to move it.)
   2. Or create a new plan for the new approach: /dr-plan [new context]
   3. Or continue with minor adjustments only.
@@ -218,7 +218,7 @@ If the user picks **Cancel**:
 ```
 ❌ Refinement cancelled. Plan is unchanged.
 
-Backup: _claude/plans/[folder]/.[filename].backup
+Backup: _project/plans/[folder]/.[filename].backup
   (Remove manually if no longer needed.)
 ```
 
@@ -229,7 +229,7 @@ Use `Write` to overwrite the original plan with the refined content.
 ## Phase 10: Completion Summary
 
 ```
-✅ Plan refined: _claude/plans/[folder]/[filename].md
+✅ Plan refined: _project/plans/[folder]/[filename].md
 
 Plan #[NNN]: [Plan Name]
 Status: [status]
@@ -238,14 +238,14 @@ Refinement count: [new count]
 Changes applied:
   [summary matching the diff]
 
-Backup: _claude/plans/[folder]/.[filename].backup
+Backup: _project/plans/[folder]/.[filename].backup
 
 Next steps:
   1. Review the refined plan.
-  2. Refine again: /dr-plan @_claude/plans/[folder]/[filename].md [changes]
+  2. Refine again: /dr-plan @_project/plans/[folder]/[filename].md [changes]
   [If in draft/:]
   3. When ready, move to in_progress:
-     mv _claude/plans/draft/[filename].md _claude/plans/in_progress/
+     mv _project/plans/draft/[filename].md _project/plans/in_progress/
      (Or ask the agent.)
 ```
 

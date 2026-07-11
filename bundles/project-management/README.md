@@ -4,7 +4,7 @@ A structured project management system for Claude Code that provides organized w
 
 ## Features
 
-- **Organized Directory Structure**: Standardized `_claude/` folder with subdirectories for plans, PRDs, research, and documentation
+- **Organized Directory Structure**: Standardized `_project/` folder with subdirectories for plans, PRDs, research, and documentation
 - **Research Workflow**: Standard and Deep research paths with claim verification, producing canonical markdown plus a portable offline HTML microsite per report
 - **PRD Creation**: Comprehensive Product Requirements Documents with all critical sections
 - **Implementation Planning**: Detailed, phase-based plans with sequential numbering and tracking
@@ -46,19 +46,19 @@ See the [marketplace README](../README.md#installation) for installation instruc
 4. **Create an implementation plan** (optionally reference the PRD):
    ```bash
    /dr-plan Implement the authentication system as specified in the PRD.
-   @_claude/prd/user-authentication-system.md
+   @_project/prd/user-authentication-system.md
    Start with core email/password flow, then add OAuth in phase 2.
    Backend is Express.js with PostgreSQL. We have 3 weeks for initial release.
    ```
 
 5. **Refine the plan** if needed (optional but recommended):
    ```bash
-   /dr-plan @_claude/plans/draft/001-authentication-system.md Add more detail to Phase 3 about password hashing and add security best practices section
+   /dr-plan @_project/plans/draft/001-authentication-system.md Add more detail to Phase 3 about password hashing and add security best practices section
    ```
 
 6. **Move plan to in-progress** when ready to implement:
    ```bash
-   mv _claude/plans/draft/001-authentication-system.md _claude/plans/in_progress/
+   mv _project/plans/draft/001-authentication-system.md _project/plans/in_progress/
    ```
    Or simply ask Claude to move it - Claude will handle the move automatically when appropriate.
 
@@ -74,7 +74,7 @@ Initializes or updates project with standard directory structure and CLAUDE.md f
 ```
 
 **What it does:**
-- Creates `_claude/` directory with subdirectories:
+- Creates `_project/` directory with subdirectories:
   - `docs/` - Technical documentation
   - `plans/draft/` - Plans being reviewed
   - `plans/in_progress/` - Plans actively being implemented
@@ -86,7 +86,7 @@ Initializes or updates project with standard directory structure and CLAUDE.md f
 - Generates or updates plugin-managed sections in `CLAUDE.md`
 - **Scope** — only manages plugin-specific sections (plan workflow, available commands, task completion protocol). For codebase-specific documentation (architecture, build/test/lint commands, coding conventions), run Claude Code's built-in `/init` alongside `/dr-init`
 - **Three detection states**:
-  - *Fresh* — no `CLAUDE.md` and no `_claude/`: scaffolds both from scratch
+  - *Fresh* — no `CLAUDE.md` and no `_project/`: scaffolds both from scratch
   - *Already initialized* — plugin version marker present: verifies structure, compares section versions, offers a diff-preview of any outdated or missing sections before updating
   - *Has CLAUDE.md, no plugin structure* — shows a full preview of what will be appended and asks before writing
 - **Diff preview** before any update to an existing `CLAUDE.md`
@@ -116,7 +116,7 @@ Claude will ask for research details.
 
 **Deep-dive follow-up** (reference an existing research directory):
 ```bash
-/dr-research go deeper on webhook reliability _claude/research/stripe-integration-2026-01-15/
+/dr-research go deeper on webhook reliability _project/research/stripe-integration-2026-01-15/
 ```
 
 **Example:**
@@ -168,7 +168,7 @@ Creates or refines a Product Requirements Document with a structured discovery p
 
 **Usage (REFINE mode):**
 ```bash
-/dr-prd @_claude/prd/[file].md [refinement request] [--no-confirm]
+/dr-prd @_project/prd/[file].md [refinement request] [--no-confirm]
 ```
 
 **Example (traditional feature):**
@@ -193,11 +193,11 @@ the KB, warm + concise tone, and no hallucinated features are the must-haves.
 
 2. **Feature-type detection** — infers one of `user-facing`, `internal-tool`, `infra`, `ai-feature`, or `spike`, confirms with you, then adapts the template. AI features get additional sections: Model & Constraints, Prompt Spec, Eval Rubric (replacing Acceptance Criteria), Performance Budgets, and Guardrails.
 
-3. **Drafting** — populates the base template with a Problem → Hypothesis → Success Metrics framing, testable Acceptance Criteria that `/dr-plan` consumes directly, and Open Questions in `owner: X, needs by: Y` format. Only incorporates research or context you reference explicitly via `@path` — the skill never proactively searches `_claude/research/`.
+3. **Drafting** — populates the base template with a Problem → Hypothesis → Success Metrics framing, testable Acceptance Criteria that `/dr-plan` consumes directly, and Open Questions in `owner: X, needs by: Y` format. Only incorporates research or context you reference explicitly via `@path` — the skill never proactively searches `_project/research/`.
 
 4. **REFINE mode** — automatic backup, diff preview, explicit confirmation (Apply / Show Diff / Cancel), status-aware warnings (Draft / Under Review / Approved / Superseded), and bidirectional linked-plan detection. PRDs written under the old template are refined without structural change unless you explicitly request migration (e.g., "migrate this to the new template").
 
-**Output location:** `_claude/prd/[feature-slug].md`
+**Output location:** `_project/prd/[feature-slug].md`
 
 **Base template sections:**
 - Metadata (status, version, dates, author, feature type)
@@ -233,7 +233,7 @@ Creates or refines detailed implementation plans with per-phase acceptance crite
 
 **With PRD reference:**
 ```bash
-/dr-plan [context] @_claude/prd/feature-name.md
+/dr-plan [context] @_project/prd/feature-name.md
 ```
 
 **Create directly in in-progress:**
@@ -274,7 +274,7 @@ Creates or refines detailed implementation plans with per-phase acceptance crite
 **CREATE Example:**
 ```bash
 /dr-plan Implement real-time notification system as specified in PRD.
-@_claude/prd/notification-system.md
+@_project/prd/notification-system.md
 Start with core WebSocket infrastructure and basic push notifications.
 Backend is Node.js with Redis for pub/sub. Frontend uses React with Socket.io.
 Phase 1: WebSocket server and connection management (1 week)
@@ -286,25 +286,25 @@ Must support 10k concurrent WebSocket connections initially.
 **REFINE Examples:**
 ```bash
 # Add OAuth support to existing auth plan
-/dr-plan @_claude/plans/draft/001-authentication-system.md Add OAuth 2.0 support with Google and GitHub providers
+/dr-plan @_project/plans/draft/001-authentication-system.md Add OAuth 2.0 support with Google and GitHub providers
 
 # Add more detail to specific phase
-/dr-plan @_claude/plans/draft/001-auth.md Add detailed code examples and security best practices to Phase 3
+/dr-plan @_project/plans/draft/001-auth.md Add detailed code examples and security best practices to Phase 3
 
 # Minor adjustment to in-progress plan
-/dr-plan @_claude/plans/in_progress/003-database-migration.md Add Redis dependency to requirements section
+/dr-plan @_project/plans/in_progress/003-database-migration.md Add Redis dependency to requirements section
 
 # Skip confirmation for quick updates
-/dr-plan @_claude/plans/draft/002-api.md Fix typo in Phase 2 tasks --no-confirm
+/dr-plan @_project/plans/draft/002-api.md Fix typo in Phase 2 tasks --no-confirm
 ```
 
 **SUMMARY Examples:**
 ```bash
 # Generate PR summary for copying manually
-/dr-plan @_claude/plans/in_progress/003-database-migration.md summary
+/dr-plan @_project/plans/in_progress/003-database-migration.md summary
 
 # Generate and push summary directly to a GitHub PR
-/dr-plan @_claude/plans/in_progress/003-database-migration.md summary https://github.com/myorg/myrepo/pull/42
+/dr-plan @_project/plans/in_progress/003-database-migration.md summary https://github.com/myorg/myrepo/pull/42
 ```
 When a PR URL is provided:
 - Validates the PR is open (blocks update on merged/closed PRs)
@@ -315,21 +315,21 @@ When a PR URL is provided:
 **QUESTION RESOLUTION Examples:**
 ```bash
 # Resolve open questions in a draft plan
-/dr-plan @_claude/plans/draft/001-authentication-system.md answer questions
+/dr-plan @_project/plans/draft/001-authentication-system.md answer questions
 
 # Can also use "resolve questions"
-/dr-plan @_claude/plans/draft/002-api.md resolve questions
+/dr-plan @_project/plans/draft/002-api.md resolve questions
 ```
 
 **CREATE Mode - What it does:**
 - Automatically assigns sequential plan number (001, 002, 003, etc.) by scanning ALL plan folders.
-- If PRD referenced via `@_claude/prd/[file].md`, the expanded PRD drives the plan's shape.
+- If PRD referenced via `@_project/prd/[file].md`, the expanded PRD drives the plan's shape.
 - **Detects plan type with silent default** — `standard-feature` applied silently; four overlays (`ai-feature`, `migration/infra/refactor`, `bug-fix`, `spike`) only announce-and-confirm when detection signals are present (keywords, repo signals, or PRD feature type).
 - **Populates Definition of Done** from project config files (`CLAUDE.md`, `AGENTS.md`, `package.json`, `Cargo.toml`, etc.) — the test/lint/typecheck commands every phase must satisfy.
 - **Structures every phase with four blocks:** Tasks / Verification (commands with expected output) / Acceptance Criteria (testable outcomes) / Phase Exit Gate (DoD check + optional verifier + agent self-review).
 - **Annotates Phase Exit Gates adaptively** — each phase carries a `<!-- verifier-recommendation: yes|no -->` comment based on risk/complexity. Spawn-verifier tasks render only when the recommendation is yes (or when Verification Policy is set to `Always`).
 - **Emits autonomous completion instructions** — every plan has `## Completion` and `## Retro` sections at the bottom. After the final Phase Exit Gate passes, the executing agent writes the retro and moves the file from `in_progress/` to `completed/` without prompting.
-- Creates the plan at `_claude/plans/draft/XXX-plan-name.md` (or `in_progress/` with `--in-progress`).
+- Creates the plan at `_project/plans/draft/XXX-plan-name.md` (or `in_progress/` with `--in-progress`).
 
 **REFINE Mode - What it does:**
 - **Reads existing plan**: Analyzes current structure, phases, and content
@@ -375,11 +375,11 @@ Ships a finished plan end-to-end: verifies completion, closes the plan out, comm
 
 **Usage:**
 ```bash
-# Auto-detect the plan in _claude/plans/in_progress/
+# Auto-detect the plan in _project/plans/in_progress/
 /dr-ship
 
 # Explicit plan file
-/dr-ship @_claude/plans/in_progress/003-database-migration.md
+/dr-ship @_project/plans/in_progress/003-database-migration.md
 
 # Add independent verification by the plan-verifier agent before closing out
 /dr-ship --verify
@@ -403,8 +403,8 @@ Plans can be moved between `draft/`, `in_progress/`, and `completed/` folders us
 
 1. **Manual `mv` command:**
    ```bash
-   mv _claude/plans/draft/001-plan-name.md _claude/plans/in_progress/
-   mv _claude/plans/in_progress/001-plan-name.md _claude/plans/completed/
+   mv _project/plans/draft/001-plan-name.md _project/plans/in_progress/
+   mv _project/plans/in_progress/001-plan-name.md _project/plans/completed/
    ```
 
 2. **Ask Claude:** Simply tell Claude to move a plan and it will handle it automatically (e.g., "move plan 001 to in-progress").
@@ -415,7 +415,7 @@ After running `/dr-init`, your project will have:
 
 ```
 your-project/
-├── _claude/
+├── _project/
 │   ├── docs/              # Technical documentation
 │   │   └── .gitkeep
 │   ├── plans/
@@ -456,7 +456,7 @@ your-project/
 
 3. **Planning Phase**
    ```bash
-   /dr-plan [implementation context] @_claude/prd/feature.md
+   /dr-plan [implementation context] @_project/prd/feature.md
    ```
    - Creates plan in `draft/` folder
    - Automatically numbered (001, 002, etc.)
@@ -464,7 +464,7 @@ your-project/
 
 4. **Refinement Phase** (optional but recommended)
    ```bash
-   /dr-plan @_claude/plans/draft/[plan-file].md [refinement request]
+   /dr-plan @_project/plans/draft/[plan-file].md [refinement request]
    ```
    - Add missing details or requirements
    - Enhance specific phases
@@ -474,7 +474,7 @@ your-project/
 
 5. **Implementation Phase**
    ```bash
-   mv _claude/plans/draft/[plan-file].md _claude/plans/in_progress/
+   mv _project/plans/draft/[plan-file].md _project/plans/in_progress/
    ```
    Or ask Claude to move the plan for you.
    - Moves plan to `in_progress/`
@@ -483,7 +483,7 @@ your-project/
 
 6. **Minor Adjustments During Implementation** (as needed)
    ```bash
-   /dr-plan @_claude/plans/in_progress/[plan-file].md [minor changes]
+   /dr-plan @_project/plans/in_progress/[plan-file].md [minor changes]
    ```
    - Small adjustments only (dependencies, clarifications)
    - Major changes should move plan back to draft first
@@ -491,10 +491,10 @@ your-project/
 7. **PR Summary** (before or after completion)
    ```bash
    # Display for manual copy
-   /dr-plan @_claude/plans/in_progress/[plan-file].md summary
+   /dr-plan @_project/plans/in_progress/[plan-file].md summary
 
    # Or push directly to a GitHub PR
-   /dr-plan @_claude/plans/in_progress/[plan-file].md summary https://github.com/owner/repo/pull/123
+   /dr-plan @_project/plans/in_progress/[plan-file].md summary https://github.com/owner/repo/pull/123
    ```
    - Generates GitHub-ready PR description
    - With a PR URL: updates the PR title and description directly
@@ -509,7 +509,7 @@ your-project/
    - Commits, pushes, and opens a PR populated from the plan summary
    - Hands back the squash-merge commit message for GitHub's merge box
 
-   Manual alternative: `mv _claude/plans/in_progress/[plan-file].md _claude/plans/completed/` and handle git yourself.
+   Manual alternative: `mv _project/plans/in_progress/[plan-file].md _project/plans/completed/` and handle git yourself.
 
 ## Important Rules
 
@@ -562,16 +562,16 @@ Must integrate with existing user auth and notification systems.
 
 # Create implementation plan referencing the PRD
 /dr-plan Implement real-time chat as specified in PRD.
-@_claude/prd/realtime-chat-feature.md
+@_project/prd/realtime-chat-feature.md
 Use Socket.io with Redis adapter for multi-server support.
 Existing stack: Express.js backend, React frontend, PostgreSQL database.
 Have 4 weeks for initial release with basic features.
 
 # Review and refine if needed
-/dr-plan @_claude/plans/draft/001-realtime-chat.md Add detailed error handling strategy and enhance security phase
+/dr-plan @_project/plans/draft/001-realtime-chat.md Add detailed error handling strategy and enhance security phase
 
 # Start implementation (move to in_progress)
-mv _claude/plans/draft/001-realtime-chat.md _claude/plans/in_progress/
+mv _project/plans/draft/001-realtime-chat.md _project/plans/in_progress/
 
 # When done: verify, close out, commit, push, open the PR
 /dr-ship
@@ -639,7 +639,7 @@ See [CHANGELOG.md](CHANGELOG.md) for version history and release notes.
 
 **Solution**: This is expected - init only reports what it created. Check the actual directories:
 ```bash
-ls -la _claude/plans/
+ls -la _project/plans/
 ```
 If folders are truly missing, the command should have created them. Try running `/dr-init` again.
 
@@ -654,8 +654,8 @@ If folders are truly missing, the command should have created them. Try running 
 **Problem**: Not sure where a plan file is located.
 
 **Solutions**:
-1. List all plans: `ls _claude/plans/*/`
-2. Search by name: `ls _claude/plans/*/*.md | grep -i "auth"`
+1. List all plans: `ls _project/plans/*/`
+2. Search by name: `ls _project/plans/*/*.md | grep -i "auth"`
 3. Ask Claude to find and move the plan for you
 
 ### PRD or Plan refinement not working
@@ -663,8 +663,8 @@ If folders are truly missing, the command should have created them. Try running 
 **Problem**: Refine mode doesn't detect my file.
 
 **Solutions**:
-1. Ensure path starts with `@`: `/dr-prd @_claude/prd/my-feature.md [changes]`
-2. For plans, path must include `_claude/plans/`: `/dr-plan @_claude/plans/draft/001-plan.md [changes]`
+1. Ensure path starts with `@`: `/dr-prd @_project/prd/my-feature.md [changes]`
+2. For plans, path must include `_project/plans/`: `/dr-plan @_project/plans/draft/001-plan.md [changes]`
 3. File must exist before refinement
 
 ### Extended thinking not being used
@@ -678,7 +678,7 @@ If folders are truly missing, the command should have created them. Try running 
 
 ### Git not tracking empty directories
 
-**Problem**: After cloning, `_claude/` structure is incomplete.
+**Problem**: After cloning, `_project/` structure is incomplete.
 
 **Explanation**: This is a git limitation. The `.gitkeep` files ensure directories are tracked. If missing:
 ```bash

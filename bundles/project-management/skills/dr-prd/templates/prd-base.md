@@ -68,8 +68,8 @@ One-line summary of how this ships (e.g., "behind feature flag at 10%, full roll
 
 ## References
 
-- [Research docs — `@_claude/research/[dir]/index.md`]
-- [Related PRDs — `@_claude/prd/[file].md`]
+- [Research docs — `@_project/research/[dir]/index.md`]
+- [Related PRDs — `@_project/prd/[file].md`]
 - [External resources]
 
 ---

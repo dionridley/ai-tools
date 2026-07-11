@@ -18,7 +18,7 @@ If plan content is missing from the conversation:
 ```
 ❌ Plan content not found in context.
 
-Usage: /dr-plan @_claude/plans/[folder]/[NNN]-[slug].md answer questions
+Usage: /dr-plan @_project/plans/[folder]/[NNN]-[slug].md answer questions
 ```
 
 Stop.
@@ -75,7 +75,7 @@ Status: [status]
 All assumptions confirmed, all questions resolved. Verification Policy is [value] — change via this command again any time.
 
 Next steps:
-  [If in draft/:] Move to in_progress: mv _claude/plans/draft/[filename].md _claude/plans/in_progress/
+  [If in draft/:] Move to in_progress: mv _project/plans/draft/[filename].md _project/plans/in_progress/
   [If in in_progress/:] Continue implementation.
 ```
 
@@ -261,7 +261,7 @@ Use `Write` to overwrite the plan file.
 ✅ Questions resolved
 
 Plan #[NNN]: [Plan Name]
-Location: _claude/plans/[folder]/[filename].md
+Location: _project/plans/[folder]/[filename].md
 
 Resolution summary:
   - Blocking questions resolved: [X] of [Y]  ✓
@@ -275,11 +275,11 @@ Exit Gates now follow the [new] policy. Phases with any [x] progress are preserv
 
 [If any items skipped:]
 ℹ️  [N] items skipped — resolve later with:
-  /dr-plan @_claude/plans/[folder]/[filename].md answer questions
+  /dr-plan @_project/plans/[folder]/[filename].md answer questions
 
 Next steps:
   [If all blocking resolved and plan is in draft/:]
-  1. Move to in_progress: mv _claude/plans/draft/[filename].md _claude/plans/in_progress/
+  1. Move to in_progress: mv _project/plans/draft/[filename].md _project/plans/in_progress/
   [If in in_progress/:]
   1. Continue implementation.
   [If blocking items remain:]

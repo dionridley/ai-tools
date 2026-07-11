@@ -24,7 +24,7 @@ When signals do surface, **announce and confirm** before applying. The user sees
 
 Evaluate in order. A signal in an earlier level overrides signals in a later level.
 
-### Level 1: PRD Feature Type (if `@_claude/prd/*.md` is referenced)
+### Level 1: PRD Feature Type (if `@_project/prd/*.md` is referenced)
 
 Map the PRD's `Feature Type` metadata field:
 

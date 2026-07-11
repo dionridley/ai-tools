@@ -8,14 +8,14 @@ Use this flow when the project already has the plugin installed. The goal is to 
 
 Run these checks (parallel):
 
-1. **`Glob _claude/**`** — inventory existing directories. Compare against the expected 7 leaf directories:
-   - `_claude/docs/`
-   - `_claude/plans/draft/`
-   - `_claude/plans/in_progress/`
-   - `_claude/plans/completed/`
-   - `_claude/prd/`
-   - `_claude/resources/`
-   - `_claude/research/`
+1. **`Glob _project/**`** — inventory existing directories. Compare against the expected 7 leaf directories:
+   - `_project/docs/`
+   - `_project/plans/draft/`
+   - `_project/plans/in_progress/`
+   - `_project/plans/completed/`
+   - `_project/prd/`
+   - `_project/resources/`
+   - `_project/research/`
    Note any missing directories.
 2. **`Read CLAUDE.md`** — already read during state detection, reuse that content.
 3. **`Read templates/CLAUDE-template.md`** (from the skill root) — the authoritative template to compare against.
@@ -70,8 +70,8 @@ If all sections are current but directories were backfilled, report the backfill
 ✅ Project structure verified
 
 Directory structure: Updated
-  Created: _claude/prd/ (was missing)
-  Created: _claude/resources/ (was missing)
+  Created: _project/prd/ (was missing)
+  Created: _project/resources/ (was missing)
 
 CLAUDE.md sections: All current (3)
 

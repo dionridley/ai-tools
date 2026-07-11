@@ -105,9 +105,9 @@ From the feature name/description:
 
 ### Determine the output path
 
-Target: `_claude/prd/[slug].md`.
+Target: `_project/prd/[slug].md`.
 
-`Write` creates parent directories automatically — do not shell out to `mkdir`. If `_claude/prd/` does not already exist, note in the completion summary that the user can run `/dr-init` for a full project scaffold, but don't block.
+`Write` creates parent directories automatically — do not shell out to `mkdir`. If `_project/prd/` does not already exist, note in the completion summary that the user can run `/dr-init` for a full project scaffold, but don't block.
 
 Use `Glob` to check whether the target path already exists. If it does, ask the user whether to overwrite, use a different slug, or switch to REFINE mode.
 
@@ -138,7 +138,7 @@ Use extended thinking. Do not leave placeholder text in a final draft.
 - **Release Strategy** — one line. If unclear, write `[To be determined during planning]`.
 - **Risks and Mitigation** — the 2-4 most material risks. Not a risk inventory.
 - **Open Questions** — use the format `[ ] Question — owner: [name], needs by: [YYYY-MM-DD]`. Put unknowns and assumptions here, not in the body.
-- **References** — include any `@_claude/research/...` paths, `@_claude/prd/...` files, or external links the user provided. Never invent references. If the user provided none, replace the bulleted placeholders with a single line — no bullet, no placeholder: `No external references — no research documents, prior PRDs, or external resources were cited during drafting.`
+- **References** — include any `@_project/research/...` paths, `@_project/prd/...` files, or external links the user provided. Never invent references. If the user provided none, replace the bulleted placeholders with a single line — no bullet, no placeholder: `No external references — no research documents, prior PRDs, or external resources were cited during drafting.`
 
 ### Provisional-content callouts
 
@@ -182,7 +182,7 @@ Use `Write` with the full populated content. `Write` creates parent directories 
 Emit a concise success message:
 
 ```
-✅ PRD created: _claude/prd/[slug].md
+✅ PRD created: _project/prd/[slug].md
 
 Feature type: [type]
 Sections included: [count]
@@ -192,11 +192,11 @@ Key things identified during drafting:
   - [3-5 non-obvious points surfaced in the clarifying phase or draft]
 
 Next steps:
-  1. Review the draft and refine: /dr-prd @_claude/prd/[slug].md [changes]
+  1. Review the draft and refine: /dr-prd @_project/prd/[slug].md [changes]
   2. Update status when ready (Draft → Under Review → Approved)
   3. When ready to implement: /dr-plan [implementation context]
 ```
 
-If `_claude/prd/` did not exist before this write, add a one-line note:
+If `_project/prd/` did not exist before this write, add a one-line note:
 
-> Note: Created `_claude/prd/` on the fly. Run `/dr-init` if you'd like the full project scaffolding (`_claude/plans/`, `_claude/research/`, etc.) plus a versioned CLAUDE.md.
+> Note: Created `_project/prd/` on the fly. Run `/dr-init` if you'd like the full project scaffolding (`_project/plans/`, `_project/research/`, etc.) plus a versioned CLAUDE.md.
