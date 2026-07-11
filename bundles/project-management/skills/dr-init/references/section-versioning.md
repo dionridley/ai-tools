@@ -1,16 +1,16 @@
 # Section Versioning Reference
 
-This document explains how plugin-managed sections in `CLAUDE.md` are version-tracked, and how `/dr-init` uses these versions to detect and update outdated content.
+This document explains how plugin-managed sections in `AGENTS.md` are version-tracked, and how `/dr-init` uses these versions to detect and update outdated content. (Before 3.0.0 the sections lived in a generated CLAUDE.md — a plugin marker found there with no marker-bearing AGENTS.md identifies a legacy project; State B offers the conversion.)
 
 Read this when handling State B (already-initialized) or when maintaining the template.
 
 ## The Versioning Scheme
 
-Plugin-managed sections in `CLAUDE-template.md` are marked with HTML comments placed immediately after their `##` heading:
+Plugin-managed sections in `AGENTS-template.md` are marked with HTML comments placed immediately after their `##` heading:
 
 ```markdown
 ## Plan Management Workflow
-<!-- section: plan-management-workflow v2 -->
+<!-- section: plan-management-workflow v3 -->
 
 Section content here...
 ```
@@ -20,25 +20,27 @@ Section content here...
 - Slug is lowercase kebab-case matching the section's purpose
 - Version is a simple integer (`v1`, `v2`, `v3`, ...)
 
+The file-level plugin marker is the line `Plugin: project-management` inside the HTML comment at the top of the generated file (the `<!--` opener sits on its own line, so match on `Plugin: project-management`). It carries no version number (plugin versions live in the manifests); markers generated before 3.0.0 include a stale version suffix after the name — the substring still matches.
+
 ## Which Sections Are Versioned
 
 As of the current template, these three sections have version markers:
 
 | Section Heading | Slug | Current Version |
 |---|---|---|
-| `## Plan Management Workflow` | `plan-management-workflow` | `v2` |
-| `## Available Commands` | `available-commands` | `v1` |
+| `## Plan Management Workflow` | `plan-management-workflow` | `v3` |
+| `## Available Commands` | `available-commands` | `v3` |
 | `## Task Completion Protocol` | `task-completion-protocol` | `v1` |
 
 Other sections in the template (`## Project Structure`, directory purpose subsections, etc.) are **not** version-tracked because their content is stable documentation that rarely changes. They are recreated on fresh init but never updated on existing projects.
 
 ## How `/dr-init` Uses the Markers (State B)
 
-When the skill runs in State B (already initialized), it performs two tiers of checks against the user's `CLAUDE.md`:
+When the skill runs in State B (already initialized), it performs two tiers of checks against the user's `AGENTS.md`:
 
 ### Tier 1 — Section existence
 
-For each versioned section in the template, check whether the corresponding `##` heading exists in the user's CLAUDE.md.
+For each versioned section in the template, check whether the corresponding `##` heading exists in the user's AGENTS.md.
 
 - Heading found → proceed to Tier 2
 - Heading not found → mark section as **✗ missing** (will be added if user approves)
@@ -59,17 +61,17 @@ When the user approves updates in State B:
 
 2. **Missing sections:** Use `Edit` to insert the section from the template immediately before the `<!-- End of plugin-managed section -->` marker. If that marker doesn't exist in the user's file, append the section at the end.
 
-3. **Preserve everything else:** Content outside the specific sections being updated is never touched. The user's customizations, additions, and project-specific content remain untouched.
+3. **Preserve everything else:** Content outside the specific sections being updated is never touched. The user's customizations, additions, and project-specific content remain untouched. The CLAUDE.md pointer is not version-tracked — State B only recreates it when missing.
 
 ## Adding a New Versioned Section (Maintainer Note)
 
-When adding a new versioned section to `CLAUDE-template.md`:
+When adding a new versioned section to `AGENTS-template.md`:
 
 1. Place the `##` heading where it belongs in the template
 2. Add a version marker on the next line: `<!-- section: your-section-name v1 -->`
 3. Write the section content
 4. Update the table above in this file
-5. Bump the plugin version in `plugin.json` and `marketplace.json`
+5. Bump the plugin version in `plugin.json`, the bundle `package.json`, and the `marketplace.json` entry
 6. Add a CHANGELOG entry noting the new section
 
 When **modifying** content in an existing versioned section:

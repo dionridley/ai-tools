@@ -46,7 +46,7 @@ Run (parallel where possible):
 Notes for the report:
 
 - The plan move (source folder → `completed/`) has **not happened yet** — it is predicted. Count it in the Stage numbers and show it as the first FILES line, using the plan's **actual source path**: normally `in_progress/`, but a `@plan-file` plan from elsewhere (e.g. `draft/`) shows that path — the gate's approval covers the move, so there is no separate confirmation later. A plan already in `completed/` needs no move: no R line, Stage counts exclude it.
-- If the plan file is untracked (e.g., the project gitignores `_claude/`), the move will be filesystem-only and never reaches the commit: annotate the R line `(untracked — filesystem move only)` and exclude it from the Stage count.
+- If the plan file is untracked (e.g., the project gitignores `_project/`), the move will be filesystem-only and never reaches the commit: annotate the R line `(untracked — filesystem move only)` and exclude it from the Stage count.
 - If `git status --porcelain` is empty and the plan needs no close-out changes (already in `completed/`, retro present), there is nothing to commit: the SHIP PLAN's Stage row says `nothing to commit` and the gate's approval covers push + PR only.
 
 ## 1d. Main/master guard (mandatory stop)
@@ -81,7 +81,7 @@ SHIP PLAN
   PR       create new | update #[N] — replaces existing description | update #[N] — sets empty description | display only ([reason])
 
 FILES ([N])
-  R  _claude/plans/in_progress/[file].md → completed/
+  R  _project/plans/in_progress/[file].md → completed/
   M  [path]
   …  (+[K] more)
 ```

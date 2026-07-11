@@ -1,6 +1,6 @@
 ---
 name: dr-research
-description: Conducts structured research on a topic with web search — a Standard path for speed, a Deep path that adds discovery and claim verification. Use when the user asks to research a topic, investigate a technology, compare approaches, or gather information for a decision. Produces canonical markdown plus a portable HTML microsite in _claude/research/.
+description: Conducts structured research on a topic with web search — a Standard path for speed, a Deep path that adds discovery and claim verification. Use when the user asks to research a topic, investigate a technology, compare approaches, or gather information for a decision. Produces canonical markdown plus a portable HTML microsite in _project/research/.
 disable-model-invocation: true
 allowed-tools: WebSearch, WebFetch, Read, Write, Glob, Bash(cp:*), Bash(mkdir:*)
 effort: max
@@ -29,9 +29,9 @@ Use `$ARGUMENTS` (the user's arguments — substituted here by Claude Code; on h
 
 Check whether the user is referencing existing research for a follow-up:
 
-- **File/directory path provided** pointing to an existing `_claude/research/` directory → this is a **deep-dive follow-up**. Verify the path exists with Glob, then read the existing `index.md` and `findings.md` to understand prior coverage.
+- **File/directory path provided** pointing to an existing `_project/research/` directory → this is a **deep-dive follow-up**. Verify the path exists with Glob, then read the existing `index.md` and `findings.md` to understand prior coverage.
 - **No file reference** → this is **new research**, regardless of whether the user uses phrases like "deep dive" or "go deeper." Those phrases describe desired depth, not a follow-up.
-- A file reference that exists in `_claude/research/` is the key identifier. Language alone is not sufficient to trigger deep-dive mode.
+- A file reference that exists in `_project/research/` is the key identifier. Language alone is not sufficient to trigger deep-dive mode.
 
 ### Choose the path: Standard or Deep
 
@@ -206,11 +206,12 @@ findings.md includes a **Claim Ledger** table near the top — one row per load-
 
 The Write tool creates parent directories automatically — decide the target path and write files to it.
 
-- **New research:** `_claude/research/[slug]-[date]/`
+- **New research:** `_project/research/[slug]-[date]/`
   - Create the slug from the topic: lowercase, hyphens for spaces, remove special characters
   - Use the current date from the conversation context (YYYY-MM-DD)
-  - Use Glob to check whether `_claude/research/` already exists. If it doesn't, inform the user they can run `/dr-init` for full project setup, but proceed — the first Write will create it.
-- **Deep dive:** `_claude/research/[parent-slug]-[date]/deep-dives/[deep-dive-slug]-[date]/`
+  - Use Glob to check whether `_project/research/` already exists. If it doesn't, inform the user they can run `/dr-init` for full project setup, but proceed — the first Write will create it.
+  - If `_claude/research/` exists and `_project/` does not, the project predates the 3.0.0 directory rename — tell the user and suggest `/dr-init` (which offers the `git mv _claude _project` migration), then write to the old `_claude/` paths for this run.
+- **Deep dive:** `_project/research/[parent-slug]-[date]/deep-dives/[deep-dive-slug]-[date]/`
 
 ### Write the files
 
@@ -283,7 +284,7 @@ After all files are written, present a summary to the user in the conversation.
 ```
 Research completed: [Topic]  ([Standard|Deep] path)
 
-Created: _claude/research/[slug]-[date]/
+Created: _project/research/[slug]-[date]/
   - index.md (answer + navigation)
   - findings.md ([brief description of what's covered])
   - [additional files with descriptions]

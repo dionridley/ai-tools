@@ -1,8 +1,13 @@
-# State C — CLAUDE.md Exists, No Plugin Structure
+# State C — Existing Guidance Files, No Plugin Structure
 
-Use this flow when the project has an existing `CLAUDE.md` (with content) but no plugin marker and no `_claude/` directory. The plugin sections need to be appended to the existing file without disturbing what's already there.
+Use this flow when the project has an AGENTS.md and/or CLAUDE.md with content but no plugin marker in either. The plugin sections need to land in AGENTS.md (canonical) without disturbing what's already there, and CLAUDE.md needs to point at AGENTS.md for Claude Code.
 
 There's no conflict to resolve: the plugin-managed sections describe plugin-specific conventions (plan workflow, available commands, task completion protocol) that don't overlap with what the user or a project-bootstrap command (like Claude Code's `/init`) would typically write.
+
+Two cases, by which files exist:
+
+- **Case 1 — user has their own AGENTS.md** (with or without a CLAUDE.md): append the plugin sections to their AGENTS.md. If a CLAUDE.md exists and doesn't already tell the agent to read AGENTS.md, also offer to append the short pointer note to it (same approval gate).
+- **Case 2 — user has only a CLAUDE.md**: create AGENTS.md fresh from the template, and append the short pointer note to their CLAUDE.md.
 
 ## Steps
 
@@ -11,22 +16,22 @@ There's no conflict to resolve: the plugin-managed sections describe plugin-spec
 If the current directory is a git repository (detected by `Glob .git/**` returning results), run:
 
 ```
-Bash: git status --porcelain CLAUDE.md
+Bash: git status --porcelain AGENTS.md CLAUDE.md
 ```
 
-If output is non-empty, CLAUDE.md has uncommitted changes. Warn the user via AskUserQuestion:
+If output is non-empty, the file(s) have uncommitted changes. Warn the user via AskUserQuestion:
 
-> **Question:** CLAUDE.md has uncommitted changes. If you proceed, I'll append plugin sections to the end of the file, which will combine with your uncommitted changes. How would you like to proceed?
+> **Question:** [AGENTS.md / CLAUDE.md] has uncommitted changes. If you proceed, I'll append plugin content, which will combine with your uncommitted changes. How would you like to proceed?
 >
 > **Options:**
-> - **Proceed anyway** — append the plugin sections now
-> - **Cancel** — don't modify CLAUDE.md, I'll commit or stash my changes first
+> - **Proceed anyway** — append the plugin content now
+> - **Cancel** — don't modify anything, I'll commit or stash my changes first
 
 If "Cancel", emit:
 
 ```
 ℹ️  Cancelled — no changes made.
-Run /dr-init again after committing or stashing your CLAUDE.md changes.
+Run /dr-init again after committing or stashing your changes.
 ```
 
 Then stop.
@@ -37,119 +42,111 @@ If not a git repo, skip this check silently.
 
 **Get the current date.** Use today's date from the conversation context, formatted as `YYYY-MM-DD`.
 
-**Read the template.** Read `templates/CLAUDE-template.md`.
+**Read the templates.** Read `templates/AGENTS-template.md` and `templates/CLAUDE-pointer.md`.
 
-**Extract the content to be appended.** From the template, skip the header HTML comment block, the `# CLAUDE.md` heading, and the intro paragraph. Keep everything from `## Project Structure` onward (including the `<!-- End of plugin-managed section -->` marker at the bottom).
+**Assemble the AGENTS.md content:**
 
-**Prepend the version marker.** At the top of the append content, add the plugin version marker so State B can detect this file on future runs:
+- **Case 1 (append to existing AGENTS.md):** extract the plugin sections from the template — skip the header HTML comment block, the `# AGENTS.md` heading, and the intro paragraph; keep everything from `## Project Structure` onward (including the `<!-- End of plugin-managed section -->` marker at the bottom). Prepend the version marker so State B can detect this file on future runs:
+
+  ```markdown
+  <!--
+    Plugin: project-management
+    Plugin sections added: {{CURRENT_DATE}}
+
+    These sections are managed by /dr-init. Running /dr-init again
+    will check version markers and offer updates if needed.
+  -->
+  ```
+
+  Substitute `{{CURRENT_DATE}}`, then assemble the append block:
+
+  ```
+  [existing AGENTS.md content ends here]
+
+  ---
+
+  <!-- Plugin-managed sections added by /dr-init -->
+
+  <version marker from above>
+
+  <plugin sections — from ## Project Structure through <!-- End of plugin-managed section --> -->
+  ```
+
+- **Case 2 (no AGENTS.md):** the full processed template (`{{CURRENT_DATE}}` substituted), written as a new file.
+
+**Assemble the CLAUDE.md pointer note** (both cases, when a CLAUDE.md exists and doesn't already tell the agent to read AGENTS.md):
 
 ```markdown
-<!--
-  Plugin: project-management v1.0.0
-  Plugin sections added: {{CURRENT_DATE}}
-
-  These sections are managed by /dr-init. Running /dr-init again
-  will check version markers and offer updates if needed.
--->
-```
-
-**Substitute `{{CURRENT_DATE}}`** with today's date in the prepended marker.
-
-**Assemble the final append block** (what will actually land in the file):
-
-```
-[existing CLAUDE.md content ends here]
 
 ---
 
-<!-- Plugin-managed sections added by /dr-init -->
+<!-- Plugin: project-management — pointer added by /dr-init -->
 
-<version marker from above>
-
-<plugin sections — from ## Project Structure through <!-- End of plugin-managed section --> -->
+Read AGENTS.md and follow all of its guidance. It is the canonical
+instruction file for every coding agent working in this repository,
+including Claude Code.
 ```
+
+(When no CLAUDE.md exists at all in Case 1, create it from `templates/CLAUDE-pointer.md` verbatim instead.)
 
 ### 3. Show the preview and ask
 
-Display the preview so the user can see exactly what will be appended:
+Display the preview so the user can see exactly what will change — every line, with the real assembled content in place of the `<...>` placeholders:
 
 ~~~markdown
 ## /dr-init — Plugin Setup Preview
 
-📋 Detected: existing CLAUDE.md without plugin structure
+📋 Detected: existing agent-guidance file(s) without plugin structure
 
-Your existing CLAUDE.md content will be preserved exactly as-is.
-The following content will be **appended to the end** of your CLAUDE.md,
-and the `_claude/` directory structure will be created.
+Your existing content will be preserved exactly as-is.
 
-**Here's exactly what will be added to CLAUDE.md:**
+**AGENTS.md** — [appended to / created]:
 
 ```diff
-+
-+ ---
-+
-+ <!-- Plugin-managed sections added by /dr-init -->
-+
-+ <full version marker comment, with date substituted>
-+
-+ ## Project Structure
-+ <full section content>
-+
-+ ## Plan Management Workflow
-+ <!-- section: plan-management-workflow v2 -->
-+ <full section content>
-+
-+ ## Available Commands
-+ <!-- section: available-commands v1 -->
-+ <full section content>
-+
-+ ## Task Completion Protocol
-+ <!-- section: task-completion-protocol v1 -->
-+ <full section content>
-+
-+ ---
-+
-+ <!-- End of plugin-managed section -->
-+ <!-- Content above this line is managed by /dr-init. Content below is yours. -->
++ <the full AGENTS.md addition assembled in step 2>
+```
+
+**CLAUDE.md** — [pointer note appended / created / already points at AGENTS.md — unchanged]:
+
+```diff
++ <the pointer note assembled in step 2, if applicable>
 ```
 
 **Directories to be created:**
-  _claude/docs/
-  _claude/plans/draft/
-  _claude/plans/in_progress/
-  _claude/plans/completed/
-  _claude/prd/
-  _claude/resources/
-  _claude/research/
+  _project/docs/
+  _project/plans/draft/
+  _project/plans/in_progress/
+  _project/plans/completed/
+  _project/prd/
+  _project/resources/
+  _project/research/
 ~~~
-
-In the actual render, replace the `<...>` placeholders with the real content assembled in step 2 — the user should see every line that will be inserted.
 
 Then use AskUserQuestion:
 
 > **Question:** Apply these changes?
 >
 > **Options:**
-> - **Proceed** — append plugin sections to CLAUDE.md and create the `_claude/` directories
+> - **Proceed** — apply the AGENTS.md and CLAUDE.md changes shown and create the `_project/` directories
 > - **Cancel** — don't make any changes
 
 ### 4. Handle the user's choice
 
 #### If "Proceed":
 
-**Use `Edit`** to append to the existing CLAUDE.md. The `old_string` should match the last line(s) of the user's existing content (a suitable unique anchor near the end of the file). The `new_string` should be the anchor followed by the assembled append block from step 2.
+**AGENTS.md** — Case 1: use `Edit` to append (anchor on the last line(s) of the user's existing content), or read-concatenate-`Write` if a clean anchor is awkward. Case 2: `Write` the new file.
 
-**Alternative simpler approach:** if finding a unique anchor is awkward, read the full current content, concatenate the append block, and use `Write` to rewrite the whole file. Either approach works — pick whichever is cleaner for the actual file.
+**CLAUDE.md** — append the pointer note with `Edit` (or create the file from the pointer template when it doesn't exist). Skip entirely if it already points at AGENTS.md.
 
-**Create the 7 `.gitkeep` files** in parallel (same as State A):
+**Create the 7 `.gitkeep` files** in parallel:
 
-- `_claude/docs/.gitkeep`
-- `_claude/plans/draft/.gitkeep`
-- `_claude/plans/in_progress/.gitkeep`
-- `_claude/plans/completed/.gitkeep`
-- `_claude/prd/.gitkeep`
-- `_claude/resources/.gitkeep`
-- `_claude/research/.gitkeep`
+- `_project/docs/.gitkeep`
+- `_project/plans/draft/.gitkeep`
+- `_project/plans/in_progress/.gitkeep`
+- `_project/plans/completed/.gitkeep`
+- `_project/prd/.gitkeep`
+- `_project/resources/.gitkeep`
+- `_project/research/.gitkeep`
 
 Parent directories are created automatically.
 
@@ -159,22 +156,23 @@ Parent directories are created automatically.
 ✅ Plugin structure added
 
 Created:
-  _claude/docs/
-  _claude/plans/draft/
-  _claude/plans/in_progress/
-  _claude/plans/completed/
-  _claude/prd/
-  _claude/resources/
-  _claude/research/
+  _project/docs/
+  _project/plans/draft/
+  _project/plans/in_progress/
+  _project/plans/completed/
+  _project/prd/
+  _project/resources/
+  _project/research/
 
-Updated CLAUDE.md:
-  - Preserved all existing content
-  - Appended plugin-managed sections at the end
+AGENTS.md:
+  - [Appended plugin-managed sections / Created from template]
   - Added version marker for future /dr-init runs
+CLAUDE.md:
+  - [Pointer note appended — your content preserved / Created as pointer / Already pointed at AGENTS.md — unchanged]
 
 Next steps:
-  1. Review CLAUDE.md — your content is at the top, plugin sections follow
-  2. Reorganize if you'd like (content above/below is entirely up to you)
+  1. Review AGENTS.md — your content is preserved; plugin sections follow
+  2. Reorganize if you'd like (content outside the managed block is entirely yours)
   3. Start a workflow: /dr-research, /dr-prd, or /dr-plan
 
 Note: /dr-init will only update plugin-managed sections on future runs,
@@ -188,6 +186,6 @@ Do not suggest or run any git commands — the user handles their own commits.
 ```
 ℹ️  Cancelled — no changes made.
 
-Your CLAUDE.md and project structure remain unchanged.
+Your files and project structure remain unchanged.
 Run /dr-init again when you're ready to set up the plugin structure.
 ```

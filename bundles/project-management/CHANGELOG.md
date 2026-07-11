@@ -5,6 +5,28 @@ All notable changes to the Project Management Plugin will be documented in this 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.0.0] - 2026-07-10
+
+Skill portability, phases 4–5: harness-neutral output directories and a harness-neutral generated artifact. Two breaking changes, one migration path.
+
+**Migration:** in an existing project, run `/dr-init` — it offers `git mv _claude _project` and the CLAUDE.md → AGENTS.md conversion (both diff-previewed, both declinable; the skills tolerate the old layout in the meantime).
+
+### Changed
+
+- **BREAKING: output directories renamed `_claude/` → `_project/`** — `_project/plans/`, `_project/prd/`, `_project/research/`, `_project/docs/`, `_project/resources/`. Every skill, template, and doc reference updated (183 occurrences across 22 files); leaf directory names unchanged.
+- **BREAKING: dr-init now generates AGENTS.md as the canonical file** — the versioned plugin-managed sections live in AGENTS.md (from `templates/AGENTS-template.md`, renamed from `CLAUDE-template.md`); the generated CLAUDE.md is a thin pointer to it. One artifact serves Claude Code (via the pointer) and any harness that reads AGENTS.md natively (e.g., Pi). dr-plan's Definition-of-Done source scan now lists AGENTS.md first.
+
+### Added
+
+- **Old-path tolerance** in dr-plan, dr-prd, dr-ship, and dr-research — one line each: a project with `_claude/` and no `_project/` is recognized as pre-3.0.0, the rename is suggested, and the run proceeds against the old paths.
+- **dr-init legacy migration offers** — State B detects a pre-3.0.0 project (plugin marker in CLAUDE.md, no AGENTS.md) and offers the conversion (plugin sections → AGENTS.md, pointer left behind, user content preserved; appends instead of overwriting when the project has its own AGENTS.md); every state offers `git mv _claude _project` when the legacy directory is present.
+- **`templates/CLAUDE-pointer.md`** — the single source for the generated CLAUDE.md pointer.
+
+### Fixed
+
+- **`section-versioning.md`'s version table was stale** (claimed v2/v1/v1; the template actually carries plan-management-workflow v3, available-commands v3, task-completion-protocol v1).
+- **Generated plugin marker no longer hardcodes a version** (was frozen at `v1.0.0` regardless of release) — detection matches the marker line `Plugin: project-management`, with or without a legacy suffix.
+
 ## [2.5.0] - 2026-07-10
 
 Skill portability, phases 1–3: the skills now follow the Agent Skills spec's relative-path rule and degrade gracefully on harnesses without Claude Code's tool set (target: Pi.dev). No behavior change on Claude Code — every conditional names the Claude tool as the primary path.

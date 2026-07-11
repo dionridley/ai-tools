@@ -12,7 +12,7 @@
       "name": "project-management",
       "source": "./bundles/project-management",
       "description": "Structured project management with research, PRDs, and implementation plans",
-      "version": "2.5.0"
+      "version": "3.0.0"
     },
     {
       "name": "engineering-tools",

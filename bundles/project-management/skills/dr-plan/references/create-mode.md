@@ -21,14 +21,14 @@ Determine the starting context using this precedence:
 
 - **`$ARGUMENTS` is empty AND there's no useful prior conversation context** → ask:
 
-  > What would you like to implement? Share as much or as little as you'd like — describe the work, the why, any constraints, and reference a PRD with `@_claude/prd/[file].md` if you have one.
+  > What would you like to implement? Share as much or as little as you'd like — describe the work, the why, any constraints, and reference a PRD with `@_project/prd/[file].md` if you have one.
 
   Wait for the user's response before continuing.
 
 ### Check for flags and PRD reference
 
-- **`--in-progress` flag** — if present, the plan will be created in `_claude/plans/in_progress/` instead of `_claude/plans/draft/`.
-- **PRD reference** (`@_claude/prd/[file].md`) — when the user includes one, the content is auto-expanded into the conversation by Claude Code. The `@path` token itself is removed from `$ARGUMENTS` after expansion. (On harnesses without `@` expansion, Read the referenced file yourself.) Use the expanded PRD content as input to the plan. Store the PRD path for the `Related PRD` metadata field.
+- **`--in-progress` flag** — if present, the plan will be created in `_project/plans/in_progress/` instead of `_project/plans/draft/`.
+- **PRD reference** (`@_project/prd/[file].md`) — when the user includes one, the content is auto-expanded into the conversation by Claude Code. The `@path` token itself is removed from `$ARGUMENTS` after expansion. (On harnesses without `@` expansion, Read the referenced file yourself.) Use the expanded PRD content as input to the plan. Store the PRD path for the `Related PRD` metadata field.
 
 ## Phase 2: Detect Plan Type (Overlay Signals)
 
@@ -70,12 +70,14 @@ Store the confirmed plan type for Phase 5 (template composition) and Phase 8 (me
 
 Plans are numbered sequentially across ALL three folders.
 
-1. Use `Glob` with pattern `_claude/plans/**/*.md`.
+1. Use `Glob` with pattern `_project/plans/**/*.md`.
 2. Filter matches to files whose name starts with `NNN-` or `NNNN-` (one or more leading digits, then a hyphen).
 3. Parse the leading number from each.
 4. Next number = highest + 1.
 5. Format: zero-padded to 3 digits if ≤ 999 (`001`, `042`, `999`); no padding if > 999 (`1000`, `1001`).
 6. If no plans exist anywhere → start at `001`.
+
+If `_claude/plans/` exists and `_project/plans/` does not, the project predates the 3.0.0 directory rename — tell the user and suggest `/dr-init` (which offers the `git mv _claude _project` migration), then use the old `_claude/` paths for this run.
 
 Concurrent-create edge cases (two plans ending up with the same number) are acceptable — the slugs differ and nothing downstream breaks.
 
@@ -99,8 +101,8 @@ If an assumption is so load-bearing that getting it wrong invalidates the whole 
 
 The DoD block in the plan's header references concrete project commands. Populate them by reading config in this precedence order:
 
-1. `CLAUDE.md` at repo root — look for Build/Test/Lint/Typecheck sections.
-2. `AGENTS.md` at repo root — same purpose, different convention.
+1. `AGENTS.md` at repo root — look for Build/Test/Lint/Typecheck sections (the canonical file in projects initialized by /dr-init 3.0.0+).
+2. `CLAUDE.md` at repo root — same purpose, Claude Code convention (in 3.0.0+ projects it's a thin pointer to AGENTS.md).
 3. `package.json` — scripts section (`test`, `lint`, `typecheck`, `check`).
 4. `Cargo.toml` — implies `cargo test`, `cargo clippy`, `cargo check`.
 5. `go.mod` — implies `go test ./...`, `go vet ./...`.
@@ -229,16 +231,16 @@ Example: `Add User Authentication` → `add-user-authentication`.
 
 ## Phase 10: Write the File
 
-- Target: `_claude/plans/draft/[NNN]-[slug].md` by default, or `_claude/plans/in_progress/[NNN]-[slug].md` if `--in-progress` was provided.
+- Target: `_project/plans/draft/[NNN]-[slug].md` by default, or `_project/plans/in_progress/[NNN]-[slug].md` if `--in-progress` was provided.
 - Use `Write` — it creates parent directories as needed.
-- If `_claude/plans/` does not exist before this write, add a one-line note in the completion summary suggesting the user run `/dr-init` for full scaffolding.
+- If `_project/plans/` does not exist before this write, add a one-line note in the completion summary suggesting the user run `/dr-init` for full scaffolding.
 
 ## Phase 11: Completion Summary
 
 Emit:
 
 ```
-✅ Plan created: _claude/plans/[folder]/[NNN]-[slug].md
+✅ Plan created: _project/plans/[folder]/[NNN]-[slug].md
 
 Plan #[NNN]: [Plan Name]
 Plan type: [type]
@@ -265,7 +267,7 @@ Conditional additions:
 
 - **If blocking questions exist**, add:
   ```
-  Next step: /dr-plan @_claude/plans/[folder]/[NNN]-[slug].md answer questions
+  Next step: /dr-plan @_project/plans/[folder]/[NNN]-[slug].md answer questions
   ```
 
 - **If no blocking questions**, add:
@@ -273,7 +275,7 @@ Conditional additions:
   Next step: review the plan, then move to in_progress when ready.
   ```
 
-- **If `_claude/plans/` did not exist before this write**, add:
+- **If `_project/plans/` did not exist before this write**, add:
   ```
-  Note: Created `_claude/plans/` on the fly. Run `/dr-init` for full project scaffolding.
+  Note: Created `_project/plans/` on the fly. Run `/dr-init` for full project scaffolding.
   ```

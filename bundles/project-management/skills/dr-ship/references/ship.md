@@ -29,10 +29,10 @@ If placeholders remain (`[Populated at completion]` or similar), **auto-draft it
 
 ### Move to completed/
 
-Execute exactly the move the approved Ship Report showed. If the report showed no move (plan already in `completed/`), skip this step. Otherwise move the file from the source path on the report's R line (normally `in_progress/`) to `_claude/plans/completed/` (same filename):
+Execute exactly the move the approved Ship Report showed. If the report showed no move (plan already in `completed/`), skip this step. Otherwise move the file from the source path on the report's R line (normally `in_progress/`) to `_project/plans/completed/` (same filename):
 
-1. Prefer `git mv "[plan source path]" "_claude/plans/completed/[file].md"` — cross-platform and stages the move in one step.
-2. If `git mv` fails (file untracked — e.g., the project gitignores `_claude/`): `Read` the file, `Write` it to the completed/ path, then `rm` the original. The move is then filesystem-only, which is correct for an ignored file.
+1. Prefer `git mv "[plan source path]" "_project/plans/completed/[file].md"` — cross-platform and stages the move in one step.
+2. If `git mv` fails (file untracked — e.g., the project gitignores `_project/`): `Read` the file, `Write` it to the completed/ path, then `rm` the original. The move is then filesystem-only, which is correct for an ignored file.
 
 ## Phase 3: Generate the summary + commit message
 
@@ -94,7 +94,7 @@ The canonical closer — always emitted, shaped by what happened:
 ```
 🚢 Plan Shipped
 
-Plan: [Plan Name] → _claude/plans/completed/[file].md
+Plan: [Plan Name] → _project/plans/completed/[file].md
 Retro: [written now / already present / skipped (reason)]
 Waived: [N items / none]
 Branch: [branch] — [pushed to origin / commit only / push FAILED: reason]

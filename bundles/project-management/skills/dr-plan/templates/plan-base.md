@@ -118,7 +118,7 @@ Every Phase Exit Gate must confirm these before flipping any `[x]` in the phase:
 After the final phase's Exit Gate passes, the executing agent performs these steps without prompting the user:
 
 1. Populate the Retro section below from observable execution signals (what worked, what didn't, learnings). Write in terse bullet form.
-2. Move this plan file from `_claude/plans/in_progress/` to `_claude/plans/completed/`.
+2. Move this plan file from `_project/plans/in_progress/` to `_project/plans/completed/`.
 3. Suggest the user run `/dr-ship` to commit, push, and open a PR populated from this plan. (If steps 1–2 were missed, `/dr-ship` verifies and backstops them.)
 
 If the final phase's Exit Gate has unresolved FAILs or UNVERIFIEDs after the allowed retries, do NOT move the file or write the retro. Escalate to the user with full context and stop.

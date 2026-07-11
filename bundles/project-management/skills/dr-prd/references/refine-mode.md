@@ -23,16 +23,16 @@ Parse:
 
 1. **Read the file.** If it doesn't exist:
 
-   Use `Glob` to list PRDs in `_claude/prd/`:
+   Use `Glob` to list PRDs in `_project/prd/`:
 
    ```
    ❌ PRD file not found: [path]
 
-   Available PRDs in _claude/prd/:
+   Available PRDs in _project/prd/:
      - [file-1].md
      - [file-2].md
 
-   Usage: /dr-prd @_claude/prd/[filename].md [refinement request]
+   Usage: /dr-prd @_project/prd/[filename].md [refinement request]
    ```
 
    Then stop.
@@ -75,7 +75,7 @@ Find both directions. You **must** run both methods; do not skip one.
 ### Method 1 — PRD → Plan links (references inside the PRD)
 
 Use `Grep` on the PRD file:
-- pattern: `@_claude/plans/`
+- pattern: `@_project/plans/`
 - path: the PRD file path
 - output_mode: `content`
 
@@ -84,8 +84,8 @@ Extract referenced plan paths (drop the `@`). Store as `prd_to_plan_links`.
 ### Method 2 — Plan → PRD links (references inside plan files)
 
 Use `Grep` across the plans directory:
-- pattern: `@_claude/prd/[actual-prd-filename].md`
-- path: `_claude/plans/`
+- pattern: `@_project/prd/[actual-prd-filename].md`
+- path: `_project/plans/`
 - output_mode: `files_with_matches`
 
 Store the returned plan paths as `plan_to_prd_links`.
@@ -96,7 +96,7 @@ Combine both lists, dedupe, store as `linked_plans`. Phase 7 and Phase 9 use thi
 
 ## Phase 5: Create a Backup
 
-Use `Read` on the existing PRD and `Write` to `_claude/prd/.[filename].backup` with the same content. No Bash `cp` — native `Read` + `Write` is cross-platform. Overwrite any existing backup (keep only the most recent).
+Use `Read` on the existing PRD and `Write` to `_project/prd/.[filename].backup` with the same content. No Bash `cp` — native `Read` + `Write` is cross-platform. Overwrite any existing backup (keep only the most recent).
 
 ## Phase 6: Analyze and Generate the Refined PRD
 
@@ -215,7 +215,7 @@ If the user picks **Cancel**:
 ❌ Refinement cancelled. Original PRD is unchanged and the backup has been removed.
 ```
 
-Use `Write` with empty/no content is not the right tool to delete the backup — instead skip this cleanup if there is no native delete available; leave a single-line note in the message: "Backup `_claude/prd/.[filename].backup` remains on disk; you can delete it manually if unwanted." This avoids pulling in Bash `rm` permissions just for cleanup.
+Use `Write` with empty/no content is not the right tool to delete the backup — instead skip this cleanup if there is no native delete available; leave a single-line note in the message: "Backup `_project/prd/.[filename].backup` remains on disk; you can delete it manually if unwanted." This avoids pulling in Bash `rm` permissions just for cleanup.
 
 ## Phase 8: Apply
 
@@ -228,18 +228,18 @@ Use `Write` to overwrite the original PRD with the refined content.
 ```
 ✅ PRD refined: [name] (v[old] → v[new])
 
-Location: _claude/prd/[filename].md
+Location: _project/prd/[filename].md
 Status: [status]
 
 Changes applied:
   [summary matching the diff]
 
-Backup: _claude/prd/.[filename].backup
+Backup: _project/prd/.[filename].backup
 
 Next steps:
   1. Review the refined PRD
   2. If approved, update Status when stakeholders sign off
-  3. Further refine: /dr-prd @_claude/prd/[filename].md [changes]
+  3. Further refine: /dr-prd @_project/prd/[filename].md [changes]
 ```
 
 ### If linked plans were found
@@ -247,13 +247,13 @@ Next steps:
 ```
 ✅ PRD refined: [name] (v[old] → v[new])
 
-Location: _claude/prd/[filename].md
+Location: _project/prd/[filename].md
 Status: [status][ — consider re-approval if Approved]
 
 Changes applied:
   [summary matching the diff]
 
-Backup: _claude/prd/.[filename].backup
+Backup: _project/prd/.[filename].backup
 
 ⚠️  Referenced by [N] plan(s):
   - [plan-path-1]

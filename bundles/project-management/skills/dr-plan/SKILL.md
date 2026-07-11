@@ -1,6 +1,6 @@
 ---
 name: dr-plan
-description: "Create or refine a detailed implementation plan file in `_claude/plans/` with per-phase acceptance criteria, verification gates, and safe refinement. Supports four modes: CREATE, REFINE, SUMMARY (PR summary, optional push to PR), and QUESTION RESOLUTION (interactive Q&A). Use when the user writes `/dr-plan` anywhere in their message, or explicitly asks to create, refine, or summarize a plan file under `_claude/plans/`. Do NOT use for general planning discussion, brainstorming, outlines, or task lists not destined for a file in `_claude/plans/`."
+description: "Create or refine a detailed implementation plan file in `_project/plans/` with per-phase acceptance criteria, verification gates, and safe refinement. Supports four modes: CREATE, REFINE, SUMMARY (PR summary, optional push to PR), and QUESTION RESOLUTION (interactive Q&A). Use when the user writes `/dr-plan` anywhere in their message, or explicitly asks to create, refine, or summarize a plan file under `_project/plans/`. Do NOT use for general planning discussion, brainstorming, outlines, or task lists not destined for a file in `_project/plans/`."
 disable-model-invocation: false
 allowed-tools: Read Write Edit Glob Grep AskUserQuestion Bash(gh pr view:*) Bash(gh pr edit:*)
 effort: max
@@ -16,7 +16,7 @@ This skill has four modes. Detect the mode from `$ARGUMENTS` (the user's argumen
 Before mode detection, confirm this invocation is genuine and not conversational drift from an earlier `/dr-plan` use.
 
 - **If the user's current message contains the literal token `/dr-plan`** → proceed.
-- **If the user explicitly asked to create, refine, or summarize a plan file under `_claude/plans/` in this message** → proceed.
+- **If the user explicitly asked to create, refine, or summarize a plan file under `_project/plans/` in this message** → proceed.
 - **Otherwise** → stop. Ask: *"Did you want to run /dr-plan, or should we keep discussing this inline?"* Only continue if they confirm.
 
 The `/dr-plan` token is a convention in the user's message text, not a harness invocation mechanism — apply this gate the same way regardless of how the skill was loaded (e.g., Pi's explicit invocation form is `/skill:dr-plan`).
@@ -60,7 +60,7 @@ These apply in every mode:
 2. **Use the current date from conversation context.** Never hardcode or guess dates. Format as `YYYY-MM-DD`.
 3. **Native tools only.** No Bash for filesystem operations. `Write` creates parent directories automatically; `Glob` handles listing and existence checks; `Read` + `Write` handle backups. Bash is reserved for `gh pr view` and `gh pr edit` in SUMMARY mode.
 4. **Cross-platform paths.** Always emit forward slashes. Works on Windows, macOS, and Linux.
-5. **Incorporate only user-provided research or context.** Do not proactively Glob `_claude/research/` or any other directory looking for material to inject. Accept explicit references (`@path/to/research.md`, `@_claude/prd/[file].md`) and incorporate those.
+5. **Incorporate only user-provided research or context.** Do not proactively Glob `_project/research/` or any other directory looking for material to inject. Accept explicit references (`@path/to/research.md`, `@_project/prd/[file].md`) and incorporate those.
 6. **Respect investment level.** This plugin has a small user base. Keep flows lean — don't add elaborate migration tooling, defensive UX, or speculative safeguards.
 7. **Autonomous execution by default.** Plans are designed to execute to completion without user intervention unless something genuinely goes wrong. Phase Exit Gates are the executing agent's self-discipline encoded in the artifact — not user checkpoints. Retry failing gates up to 2 times (3 total attempts) before escalating.
 8. **Structured questions, gracefully.** Where these instructions say `AskUserQuestion`, use the harness's structured question tool if one is available (`AskUserQuestion` in Claude Code); otherwise ask the same question in plain text, list the options, and wait for the user's reply.

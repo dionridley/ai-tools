@@ -348,7 +348,7 @@ When research is a follow-up deep dive on existing research:
 
 **Directory structure:**
 ```
-_claude/research/[parent-slug]-[date]/
+_project/research/[parent-slug]-[date]/
 ├── index.md / index.html                 (updated with deep-dive link)
 ├── findings.md / findings.html
 ├── resources.md / resources.html
