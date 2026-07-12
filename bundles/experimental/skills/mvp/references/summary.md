@@ -68,6 +68,8 @@ For each session in `analytics.sessionLog`:
 - Start time, end time, duration
 - Tasks completed during session
 
+**Ratio guard:** whenever a denominator is 0 — e.g. `agentSpawns.total` on a build that ran in Reduced Sequential Mode (no subagent dispatches; tasks executed inline) — render that metric as `N/A` in the page instead of computing the ratio.
+
 ---
 
 ## Phase 3: Generate HTML

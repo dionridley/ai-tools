@@ -49,6 +49,8 @@ From `state.json`, calculate:
    - Total elapsed time (sum of session durations)
    - Tasks completed per session
 
+**Ratio guard:** whenever a denominator is 0 — e.g. `agentSpawns.total` on a build that ran in Reduced Sequential Mode (no subagent dispatches; tasks executed inline) — render that statistic as `N/A` instead of computing the ratio.
+
 ---
 
 ## Phase 3: Display Dashboard
