@@ -5,6 +5,26 @@ All notable changes to the Experimental plugin will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.0] - 2026-07-12
+
+Skill portability (mvp structural port): the deep Claude-Code-specific machinery — the two-session permissions/restart flow and the subagent build orchestration — is now capability-conditional. mvp runs on any Agent Skills harness; no behavior change on Claude Code. Live Pi validation (background exec, MCP config) lands with the test-in-Pi portability phase.
+
+### Added
+
+- **Reduced Sequential Mode** — a documented degradation for harnesses without subagent dispatch (Subagent Orchestration convention in SKILL.md's Shared Conventions): the main agent executes delegatable build tasks inline, one at a time; locks still bookkept, per-task reports still written to `.mvp/agent-logs/` as self-reports, quality review runs as a fresh skeptical self-review, `analytics.agentSpawns` counts real dispatches only.
+- **Single-session setup path** — on harnesses that don't read tool permissions from `.claude/settings.local.json` (e.g. Pi), `/mvp start` skips every permissions write and restart pause and runs setup in one continuous session; the file-based state statuses work identically on both paths.
+- **Zero-spawn ratio guards** — status and summary render agent-statistics ratios as "N/A" instead of dividing by zero when a build ran without dispatches.
+
+### Changed
+
+- **start.md session mechanics are capability-conditional** — the Claude Code two-session flow (settings write → restart → `--resume`, `.mcp.json`, restart notices) is preserved verbatim inside its branch; the Playwright E2E offer and `.mcp.json` phase are gated on MCP support with the HTTP-check fallback named.
+- **build.md orchestration is capability-conditional** — batch dispatch, `isolation: "worktree"` choice (including a new sequencing rule for subagent harnesses without worktrees), worktree merge-before-review, browser-test agents, and error recovery all reference the convention; Claude Code batching, isolation defaults, and merge ordering unchanged.
+- **Branded prose neutralized** — "Instructions for Claude" headings are now "Instructions for the Agent" across all four mode files; dev-server question wording says "the agent".
+
+### Fixed
+
+- **Pre-existing doc bugs** (caught during the conditional rework): the intro and Phase 5b claimed permissions were written in "Phase 4" (actual: Phase 2 Step 1); build.md's Step B list had duplicate "3." and "5." item numbers (now 1–7); build.md pointed to a non-existent "Phase 11 (Completion)" (actual: Phase 7).
+
 ## [0.8.0] - 2026-07-10
 
 Skill portability (mvp's simple call sites): Agent Skills spec relative paths plus graceful-degradation notes. No behavior change on Claude Code. The deeper mvp port (subagent orchestration, background processes, worktree isolation) is a later portability phase.
