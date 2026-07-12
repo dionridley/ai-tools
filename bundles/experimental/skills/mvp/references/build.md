@@ -2,7 +2,7 @@
 
 This file is loaded by the `/mvp` skill router when the user runs `/mvp build`.
 
-## Instructions for Claude
+## Instructions for the Agent
 
 You are executing the BUILD mode of the `/mvp` skill. Your job is to:
 1. Load state, read conventions for the chosen stack

@@ -2,7 +2,7 @@
 
 This file is loaded by the `/mvp` skill router when the user runs `/mvp summary`.
 
-## Instructions for Claude
+## Instructions for the Agent
 
 You are executing the SUMMARY mode of the `/mvp` skill. Your job is to generate a self-contained HTML analytics page from the project's state data.
 

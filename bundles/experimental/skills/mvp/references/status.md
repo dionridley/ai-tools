@@ -2,7 +2,7 @@
 
 This file is loaded by the `/mvp` skill router when the user runs `/mvp status`.
 
-## Instructions for Claude
+## Instructions for the Agent
 
 You are executing the STATUS mode of the `/mvp` skill. This is a **read-only** operation — do NOT modify any files.
 
