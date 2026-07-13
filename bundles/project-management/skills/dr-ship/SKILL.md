@@ -1,6 +1,7 @@
 ---
 name: dr-ship
 description: Close out a completed /dr-plan and ship it — verify all plan checkboxes, backfill the retro, move the plan to completed/, then commit, push, and open a GitHub PR populated from the plan summary. Invoked explicitly as /dr-ship.
+compatibility: Requires git; PR creation additionally requires the GitHub CLI (gh) and a GitHub remote, degrading to display-only output without them.
 disable-model-invocation: true
 allowed-tools: Read, Write, Edit, Glob, Grep, AskUserQuestion, Agent, Bash(git status:*), Bash(git add:*), Bash(git commit:*), Bash(git push:*), Bash(git mv:*), Bash(git switch:*), Bash(git branch:*), Bash(git remote:*), Bash(git rev-parse:*), Bash(gh pr create:*), Bash(gh pr view:*), Bash(gh pr edit:*), Bash(gh auth status:*), Bash(rm:*)
 effort: medium
