@@ -1,7 +1,8 @@
 ---
 name: react-19
-version: 0.1.0
 description: This skill should be used when the user is building, modifying, or reviewing React components or applications. It provides React 19.x development patterns and APIs that should be preferred over legacy approaches. Covers Actions, useActionState, useFormStatus, useOptimistic, use() API, Form Actions, ref as prop, Context as provider, document metadata, Server Components, Server Actions, prerender(), Activity component, useEffectEvent, cacheSignal(), and Partial Pre-rendering.
+metadata:
+  version: "0.1.0"
 ---
 
 # React 19.x Development
