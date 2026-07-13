@@ -59,7 +59,7 @@ The root `package.json` declares this repo as a Pi package — its `pi.skills` m
 pi install git:github.com/dionridley/ai-tools
 ```
 
-Skills auto-discover by description; explicit invocation is `/skill:<name>` (e.g. `/skill:dr-plan`). Skills marked `disable-model-invocation: true` (`dr-init`, `dr-research`, `dr-ship`) load but are explicit-only — hidden from auto-discovery by design.
+Skills auto-discover by description; explicit invocation is `/skill:<name>` (e.g. `/skill:dr-plan`). Skills marked `disable-model-invocation: true` (`dr-init`, `dr-research`, `dr-ship`, `mvp`) load but are explicit-only — hidden from auto-discovery by design.
 
 Update installed packages:
 

@@ -5,6 +5,12 @@ All notable changes to the Experimental plugin will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.10.1] - 2026-07-12
+
+### Fixed
+
+- **mvp build: null-PID fallback in the completion process sweep** — live Pi testing (plan 006) surfaced a cascade: when the agent misses storing the dev-server PID at start-up (observed once), the final sweep has nothing to kill and managed servers are orphaned. The sweep now falls back to locating managed servers by verified command match when a tracked PID is null.
+
 ## [0.10.0] - 2026-07-12
 
 ### Added
