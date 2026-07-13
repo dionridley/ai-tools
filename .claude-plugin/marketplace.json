@@ -24,7 +24,7 @@
       "name": "experimental",
       "source": "./bundles/experimental",
       "description": "Work in Progress Tools — experimental capabilities under active development and testing",
-      "version": "0.8.0"
+      "version": "0.9.0"
     }
   ]
 }

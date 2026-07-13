@@ -9,7 +9,7 @@ allowed-tools: Read Write Edit Grep Glob Bash(*) Agent AskUserQuestion WebSearch
 
 # MVP Builder
 
-Autonomous skill that brainstorms an app idea with the user, scaffolds the project, and builds a working prototype using parallel AI agents.
+Autonomous skill that brainstorms an app idea with the user, scaffolds the project, and builds a working prototype using AI agents (in parallel where the harness supports it).
 
 ```
 Effort mode: high (set by /mvp for best results)
@@ -60,6 +60,16 @@ All modes inherit these conventions. Mode-specific reference files build on top 
 
 Where these instructions say `AskUserQuestion`, use the harness's structured question tool if one is available (`AskUserQuestion` in Claude Code); otherwise ask the same question in plain text, list the options, and wait for the user's reply.
 
+### Subagent Orchestration
+
+Where these instructions say to dispatch, spawn, or delegate work to agents (build mode's orchestration loop), use the harness's subagent tool if one is available (the Agent tool in Claude Code). Otherwise run **Reduced Sequential Mode**: you are both orchestrator and worker — execute each delegatable task inline, one at a time, following the same task brief you would have given the agent. In this mode:
+
+- Locks are trivially satisfied (you are the only actor), but lock bookkeeping in `state.json` is still written.
+- Per-task reports are still written to `.mvp/agent-logs/` as self-reports, using the same JSON shape.
+- `analytics.agentSpawns` counts real dispatches only — it stays 0 in this mode.
+- Quality review still runs: a fresh, skeptical self-review pass against the same review instructions, recording the same JSON verdict.
+- Concurrency limits and worktree isolation do not apply — there is nothing to parallelize or isolate.
+
 ### State Directory
 
 All MVP state is persisted in `.mvp/` in the current working directory:
@@ -98,7 +108,7 @@ All timestamps use ISO 8601 format: `YYYY-MM-DDTHH:MM:SS` (local time). Use the 
 
 ### Agent Communication Format
 
-Subagents MUST return results as structured JSON:
+Subagents MUST return results as structured JSON (in Reduced Sequential Mode, write the same JSON shape as your own task report):
 
 ```json
 {

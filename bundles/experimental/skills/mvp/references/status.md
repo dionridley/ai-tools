@@ -2,7 +2,7 @@
 
 This file is loaded by the `/mvp` skill router when the user runs `/mvp status`.
 
-## Instructions for Claude
+## Instructions for the Agent
 
 You are executing the STATUS mode of the `/mvp` skill. This is a **read-only** operation — do NOT modify any files.
 
@@ -48,6 +48,8 @@ From `state.json`, calculate:
    - Total sessions from `analytics.sessionLog`
    - Total elapsed time (sum of session durations)
    - Tasks completed per session
+
+**Ratio guard:** whenever a denominator is 0 — e.g. `agentSpawns.total` on a build that ran in Reduced Sequential Mode (no subagent dispatches; tasks executed inline) — render that statistic as `N/A` instead of computing the ratio.
 
 ---
 

@@ -2,17 +2,17 @@
 
 This file is loaded by the `/mvp` skill router when the user runs `/mvp start` or `/mvp` with no arguments.
 
-## Instructions for Claude
+## Instructions for the Agent
 
 You are executing the START mode of the `/mvp` skill. Your job is to:
 1. Brainstorm an app idea with the user and lock in scope
 2. Ask about Playwright E2E testing preference and server management preference
 3. Check prerequisites for the chosen stack
-4. Write tool permissions to `.claude/settings.local.json` and pause for a Claude Code restart
-5. After restart: scaffold the project with all fixes and patches applied
-6. Write `.mcp.json` and finalize `.mvp/` state directory
+4. Write tool permissions to `.claude/settings.local.json` and pause for a restart (Claude Code only — see Harness Note)
+5. Scaffold the project with all fixes and patches applied (after the restart, on Claude Code)
+6. Write `.mcp.json` (if the harness supports it) and finalize `.mvp/` state directory
 
-**Two-session flow:** Setup runs across two Claude Code sessions separated by a required restart. Phase 4 writes permissions and saves brainstorm state, then stops. After restart with `--resume`, `/mvp start` detects the saved state and jumps directly to Phase 5 (scaffold) without re-asking questions.
+**Harness Note — session mechanics are capability-conditional.** On Claude Code, setup runs across two sessions separated by a required restart: Phase 2 Step 1 writes tool permissions and stops; after restart with `--resume`, `/mvp start` detects the saved state and resumes without re-asking questions. On harnesses that do not read tool permissions from `.claude/settings.local.json` (e.g. Pi, which does not enforce `allowed-tools`), skip every permissions write and restart pause — setup runs in one continuous session. The state statuses (`awaiting_brainstorm`, `awaiting_scaffold`) work identically on both paths because they are file-based.
 
 ---
 
@@ -22,14 +22,14 @@ Before anything else, check if `.mvp/state.json` already exists in the current d
 
 1. **Try to read `.mvp/state.json`:**
    - If it EXISTS and `status == "awaiting_brainstorm"`:
-     - Stack was chosen and permissions were written, but brainstorming was not completed.
-     - Show: "Permissions loaded. Resuming setup — continuing with app idea questions."
+     - Stack was chosen (and, on Claude Code, permissions were written), but brainstorming was not completed.
+     - Show: "Setup resumed — continuing with app idea questions."
      - Read `stack` from `state.project.stack`
      - **Jump directly to Phase 2, Step 2** — skip the stack question, go straight to the app idea.
 
    - If it EXISTS and `status == "awaiting_scaffold"`:
-     - Settings were written before a required restart. Scaffold hasn't run yet.
-     - Show: "Permissions loaded. Resuming setup for [name] — continuing to scaffold."
+     - Brainstorming finished (and, on Claude Code, settings were written before a required restart). Scaffold hasn't run yet.
+     - Show: "Setup resumed for [name] — continuing to scaffold."
      - Read all stored brainstorm values from state.json (stack, port, playwrightEnabled, serverManagement, etc.)
      - **Jump directly to Phase 5** — skip brainstorming and prerequisites entirely.
 
@@ -68,11 +68,14 @@ Use AskUserQuestion:
   2. "Elixir (Phoenix + LiveView)" — Description: "Full-stack Elixir with real-time server-rendered UI. SQLite via Ecto."
 - **multiSelect:** false
 
-Store the chosen stack. Then immediately write permissions and restart — loading them now means all prerequisite checks and scaffold commands will run without per-command approval prompts.
+Store the chosen stack. What happens next depends on the harness:
 
-**Write settings, save state, and pause for restart:**
+- **Claude Code (or any harness that reads tool permissions from `.claude/settings.local.json`):** immediately write permissions and restart — loading them now means all prerequisite checks and scaffold commands will run without per-command approval prompts. Follow all five steps below, including the STOP.
+- **Harnesses without settings-file tool permissions (e.g. Pi, which does not enforce `allowed-tools`):** run only steps 2 and 4, then continue directly to Step 2 (App Idea) without stopping — there is nothing to restart for.
 
-1. Read the appropriate baseline permissions file:
+**Write settings, save state, and pause for restart** *(steps marked "Claude Code only" are skipped on other harnesses)*:
+
+1. *(Claude Code only)* Read the appropriate baseline permissions file:
    - **JS:** Read `references/settings/typescript.json`
    - **Elixir:** Read `references/settings/elixir.json`
 
@@ -82,9 +85,9 @@ Store the chosen stack. Then immediately write permissions and restart — loadi
    git rev-parse --git-dir 2>/dev/null || git init
    ```
 
-3. Write `.claude/settings.local.json` with the contents read above.
+3. *(Claude Code only)* Write `.claude/settings.local.json` with the contents read above.
 
-4. Write a minimal `.mvp/state.json` to persist the stack choice across the restart:
+4. Write a minimal `.mvp/state.json` to persist the stack choice across the restart (and to make setup resumable on any harness):
    ```json
    {
      "version": "1.1.0",
@@ -95,7 +98,7 @@ Store the chosen stack. Then immediately write permissions and restart — loadi
    }
    ```
 
-5. Show restart message and **STOP**:
+5. *(Claude Code only)* Show restart message and **STOP**:
    ```
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
      Restart required to load tool permissions
@@ -120,7 +123,7 @@ Store the chosen stack. Then immediately write permissions and restart — loadi
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    ```
 
-**STOP here.** Do not proceed to Step 2 until the user has restarted and re-run `/mvp start`.
+**STOP here** *(Claude Code only)*. Do not proceed to Step 2 until the user has restarted and re-run `/mvp start`. On harnesses that skipped the permissions write, continue directly to Step 2 now — no stop.
 
 ### Step 2: App Idea
 
@@ -186,6 +189,8 @@ If "I want to adjust": ask what they'd like to change, re-analyze, re-present. L
 
 ### Step 4: Playwright E2E Testing
 
+*(Harness-conditional)* Offer Playwright only when the harness supports MCP servers (Claude Code does). If yours has no MCP support, skip this question entirely, set `playwrightEnabled: false`, and tell the user browser testing is unavailable on this harness — the build falls back to HTTP checks.
+
 Use AskUserQuestion:
 - **Question:**
   ```
@@ -214,18 +219,18 @@ Use AskUserQuestion:
   ```
   How would you like the dev server to be managed during the build?
 
-  Agent-managed: Claude starts and stops the server automatically. Fully
+  Agent-managed: the agent starts and stops the server automatically. Fully
   autonomous — but a failed agent can leave a process holding the port open,
   requiring manual cleanup.
 
-  User-managed: You start the server yourself in a separate terminal. Claude
+  User-managed: You start the server yourself in a separate terminal. The agent
   will tell you when to restart (e.g. after config changes or new dependencies).
   More reliable — you always have visibility into server state.
   ```
 - **Header:** "Dev Server Management"
 - **Options:**
-  1. "User-managed (Recommended)" — Description: "You run the server in a separate terminal. Claude tells you when to restart."
-  2. "Agent-managed (Fully autonomous)" — Description: "Claude starts and stops the server automatically."
+  1. "User-managed (Recommended)" — Description: "You run the server in a separate terminal. The agent tells you when to restart."
+  2. "Agent-managed (Fully autonomous)" — Description: "The agent starts and stops the server automatically."
 - **multiSelect:** false
 
 Store the choice as `serverManagement: "user" | "agent"`.
@@ -388,7 +393,7 @@ All prerequisites met!
 
 ## Phase 4: Save Brainstorm State
 
-Settings and git are already initialized from the first restart (Phase 2 Step 1). This phase saves the completed brainstorm data to state.json before scaffold begins. No restart is needed.
+Git (and, on Claude Code, settings) were already initialized in Phase 2 Step 1. This phase saves the completed brainstorm data to state.json before scaffold begins. No restart is needed on any harness.
 
 ### Write partial `state.json`
 
@@ -422,7 +427,7 @@ Update `.mvp/state.json` with `status: "awaiting_scaffold"` and all brainstorm d
 }
 ```
 
-Continue immediately to Phase 5 — no restart required. Permissions are already loaded from the Phase 2 restart.
+Continue immediately to Phase 5 — no restart required. On Claude Code, permissions are already loaded from the Phase 2 restart; on other harnesses there was nothing to load.
 
 ---
 
@@ -843,7 +848,9 @@ kill $SERVER_PID 2>/dev/null
 
 ## Phase 5b: Write `.mcp.json`
 
-Settings were already written in Phase 4. This phase writes only the MCP server configuration, which depends on the port determined during scaffold.
+*(Harness-conditional)* This phase applies only if the harness supports project-scoped MCP server configuration via `.mcp.json` (Claude Code does). If yours does not, skip this phase: Tidewave and Playwright MCP features degrade gracefully — build mode falls back to HTTP checks when Playwright MCP tools are absent, and Tidewave introspection is simply unavailable.
+
+Settings (where applicable) were written in Phase 2 Step 1. This phase writes only the MCP server configuration, which depends on the port determined during scaffold.
 
 Write `.mcp.json` in the current directory.
 
@@ -932,7 +939,7 @@ Windows:
 ```
 
 > Tidewave for Elixir is served by the running Phoenix app — it won't respond until `mix phx.server` is running.
-> Tidewave for JavaScript runs as a standalone stdio process in the project directory — available as soon as Claude Code restarts.
+> Tidewave for JavaScript runs as a standalone stdio process in the project directory — available once the harness has loaded the MCP config (after the restart, on Claude Code).
 
 ---
 
@@ -1149,7 +1156,9 @@ MVP project initialized!
   Server:         [User-managed / Agent-managed]
 ```
 
-Then show this restart notice as a clearly separated block:
+Omit the `.claude/settings.local.json` and `.mcp.json` checklist lines if those files were not written on this harness.
+
+Then, **if a restart-requiring artifact was written this session** (`.claude/settings.local.json` or `.mcp.json` — i.e. the Claude Code path), show this restart notice as a clearly separated block:
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -1176,6 +1185,18 @@ Then show this restart notice as a clearly separated block:
   app at http://localhost:[port]/tidewave. It will become
   available once the dev server starts during /mvp build.
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+**Otherwise** (no settings or MCP config written — single-session harnesses), show this instead:
+
+```
+Setup complete — no restart needed on this harness.
+
+Next step:  /mvp build
+
+Note: MCP-dependent features (Tidewave introspection, Playwright
+browser testing) are not configured on this harness; the build
+falls back to HTTP checks.
 ```
 
 ---

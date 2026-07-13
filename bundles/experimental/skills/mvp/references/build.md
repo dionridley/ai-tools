@@ -2,7 +2,7 @@
 
 This file is loaded by the `/mvp` skill router when the user runs `/mvp build`.
 
-## Instructions for Claude
+## Instructions for the Agent
 
 You are executing the BUILD mode of the `/mvp` skill. Your job is to:
 1. Load state, read conventions for the chosen stack
@@ -85,14 +85,14 @@ The project root is your current working directory for the entire session. You M
      Resolve this conflict, then run /mvp build again.
      ```
 
-5. **Git repository check** — worktree isolation requires an initialized repo. Verify before any agents run:
+5. **Git repository check** — commits (and, on harnesses that support it, worktree isolation) require an initialized repo. Verify before any build work runs:
 
    ```bash
    git rev-parse --git-dir 2>/dev/null
    ```
 
    - If the command **succeeds**: git is initialized — continue.
-   - If it **fails** (not a git repo): initialize now and make a baseline commit so worktree isolation works:
+   - If it **fails** (not a git repo): initialize now and make a baseline commit so commits — and, where supported, worktree isolation — work:
      ```bash
      git init
      git add -A
@@ -292,7 +292,7 @@ fi
 
 1. **Find current phase** from `state.currentPhase` (the index into `state.phases[]`)
 2. **If phase status is "completed":** advance `currentPhase`, write `state.json`
-3. **If all phases complete:** go to Phase 11 (Completion)
+3. **If all phases complete:** go to Phase 7 (Completion)
 4. **If phase status is "pending":** set to "in_progress", record `startedAt`, write `state.json`
 
 ### Create visual task list for the phase
@@ -477,13 +477,13 @@ Before dispatching any agents:
 3. For Elixir: read all context module files in `lib/[slug]/` — extract function signatures to include in agent prompts
 4. For Elixir: read `references/conventions/elixir-patterns.md` — include relevant patterns in screen-building agent prompts
 
-**Agent dispatch rules:**
+**Agent dispatch rules** *(concurrency limits apply to subagent harnesses only — Reduced Sequential Mode is inherently one task at a time, but the file-conflict and function-signature rules still order your inline work)*:
 - Maximum 3 concurrent agents
 - Never two agents touching the same file
 - Never two agents implementing the same screen/LiveView
 - Agents writing LiveViews that call context functions MUST receive the actual function signatures (not just descriptions)
 
-**Recommended parallelization (Elixir):**
+**Recommended parallelization (Elixir, subagent harnesses):**
 
 | Batch | Agents |
 |-------|--------|
@@ -507,7 +507,7 @@ Before dispatching any agents:
 
 **Playwright browser tests (if `state.project.playwrightEnabled == true`):**
 
-After each agent completes and passes quality review, dispatch a browser test agent:
+After each agent completes and passes quality review, dispatch a browser test agent (in Reduced Sequential Mode, execute the same test script yourself inline using the Playwright MCP tools, if present):
 
 ```
 You are a Browser Test Agent for MVP: [App Name]
@@ -585,7 +585,7 @@ Parallelizable by screen (each screen is independent).
 
 **Goal:** Validate the complete application from a real user's perspective. The per-screen tests in `core` and `polish` phases verified individual screens using seeded data. This phase tests the full product from a blank slate — the state a real user experiences the first time they open the app.
 
-**This phase is not delegated.** The main agent dispatches and monitors all browser test agents directly.
+**This phase is not delegated.** The main agent dispatches and monitors all browser test agents directly. (In Reduced Sequential Mode, execute each test script yourself inline using the Playwright MCP tools if present; without Playwright MCP this phase is already skipped via `playwrightEnabled == false`.)
 
 **Test 1 — Blank slate walkthrough (MANDATORY FIRST TEST):**
 
@@ -728,12 +728,14 @@ Execute directly. After each:
 
 ### Step B: Dispatch subagent batch
 
+*(Harness-conditional — see SKILL.md's Subagent Orchestration convention.)* With subagent support, dispatch as written below. In Reduced Sequential Mode, execute each delegatable task inline instead: steps 1–5 still apply (locks, status updates, single-owner sequencing — and the agent instructions template becomes your own working brief), step 6's isolation choice is skipped, and step 7's parallel launch becomes one-task-at-a-time inline execution.
+
 For each delegatable task:
 
 1. **Acquire any needed locks** in `state.json`
 2. **Mark task as in_progress**, set `startedAt`, write `state.json`
 3. **Update the corresponding TaskUpdate to `in_progress`**
-3. **Build agent instructions:**
+4. **Build agent instructions:**
 
    ```
    You are Agent #[ID] working on MVP: [App Name]
@@ -799,7 +801,7 @@ For each delegatable task:
    ```
    ```
 
-4. **Single-owner files — assign to at most one agent per batch:**
+5. **Single-owner files — assign to at most one agent per batch:**
    The following files are write-contention hotspots that multiple agents often need simultaneously. In any given batch, each of these files may only be assigned to ONE agent:
    - `src/lib/api.ts` (client API layer)
    - `server/lib/routes.ts` (API route constants)
@@ -807,15 +809,16 @@ For each delegatable task:
 
    When multiple tasks need changes to these files, sequence them: complete one agent's task and let the main agent integrate the changes, then dispatch the next agent. Do NOT attempt to parallelize work on these files — even "additive" parallel changes will cause conflicts.
 
-5. **Choose isolation:**
+6. **Choose isolation** *(subagent harnesses with worktree support only — e.g. `isolation: "worktree"` on Claude Code's Agent tool)*:
    - `isolation: "worktree"` for any agent creating or modifying more than 2 files (default for most agents)
    - No isolation for single-file low-risk tasks only
+   - If the harness dispatches subagents but has no worktree isolation: dispatch agents that write more than 2 files sequentially (or partition files between them) instead of in parallel
 
-5. **Launch parallel agents** in a single message using multiple Task tool calls when tasks are independent
+7. **Launch parallel agents** in a single message using multiple Task tool calls when tasks are independent *(subagent harnesses only — Reduced Sequential Mode executes one task at a time)*
 
 ### Step C: Process completions
 
-As each agent returns:
+As each agent returns (or, in Reduced Sequential Mode, as each inline task completes):
 
 1. Parse JSON result
 2. **Handle `dependenciesNeeded`:** install them (main agent only), then run `mix deps.get` or `npm install`
@@ -849,7 +852,7 @@ As each agent returns:
    - `agentSpawn.completedAt`: now, `result`: from status
    - `filesChanged`: merged files list
 6. **Update the corresponding TaskUpdate** — set to `completed` if success, or leave as `in_progress` if heading to quality review
-7. Increment `analytics.agentSpawns.total` and `.successful` or `.failed`
+7. Increment `analytics.agentSpawns.total` and `.successful` or `.failed` *(real dispatches only — in Reduced Sequential Mode leave `agentSpawns` untouched, per SKILL.md's convention)*
 8. Write `state.json` immediately
 
 ### Step D: Quality review
@@ -864,7 +867,7 @@ As each agent returns:
 Mark these as skipped: `qualityReview: { skipped: true, reason: "low-risk task" }`
 Increment `analytics.qualityReviews.skipped`.
 
-**Worktree merge before review:** If the agent ran with `isolation: "worktree"`, the quality review agent cannot see the changes from the main working directory. Merge the worktree branch back before dispatching review:
+**Worktree merge before review** *(only applies when the agent ran with worktree isolation — skip cleanly on harnesses without it)*: if the agent ran with `isolation: "worktree"`, the quality review agent cannot see the changes from the main working directory. Merge the worktree branch back before dispatching review:
 ```bash
 # The Agent tool returns the worktree branch name when isolation: "worktree" was used
 # and changes were made. Merge it back before running quality review.
@@ -872,7 +875,7 @@ git merge --no-ff [worktree-branch] -m "mvp: merge agent [ID] — [task descript
 ```
 Only then dispatch the quality review agent — it will read the merged files from the main working directory. If the Agent tool result did not include a worktree branch (task made no file changes), no merge is needed.
 
-**For all other completed tasks** (status "success" or "partial"), dispatch a review agent:
+**For all other completed tasks** (status "success" or "partial"), dispatch a review agent — or, in Reduced Sequential Mode, run the review yourself as a fresh, skeptical pass against the same instructions below and record the same JSON verdict; do not skip it because you wrote the code:
 
 ```
 You are a Quality Review Agent for MVP: [App Name]
@@ -1018,7 +1021,7 @@ When all tasks in the current phase are completed or failed:
 3. If gate fails: attempt fix, or mark as error and ask user
 4. **If the completed phase is `core` or `polish` and `state.project.playwrightEnabled == true`:** run a regression smoke test before marking the phase complete:
 
-   Dispatch a browser test agent with this prompt:
+   Dispatch a browser test agent with this prompt (inline in Reduced Sequential Mode):
    ```
    You are a Regression Smoke Test Agent for MVP: [App Name]
    Stack: [stack]
@@ -1106,7 +1109,7 @@ Tell user: "Run /mvp build to continue."
 
 ## Phase 6: Error Recovery
 
-1. **Agent returns "failed":** Retry up to 3 times with error context added to prompt. After 3 failures, skip and continue.
+1. **Agent returns "failed"** (or an inline task fails in Reduced Sequential Mode): Retry up to 3 times with the error context added to the prompt/brief. After 3 failures, skip and continue.
 2. **Dev server crashes:** Detect via failed curl. Restart (main agent). Continue.
 3. **Dependency install fails:** Try alternative package name. If still fails, mark dependent tasks blocked.
 4. **Test failures at phase gate:** Fix failures before advancing — do not skip the gate.
