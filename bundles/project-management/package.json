@@ -1,6 +1,6 @@
 {
   "name": "@dionridley/project-management",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "description": "Structured project management with research, PRDs, and implementation plans",
   "license": "MIT",
   "keywords": ["pi-package"],

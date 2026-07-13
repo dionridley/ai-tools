@@ -5,6 +5,14 @@ All notable changes to the Project Management Plugin will be documented in this 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.0] - 2026-07-12
+
+Skill portability (packaging polish): explicit environment requirements in spec-blessed frontmatter. All five skills validated against the Agent Skills reference validator (`skills-ref validate`); the three Claude Code extension fields (`argument-hint`, `disable-model-invocation`, `effort`) are documented accepted deviations — they are consumed by Claude Code from the top level and ignored by spec-lenient harnesses like Pi.
+
+### Added
+
+- **`compatibility` frontmatter** on the two skills with hard environment requirements, per the Agent Skills spec's optional field: dr-research (requires web search/fetch tools; other harnesses need a web-access package) and dr-ship (requires git; PR creation additionally requires the GitHub CLI and a GitHub remote, degrading to display-only output without them). dr-init, dr-plan, and dr-prd run on stock capabilities and deliberately carry no `compatibility` field.
+
 ## [3.0.0] - 2026-07-10
 
 Skill portability, phases 4–5: harness-neutral output directories and a harness-neutral generated artifact. Two breaking changes, one migration path.

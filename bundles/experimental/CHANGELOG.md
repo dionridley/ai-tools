@@ -5,6 +5,12 @@ All notable changes to the Experimental plugin will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.10.0] - 2026-07-12
+
+### Added
+
+- **`compatibility` frontmatter on mvp**, per the Agent Skills spec's optional field: declares Claude Code design intent (subagent dispatch, worktree isolation, settings-based permissions), the Reduced Sequential Mode + single-session degradation on other Agent Skills harnesses, and the hard requirements (git; bash background execution for the agent-managed dev server).
+
 ## [0.9.0] - 2026-07-12
 
 Skill portability (mvp structural port): the deep Claude-Code-specific machinery — the two-session permissions/restart flow and the subagent build orchestration — is now capability-conditional. mvp runs on any Agent Skills harness; no behavior change on Claude Code. Live Pi validation (background exec, MCP config) lands with the test-in-Pi portability phase.
