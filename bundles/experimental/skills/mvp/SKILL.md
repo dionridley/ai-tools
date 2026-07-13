@@ -1,6 +1,7 @@
 ---
 name: mvp
 description: Autonomous MVP builder — brainstorm, scaffold, build, and track web app prototypes
+compatibility: Designed for Claude Code (subagent dispatch, worktree isolation, settings-based permissions); runs on other Agent Skills harnesses in Reduced Sequential Mode with single-session setup. Requires git; the agent-managed dev server additionally requires bash background execution.
 argument-hint: <start|build|status|summary>
 disable-model-invocation: true
 effort: high

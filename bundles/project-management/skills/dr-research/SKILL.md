@@ -1,6 +1,7 @@
 ---
 name: dr-research
 description: Conducts structured research on a topic with web search — a Standard path for speed, a Deep path that adds discovery and claim verification. Use when the user asks to research a topic, investigate a technology, compare approaches, or gather information for a decision. Produces canonical markdown plus a portable HTML microsite in _project/research/.
+compatibility: Requires web search and fetch tools (built into Claude Code; other harnesses need a web-access package installed).
 disable-model-invocation: true
 allowed-tools: WebSearch, WebFetch, Read, Write, Glob, Bash(cp:*), Bash(mkdir:*)
 effort: max

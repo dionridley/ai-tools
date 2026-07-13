@@ -96,6 +96,15 @@ pi install /path/to/ai-tools
 pi install /path/to/ai-tools/bundles/project-management
 ```
 
+### Capability notes
+
+The skills are written capability-conditionally: Claude Code features are used when present, with documented degradations elsewhere. On Pi (and other Agent Skills harnesses), expect:
+
+- **dr-research** — requires web search/fetch; install a web-access package before using it.
+- **dr-ship** — requires git; the PR step needs the GitHub CLI (`gh`) and a GitHub remote, otherwise it displays the PR content for manual use.
+- **mvp** — runs in Reduced Sequential Mode (tasks execute inline and sequentially instead of via parallel subagents/worktrees) with single-session setup; requires git.
+- **Everything else** (dr-init, dr-plan, dr-prd, frontend-design, react-19) — runs on stock capabilities; structured-question and verifier-subagent steps fall back to plain text and inline self-review.
+
 ## Repository Layout
 
 ```

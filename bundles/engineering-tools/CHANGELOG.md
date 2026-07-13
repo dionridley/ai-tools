@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.1] - 2026-07-12
+
+### Fixed
+
+- **react-19's non-spec top-level `version` frontmatter field** moved under `metadata:` per the Agent Skills spec — both skills now pass `skills-ref validate` clean. No behavior change in any harness (plugin versioning lives in plugin.json; nothing consumed the skill-level field).
+
 ## [0.4.0] - 2026-07-08
 
 Cross-harness repo restructure: the plugin is unchanged in name and behavior, but its home and packaging grew a second harness.
