@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Resources — One Repo, Many Bundles</title>
+<!-- template: dr-research v2 -->
+<link rel="stylesheet" href="../../assets/styles.css">
+<!-- FOUC guard: set palette + mode + width before first paint (URL param -> saved -> default) -->
+<script>
+  (function () {
+    var url = new URLSearchParams(location.search);
+    function pick(key, store, fb) {
+      var v = url.get(key);
+      if (v) { try { localStorage.setItem(store, v); } catch (e) {} return v; }
+      try { v = localStorage.getItem(store); } catch (e) {}
+      return v || fb;
+    }
+    var sysDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    document.documentElement.dataset.palette = pick('palette', 'dr-palette', 'a');
+    document.documentElement.dataset.mode = pick('mode', 'dr-mode', sysDark ? 'dark' : 'light');
+    document.documentElement.dataset.width = pick('width', 'dr-width', 'c');
+  })();
+</script>
+</head>
+<body>
+  <div class="controls widthctl" role="group" aria-label="View settings">
+    <div class="wgroup">
+      <span class="wlabel">width</span>
+      <span class="wbtns" id="dr-width">
+        <button data-width="a" title="800px column">800</button>
+        <button data-width="b" title="1000px column">1000</button>
+        <button data-width="c" title="860px prose, wide tables break out">Breakout</button>
+        <button data-width="d" title="Fill the screen, keeps the contents rail">Full Width</button>
+      </span>
+    </div>
+    <div class="wgroup">
+      <div class="picker" id="dr-picker">
+        <button data-palette="a" aria-pressed="false" title="Black &amp; White"><span class="chip" style="background:linear-gradient(135deg,#fafafa 55%,#111111 55%)"></span></button>
+        <button data-palette="b" aria-pressed="false" title="Stone &amp; Teal"><span class="chip" style="background:linear-gradient(135deg,#f7f6f3 55%,#0f766e 55%)"></span></button>
+        <button data-palette="c" aria-pressed="false" title="Slate &amp; Amber"><span class="chip" style="background:linear-gradient(135deg,#f5f6f8 55%,#b45309 55%)"></span></button>
+        <button data-palette="d" aria-pressed="false" title="Paper &amp; Rust"><span class="chip" style="background:linear-gradient(135deg,#faf6f0 55%,#b5442d 55%)"></span></button>
+        <button data-palette="e" aria-pressed="false" title="Mist &amp; Indigo"><span class="chip" style="background:linear-gradient(135deg,#f6f5fa 55%,#4f46e5 55%)"></span></button>
+      </div>
+      <div class="sep"></div>
+      <button class="modebtn" id="dr-mode" title="Toggle light/dark" aria-label="Toggle light/dark">◐</button>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <article id="content" class="doc"></article>
+    <footer class="doc-footer">Generated 2026-07-06 · dr-research · canonical source: resources.md</footer>
+  </div>
+
+  <div id="zoom" aria-hidden="true"><div class="stage"></div><div class="hint">click anywhere or press Esc to close</div></div>
+
+  <!-- CONTENT: canonical markdown, inert (browser does not execute type="text/markdown") -->
+  <script type="text/markdown" id="dr-content-src"># Deep Dive Resources: One Repo, Many Bundles
+
+**Date:** 2026-07-06
+
+[← Back to Pi.dev Capability Audit](../../index.md) · [Deep Dive Index](./index.md)
+
+## Documentation (primary sources)
+
+- [Pi packages docs (rendered)](https://badlogic-pi-mono.mintlify.app/coding-agent/pi-packages) — verbatim source for: the workspaces monorepo example, settings object-form filters and pattern syntax, `bundledDependencies` meta-package pattern, "Not copied - added as reference" local installs, npm-vs-git publishing routes
+- [docs/packages.md (repo)](https://github.com/badlogic/pi-mono/blob/main/packages/coding-agent/docs/packages.md) — settings file locations (`~/.pi/agent/settings.json`, `.pi/settings.json`), git URL forms, `pi update --extensions/--all`, auto-discovery conventions, automatic `npm install` of dependencies
+- [docs/skills.md](https://github.com/badlogic/pi-mono/blob/main/packages/coding-agent/docs/skills.md) — `--skill <path>` and settings-level skill paths (Option D)
+
+## Source Code (verification)
+
+- [package-manager.ts](https://github.com/badlogic/pi-mono/blob/main/packages/coding-agent/src/core/package-manager.ts) — `GitSource` type (no subdir field), whole-repo `git clone`, root-only `readPiManifest()`, automatic dependency install (`runNpmCommand(this.getGitDependencyInstallArgs(), { cwd: targetDir })`), update/pinning logic (`git reset --hard <ref>`), local-path handling, `applyPatterns()` filtering, `autoload` delta handling
+
+## Real-World Examples
+
+- [gotgenes/pi-packages](https://github.com/gotgenes/pi-packages) — production dual-model monorepo: pnpm workspaces, 8 packages under `packages/*` each with its own `package.json`, published individually as `@gotgenes/*` on npm AND installable whole via `pi install git:github.com/gotgenes/pi-packages`
+- [xynogen/pix-mono](https://github.com/xynogen/pix-mono), [jvm/pi-mono](https://github.com/jvm/pi-mono) — further Pi-ecosystem monorepos surfaced in search (not examined in depth)
+
+## Related Documents
+
+- [← Parent Research: Pi.dev Agent Harness Capability Audit](../../index.md)
+- [Index](./index.md) — this deep dive's overview
+- [Findings](./findings.md) — claim ledger and options analysis
+</script>
+
+  <script src="../../assets/vendor/marked.min.js"></script>
+  <script src="../../assets/vendor/highlight.min.js"></script>
+
+  <script src="../../assets/render.js"></script>
+  <script src="../../assets/theme.js"></script>
+</body>
+</html>

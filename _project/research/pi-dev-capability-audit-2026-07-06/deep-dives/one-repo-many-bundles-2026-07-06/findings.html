@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Findings — One Repo, Many Bundles</title>
+<!-- template: dr-research v2 -->
+<link rel="stylesheet" href="../../assets/styles.css">
+<!-- FOUC guard: set palette + mode + width before first paint (URL param -> saved -> default) -->
+<script>
+  (function () {
+    var url = new URLSearchParams(location.search);
+    function pick(key, store, fb) {
+      var v = url.get(key);
+      if (v) { try { localStorage.setItem(store, v); } catch (e) {} return v; }
+      try { v = localStorage.getItem(store); } catch (e) {}
+      return v || fb;
+    }
+    var sysDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    document.documentElement.dataset.palette = pick('palette', 'dr-palette', 'a');
+    document.documentElement.dataset.mode = pick('mode', 'dr-mode', sysDark ? 'dark' : 'light');
+    document.documentElement.dataset.width = pick('width', 'dr-width', 'c');
+  })();
+</script>
+</head>
+<body>
+  <div class="controls widthctl" role="group" aria-label="View settings">
+    <div class="wgroup">
+      <span class="wlabel">width</span>
+      <span class="wbtns" id="dr-width">
+        <button data-width="a" title="800px column">800</button>
+        <button data-width="b" title="1000px column">1000</button>
+        <button data-width="c" title="860px prose, wide tables break out">Breakout</button>
+        <button data-width="d" title="Fill the screen, keeps the contents rail">Full Width</button>
+      </span>
+    </div>
+    <div class="wgroup">
+      <div class="picker" id="dr-picker">
+        <button data-palette="a" aria-pressed="false" title="Black &amp; White"><span class="chip" style="background:linear-gradient(135deg,#fafafa 55%,#111111 55%)"></span></button>
+        <button data-palette="b" aria-pressed="false" title="Stone &amp; Teal"><span class="chip" style="background:linear-gradient(135deg,#f7f6f3 55%,#0f766e 55%)"></span></button>
+        <button data-palette="c" aria-pressed="false" title="Slate &amp; Amber"><span class="chip" style="background:linear-gradient(135deg,#f5f6f8 55%,#b45309 55%)"></span></button>
+        <button data-palette="d" aria-pressed="false" title="Paper &amp; Rust"><span class="chip" style="background:linear-gradient(135deg,#faf6f0 55%,#b5442d 55%)"></span></button>
+        <button data-palette="e" aria-pressed="false" title="Mist &amp; Indigo"><span class="chip" style="background:linear-gradient(135deg,#f6f5fa 55%,#4f46e5 55%)"></span></button>
+      </div>
+      <div class="sep"></div>
+      <button class="modebtn" id="dr-mode" title="Toggle light/dark" aria-label="Toggle light/dark">◐</button>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <article id="content" class="doc"></article>
+    <footer class="doc-footer">Generated 2026-07-06 · dr-research · canonical source: findings.md</footer>
+  </div>
+
+  <div id="zoom" aria-hidden="true"><div class="stage"></div><div class="hint">click anywhere or press Esc to close</div></div>
+
+  <!-- CONTENT: canonical markdown, inert (browser does not execute type="text/markdown") -->
+  <script type="text/markdown" id="dr-content-src"># Deep Dive Findings: One Repo, Many Bundles — Pi Packaging Options
+
+**Date:** 2026-07-06
+
+[← Back to Pi.dev Capability Audit](../../index.md) · [Deep Dive Index](./index.md)
+
+## Claim Ledger
+
+| # | Claim | Verdict | Evidence |
+|---|-------|---------|----------|
+| 1 | `pi install git:` clones the **entire repo** — no subdirectory targeting exists in any URL form — and Pi reads the `pi` manifest from the **root** `package.json` only (nested manifests are inert) | Confirmed | [package-manager.ts](https://github.com/badlogic/pi-mono/blob/main/packages/coding-agent/src/core/package-manager.ts): `GitSource` has `host`/`path`/`ref` but no subdir field; `readPiManifest(packageRoot)` joins only `packageRoot/package.json` (primary, code); [docs/packages.md](https://github.com/badlogic/pi-mono/blob/main/packages/coding-agent/docs/packages.md) lists the git URL forms with no path syntax (independent) |
+| 2 | Selective **use** from one installed repo is first-class: the settings `packages` array takes an object form with per-resource-type filter arrays (globs, `!exclude`, `+force-include`, `-force-exclude`, `[]` = none, omitted = all), layering on top of the manifest; `pi config` edits this interactively (global ↔ project via Tab) | Confirmed | [docs/packages.md](https://github.com/badlogic/pi-mono/blob/main/packages/coding-agent/docs/packages.md) verbatim example + "Filters layer on top of the manifest (they narrow down what's allowed)" (primary); `applyPatterns()` filtering in [package-manager.ts](https://github.com/badlogic/pi-mono/blob/main/packages/coding-agent/src/core/package-manager.ts) (independent, code) |
+| 3 | The **official monorepo pattern** is a root manifest with npm `workspaces` plus `pi` globs across `packages/*/skills` etc.; the same repo's sub-packages can additionally be published to npm individually for true selective install | Confirmed | [Pi packages docs](https://badlogic-pi-mono.mintlify.app/coding-agent/pi-packages) verbatim workspaces example (primary); real-world: [gotgenes/pi-packages](https://github.com/gotgenes/pi-packages) — pnpm-workspaces monorepo, 8 packages, installable whole via `pi install git:github.com/gotgenes/pi-packages` or individually via `pi install npm:@gotgenes/<pkg>` (independent) |
+| 4 | Pi **runs `npm install` automatically** on installed packages (git and npm sources), so extension dependencies resolve without user action | Confirmed | [package-manager.ts](https://github.com/badlogic/pi-mono/blob/main/packages/coding-agent/src/core/package-manager.ts): `if (existsSync(packageJsonPath)) { await this.runNpmCommand(this.getGitDependencyInstallArgs(), { cwd: targetDir }); }` (primary, code); [docs](https://badlogic-pi-mono.mintlify.app/coding-agent/pi-packages): "it runs `npm install`, so those dependencies are installed automatically" (independent) |
+| 5 | Versioning/updates: git installs pin to refs/tags (`@v1.0.0`); `pi update --extensions` / `--all` reconciles; exact-pinned versions are skipped; re-point with `pi install git:…@new-ref` | Confirmed | [docs/packages.md](https://github.com/badlogic/pi-mono/blob/main/packages/coding-agent/docs/packages.md) (primary); update/reset-hard logic in [package-manager.ts](https://github.com/badlogic/pi-mono/blob/main/packages/coding-agent/src/core/package-manager.ts) (independent, code) |
+| 6 | Local path installs are **references, not copies** ("Not copied - added as reference"), and a directory install follows full package rules — so per-subfolder selective install works for cloned repos, with live edits visible immediately | Confirmed | [Pi packages docs](https://badlogic-pi-mono.mintlify.app/coding-agent/pi-packages) (primary); local-path handling in [package-manager.ts](https://github.com/badlogic/pi-mono/blob/main/packages/coding-agent/src/core/package-manager.ts) (independent, code) |
+
+## The Mechanics (what actually happens on install)
+
+Anatomy of `pi install git:github.com/user/repo@v1`, per [package-manager.ts](https://github.com/badlogic/pi-mono/blob/main/packages/coding-agent/src/core/package-manager.ts):
+
+1. `git clone` of the **whole repo** into `~/.pi/agent/git/<host>/<path>` (ledger #1)
+2. If a `package.json` exists at the root, Pi runs the configured package manager's install (`npm install --omit=dev` / `bun install` / pnpm equivalent) — dependencies resolve automatically (ledger #4)
+3. The `pi` key is read from the **root** `package.json` only; if absent, convention directories auto-discover (`extensions/`, `skills/` — recursive for `SKILL.md` folders, `prompts/`, `themes/`)
+4. The package is persisted to settings (`~/.pi/agent/settings.json` global, or `.pi/settings.json` project)
+5. Settings-level filters, if present, narrow what the manifest declared (ledger #2)
+
+npm installs behave the same with npm resolution; local-path installs skip the copy entirely and reference the directory in place (ledger #6).
+
+Updates: `pi update --extensions` refreshes packages and reconciles git refs; exact-pinned versions (`@1.2.3`) are left alone; moving a git package to a new tag is `pi install git:…@new-tag` (ledger #5).
+
+## The Options — one repo, selectable bundles
+
+Five mechanisms exist. They are **not mutually exclusive** — the recommended architecture (see [recommendations](./recommendations.md)) layers A + B + C.
+
+### Option A — One git package + settings filters (selective *use*)
+
+Install the whole repo once; select per plugin declaratively. The settings object form, verbatim syntax from [the docs](https://badlogic-pi-mono.mintlify.app/coding-agent/pi-packages):
+
+```json
+{
+  "packages": [
+    {
+      "source": "git:github.com/dionridley/ai-tools@v3.0.0",
+      "skills": ["project-mgmt-plugin/skills/*", "!experimental/**"],
+      "extensions": [],
+      "prompts": []
+    }
+  ]
+}
+```
+
+`!pattern` excludes, `+path` force-includes, `-path` force-excludes, `[]` loads none of that type, omitted key loads all (ledger #2). `pi config` offers the same control interactively, and project-level `.pi/settings.json` can differ from global — so per-project plugin selection comes free. Keeping per-plugin folder boundaries makes these filters read like plugin names.
+
+- ✅ One install command; no publishing workflow; selection is per-user *and* per-project
+- ⚠️ Opt-out model: a fresh install enables everything the manifest declares until filtered; selection knowledge lives in the consumer's settings, not the repo
+
+### Option B — Workspaces monorepo + per-plugin npm packages (selective *install*)
+
+The [officially documented](https://badlogic-pi-mono.mintlify.app/coding-agent/pi-packages) monorepo shape (ledger #3):
+
+```json
+{
+  "workspaces": ["packages/*"],
+  "pi": {
+    "extensions": ["packages/*/extensions"],
+    "skills": ["packages/*/skills"]
+  }
+}
+```
+
+Each subfolder carries its own `package.json` (+ `pi` key) and can be `npm publish`ed under a scope — users then `pi install npm:@dionridley/pm-tools` and get *only* that plugin. [gotgenes/pi-packages](https://github.com/gotgenes/pi-packages) runs exactly this dual model in production: 8 packages, whole-repo git install **or** per-package npm install.
+
+- ✅ True selective install; npm semver per plugin (maps 1:1 to your per-plugin versioning/CHANGELOGs); the root manifest still serves the everything-install
+- ⚠️ Requires an npm publish step per plugin per release — real ongoing overhead to weigh against the don't-over-invest principle
+
+### Option C — Local path installs per subfolder (dev loop + clone-users)
+
+`pi install S:/dev/repos/dionridley/ai-tools/project-mgmt-plugin` — a directory install follows package rules, and it's a **reference, not a copy** (ledger #6): edits to the working tree are live in the next Pi session. Anyone who clones the repo gets per-plugin selective install this way with zero publishing.
+
+- ✅ Perfect dev feedback loop while porting skills (Phase 8 testing); free selective install for clone-users
+- ⚠️ Not a distribution story; paths are machine-specific
+
+### Option D — No packaging: settings/CLI resource paths
+
+Skills also load via `--skill <path>` and settings-level resource arrays, and prompts similarly ([docs/skills.md](https://github.com/badlogic/pi-mono/blob/main/packages/coding-agent/docs/skills.md)) — a cloned repo can be wired path-by-path with no package at all.
+
+- ✅ Maximum control, zero structure required
+- ⚠️ Forfeits everything packages provide (updates, dependency install, `pi config`, distribution); per-file bookkeeping. Listed for completeness, not recommended
+
+### Option E — Meta-packages via `bundledDependencies` (composition)
+
+Pi packages can bundle *other* pi packages: add them to `dependencies` **and** `bundledDependencies`, then reference their resources through `node_modules/` paths in the `pi` manifest ([docs, verbatim example](https://badlogic-pi-mono.mintlify.app/coding-agent/pi-packages)):
+
+```json
+{
+  "dependencies": { "shitty-extensions": "^1.0.1" },
+  "bundledDependencies": ["shitty-extensions"],
+  "pi": {
+    "extensions": ["extensions", "node_modules/shitty-extensions/extensions"],
+    "skills": ["skills", "node_modules/shitty-extensions/skills"]
+  }
+}
+```
+
+Relevant later: a published "dr-suite" bundle could pin a third-party question-tool or subagent package alongside your skills, instead of asking users to install two things.
+
+## Options Compared
+
+Qualitative scoring against your constraints (one repo, low maintenance, Claude side untouched). These are assessments, not measurements.
+
+| Criterion | A: git + filters | B: workspaces + npm | C: local paths | D: raw paths | E: meta-package |
+|---|---|---|---|---|---|
+| Works today, no publishing | ✅ Yes | ⚠️ Publish step per plugin | ✅ Yes | ✅ Yes | ⚠️ Needs npm |
+| Selective install (never fetch unwanted) | ❌ Opt-out after full clone | ✅ Yes | ✅ Per folder | ✅ Per file | ✅ Per bundle |
+| Selective use (per project/user) | ✅ First-class | ✅ (install set) | ✅ | ✅ | ⚠️ Bundle-level |
+| Update story | ✅ `pi update` + git tags | ✅ npm semver per plugin | ⚠️ git pull (manual) | ❌ Manual | ✅ npm semver |
+| Maintenance overhead | ✅ Root manifest only | ⚠️ Per-plugin manifests + publish | ✅ None | ✅ None | ⚠️ Highest |
+| Fits per-plugin versioning/CHANGELOGs | ⚠️ Repo-level tags only | ✅ 1:1 | ⚠️ n/a | ⚠️ n/a | ✅ |
+| Claude-side coexistence | ✅ No conflict | ✅ No conflict | ✅ | ✅ | ✅ |
+
+Coexistence note (verified by ledger #1's root-only manifest reading): subfolder `package.json` files are **inert** during a whole-repo git install — they activate only when that subfolder is installed directly (local path) or published to npm. So per-plugin manifests, the root manifest, `marketplace.json`, and per-plugin `plugin.json` all live in one repo without interfering.
+
+## Mapping to the Current Repo
+
+Nothing has to move for Option A: the root manifest can glob today's layout directly —
+
+```json
+{
+  "name": "@dionridley/ai-tools",
+  "keywords": ["pi-package"],
+  "pi": {
+    "skills": [
+      "project-mgmt-plugin/skills/*",
+      "engineering-tools/skills/*",
+      "experimental/skills/*"
+    ]
+  }
+}
+```
+
+If Stage 3 adopts the `packages/*`-style layout from the [official workspaces example](https://badlogic-pi-mono.mintlify.app/coding-agent/pi-packages), the same globs simplify and Option B becomes a config change plus a publish workflow — not a restructure.
+
+One interaction to note: adding a root `package.json` with `workspaces` changes what `npm install` does at the repo root (it installs all workspace deps). That's desirable once TypeScript extensions exist, and harmless before — there are no dependencies yet.
+
+## Gaps & Limitations
+
+- **`autoload: false` semantics are single-source (code-level).** The [package-manager.ts](https://github.com/badlogic/pi-mono/blob/main/packages/coding-agent/src/core/package-manager.ts) reading suggests a project package with `autoload: false` disables its resources so user-level versions take precedence, but the docs page doesn't cover it — not load-bearing here, verify if it becomes relevant.
+- **Fresh-install default state** ("everything enabled until filtered") is inferred from "omit a key to load all of that type" — consistent across docs and code, but not tested hands-on.
+- **Name-collision precedence** (same skill name from a package vs `.pi/skills/` vs another package) was not investigated.
+- **No hands-on install was performed** — consistent with the parent audit; Phase 8 covers it. The settings examples above follow documented syntax but weren't executed.
+- npm `files`-field packaging details (what to include when publishing) are not covered by Pi's docs; standard npm rules apply.
+
+## Open Questions
+
+- Does `pi config`'s interactive UI group resources by directory in a way that makes per-plugin toggling one action, or is it per-resource? (Cosmetic, but shapes the README instructions.)
+- When Option B activates someday: publish under a scope (`@dionridley/…`)? Scoped names also avoid collision with the crowded `pi-*` namespace.
+- **Premise:** is per-plugin *selection* worth optimizing for at all at current usage? The parent audit's don't-over-invest principle suggests Option A's "install everything, filter if you care" may be the entire v1 story — with B deferred until someone actually asks for a standalone install.
+
+## Related Documents
+
+- [← Parent Research: Pi.dev Agent Harness Capability Audit](../../index.md) — original research overview
+- [Index](./index.md) — this deep dive's overview
+- [Recommendations](./recommendations.md) — the layered architecture recommendation
+- [Resources](./resources.md) — sources for this deep dive
+</script>
+
+  <script src="../../assets/vendor/marked.min.js"></script>
+  <script src="../../assets/vendor/highlight.min.js"></script>
+
+  <script src="../../assets/render.js"></script>
+  <script src="../../assets/theme.js"></script>
+</body>
+</html>

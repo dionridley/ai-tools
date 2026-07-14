@@ -1,0 +1,187 @@
+# Research Findings: Pi.dev Agent Harness Capability Audit
+
+**Date:** 2026-07-06
+
+[← Back to Index](./index.md)
+
+## Claim Ledger
+
+| # | Claim | Verdict | Evidence |
+|---|-------|---------|----------|
+| 1 | Pi implements the Agent Skills spec: skills are auto-discovered (name + description advertised to the model) AND explicitly invokable via `/skill:name` | Confirmed | [docs/skills.md](https://github.com/badlogic/pi-mono/blob/main/packages/coding-agent/docs/skills.md) (primary); [skills.ts source](https://github.com/badlogic/pi-mono/blob/main/packages/coding-agent/src/core/skills.ts) shows the XML skill listing + read-tool instruction; [agentskills.io Client Showcase](https://agentskills.io/clients) lists pi (independent — the spec org's own adoption list) |
+| 2 | Pi's core is deliberately minimal: built-in tools are exactly `read, bash, edit, write, grep, find, ls` — no web search/fetch, no subagents, no todos, no background bash; the package ecosystem fills every one of those gaps | Confirmed | [docs/index.md quote](https://github.com/badlogic/pi-mono/blob/main/packages/coding-agent/docs/index.md): "intentionally does not include built-in MCP, sub-agents, permission popups, plan mode, to-dos, or background bash" (primary); independent: the [pi.dev package browser](https://pi.dev/packages) shows high-download packages for each gap (web ~128K/mo, subagents ~103K/mo); adversarial search found no built-in web tool having been added |
+| 3 | Skills get **no `$ARGUMENTS` substitution** — `/skill:name args` arguments are appended after the skill content as a user-style message (`User: <args>`); `$ARGUMENTS`/`$1`/`$@` substitution exists only in prompt templates | Confirmed | [docs/skills.md](https://github.com/badlogic/pi-mono/blob/main/packages/coding-agent/docs/skills.md): "Arguments are appended to the skill content as `User: <args>`" (primary); [skills.ts](https://github.com/badlogic/pi-mono/blob/main/packages/coding-agent/src/core/skills.ts) contains no substitution machinery (independent, code); [docs/prompt-templates.md](https://github.com/badlogic/pi-mono/blob/main/packages/coding-agent/docs/prompt-templates.md) documents `$ARGUMENTS` for templates only (contrast) |
+| 4 | Unknown SKILL.md frontmatter fields are silently ignored; Pi natively reads `name`, `description`, and `disable-model-invocation`; `allowed-tools` is NOT enforced | Confirmed | [skills.ts](https://github.com/badlogic/pi-mono/blob/main/packages/coding-agent/src/core/skills.ts): `SkillFrontmatter` reads exactly those three fields with a `[key: string]: unknown` catch-all, no warnings (primary, code); [docs/skills.md](https://github.com/badlogic/pi-mono/blob/main/packages/coding-agent/docs/skills.md) states unknown fields are "ignored" (independent) |
+| 5 | Pi loads `AGENTS.md` **or** `CLAUDE.md` at startup — from `~/.pi/agent/` (global), parent directories walking up, and the current directory, concatenated | Confirmed | [docs/index.md](https://github.com/badlogic/pi-mono/blob/main/packages/coding-agent/docs/index.md) (primary); [pi.dev](https://pi.dev) landing page states the same (independent). Precedence when BOTH files exist in one directory was not verified — see Gaps |
+| 6 | Pi packages bundle skills/extensions/prompts/themes via a `pi` key in `package.json` (glob-pattern path arrays), installable from npm, git, or local paths | Confirmed | [docs/packages.md](https://github.com/badlogic/pi-mono/blob/main/packages/coding-agent/docs/packages.md) with verbatim manifest example (primary); independent: real published packages use it ([pi-web-access](https://github.com/nicobailon/pi-web-access), [bigpowers](https://pi.dev/packages) skills bundle) |
+
+## What Pi Is
+
+Pi is a minimal, extensible terminal coding agent by Mario Zechner (badlogic), described on the official [Agent Skills client list](https://agentskills.io/clients) as "a minimal terminal coding harness. Adapt pi to your workflows, not the other way around." It lives in the [badlogic/pi-mono](https://github.com/badlogic/pi-mono) monorepo (npm scope `@earendil-works`; some mirrors/listings show the repo as `earendil-works/pi` — same project). The relevant package is `@earendil-works/pi-coding-agent`, latest **0.80.3** with patch releases every 1–3 days ([npm registry](https://registry.npmjs.org/@earendil-works/pi-coding-agent)) — a fast-moving target; details below are stamped against main-branch docs as of 2026-07-06.
+
+The core design stance shapes every answer in this audit: the harness ships seven tools and no workflow machinery, and everything else — web access, subagents, task lists, structured questions, permission gates — is provided by TypeScript **extensions**, distributed as **packages**. Capability-conditional prose in our skills will find a *very* capable Pi when the right packages are installed, and a bare-bones Pi otherwise.
+
+## Skills Support (Question 1)
+
+Pi implements the [Agent Skills spec](https://agentskills.io/specification) with deliberate leniency — per [docs/skills.md](https://github.com/badlogic/pi-mono/blob/main/packages/coding-agent/docs/skills.md), it "allows skill names to differ from their parent directory even though the standard disallows it; that rule is suboptimal for shared skill directories."
+
+**Where skills live** ([docs/skills.md](https://github.com/badlogic/pi-mono/blob/main/packages/coding-agent/docs/skills.md)):
+- Global: `~/.pi/agent/skills/`, `~/.agents/skills/`
+- Project: `.pi/skills/`, `.agents/skills/` (loaded only after the project is trusted)
+- Packages: `skills/` directories or `pi.skills` in `package.json` — discovery is recursive ("`skills/` recursively finds `SKILL.md` folders", [docs/packages.md](https://github.com/badlogic/pi-mono/blob/main/packages/coding-agent/docs/packages.md))
+- CLI: `--skill <path>`
+- Cross-import: settings can point at Claude Code skill directories
+
+Note `.agents/skills/` — a harness-neutral project location, not a Pi-ism. That matters for the Stage 3 layout.
+
+**Discovery and invocation — both models exist:**
+- **Auto:** at startup Pi scans skill locations and injects each skill's name, description, and file path into the system prompt as XML, instructing the model to "use the `read` tool to load a skill's file when the task matches its description" ([skills.ts](https://github.com/badlogic/pi-mono/blob/main/packages/coding-agent/src/core/skills.ts)). This is the spec's progressive-disclosure model, same as Claude Code.
+- **Explicit:** `/skill:name` (e.g. `/skill:pdf-tools extract`). Skills with `disable-model-invocation: true` are excluded from the system-prompt listing but remain explicitly invokable — **Pi natively implements this Claude Code extension field** ([skills.ts](https://github.com/badlogic/pi-mono/blob/main/packages/coding-agent/src/core/skills.ts)).
+
+**Validation:** name and description rules match the spec (64/1024 chars, kebab-case); violations produce warnings, and skills still load unless `description` is missing ([skills.ts](https://github.com/badlogic/pi-mono/blob/main/packages/coding-agent/src/core/skills.ts)).
+
+**Implication for our skills:** the invocation-token difference is the only visible seam. Claude Code users type `/dr-plan`; Pi users type `/skill:dr-plan`. The dr-plan/dr-prd Trigger Validation gates key on the literal `/dr-plan` token in the message — that convention survives on Pi (the token is still just text), but the gate prose should not assume the token is *how* the harness invoked the skill.
+
+## Arguments (Question 2)
+
+Two different mechanisms, cleanly split (ledger #3):
+
+- **Skills:** no substitution. Arguments after `/skill:name` are appended to the loaded skill content as `User: <args>`. A literal `$ARGUMENTS` string in a SKILL.md body arrives at the model untouched.
+- **Prompt templates** (separate artifact type, `prompts/*.md`, invoked as `/templatename`): full bash-style substitution — `$1`, `$2`, `$@`, `$ARGUMENTS`, `${1:-default}`, `${@:N:L}` ([docs/prompt-templates.md](https://github.com/badlogic/pi-mono/blob/main/packages/coding-agent/docs/prompt-templates.md)). Templates also support `description` and `argument-hint` frontmatter.
+
+**Implication:** the portability plan's planned wording — "the user's request (provided as `$ARGUMENTS` or in the invoking message)" — matches Pi's actual behavior exactly. On Claude Code `$ARGUMENTS` substitutes; on Pi the request arrives as an appended user message. No skill needs restructuring, only that phrasing.
+
+## Built-in Tools (Question 3)
+
+> "Built-in tools: `read`, `bash`, `edit`, `write`, `grep`, `find`, `ls`." — [docs/index.md](https://github.com/badlogic/pi-mono/blob/main/packages/coding-agent/docs/index.md)
+
+That is the complete list. **No web search or web fetch in core** (ledger #2). Web access comes from packages — a crowded, healthy category:
+
+| Package | Notes |
+|---|---|
+| [pi-web-access](https://github.com/nicobailon/pi-web-access) | ~128K downloads/mo; search + fetch + GitHub repos + PDF + YouTube; works without API keys (Exa default) |
+| [@juicesharp/rpiv-web-tools](https://pi.dev/packages) | pluggable providers (Brave, Tavily, Exa, Perplexity, SearXNG, …) |
+| [@ollama/pi-web-search](https://www.npmjs.com/package/@ollama/pi-web-search) | Ollama's search/fetch APIs |
+| [pi-webfetch](https://github.com/code-yeongyu/pi-webfetch), [pi-websearch](https://github.com/code-yeongyu/pi-websearch), [pi-web-tools](https://github.com/edlsh/pi-web-tools), [pi-web-utils](https://github.com/shantanugoel/pi-web-utils), [pi-web-fetch](https://github.com/georgebashi/pi-web-fetch) | further alternatives; readability extraction, headless Chrome, provider gating |
+
+**Implication:** dr-research's up-front requirement declaration is the right design, and it can name a concrete remedy: "requires web search + fetch tools (built into Claude Code; on Pi, install a web package such as `pi install npm:pi-web-access`)."
+
+## Structured Questions (Question 4)
+
+Absent in core — no AskUserQuestion equivalent among built-ins. Two paths provide it:
+
+- **Extension API:** `ctx.ui.select(title, options)`, `ctx.ui.confirm(...)`, `ctx.ui.input(...)`, `ctx.ui.editor(...)` — extensions can put real dialogs in the TUI ([docs/extensions.md](https://github.com/badlogic/pi-mono/blob/main/packages/coding-agent/docs/extensions.md)). The docs explicitly mention "a Q&A tool that lets the user answer model questions in a structured format" as an extension use case.
+- **Existing package:** [@juicesharp/rpiv-ask-user-question](https://pi.dev/packages) (~35K downloads/mo) — "structured questionnaire the model can put to you when it would otherwise guess, with typed options."
+
+Note `ctx.hasUI` / `ctx.mode` exist because Pi also runs headless (`rpc`/`json`/`print` modes) — even on Pi, dialogs aren't guaranteed.
+
+**Implication:** the planned conditional phrasing holds: "ask via a structured question tool if available; otherwise ask in plain text and wait for the reply." The ~25 AskUserQuestion call sites don't need per-site invention — one shared phrasing pattern works.
+
+## Subagents & Background Processes (Question 5)
+
+Both excluded from core **by explicit design** (ledger #2):
+
+> "No sub-agents. There's many ways to do this. Spawn pi instances via tmux, or build your own with extensions, or install a package that does it your way." — [coding-agent README](https://github.com/badlogic/pi-mono/blob/main/packages/coding-agent/README.md)
+
+> "No background bash. Use tmux. Full observability, direct interaction." — [coding-agent README](https://github.com/badlogic/pi-mono/blob/main/packages/coding-agent/README.md)
+
+The subagent package ecosystem is large but **fragmented** — at least seven independent implementations: [pi-subagents (nicobailon)](https://github.com/nicobailon/pi-subagents) (~103K/mo), [tintinweb/pi-subagents](https://github.com/tintinweb/pi-subagents) ("Claude Code look and feel — parallel execution, custom agent types, mid-run steering"), [mjakl/pi-subagent](https://github.com/mjakl/pi-subagent), [pi-subagents-lite](https://github.com/AlexParamonov/pi-subagents-lite), [@quintinshaw/pi-dynamic-workflows](https://pi.dev/packages) ("fan a task out across 100s of subagents"), [pi-crew](https://pi.dev/packages) ("coordinated AI teams, workflows, worktrees, and async task orchestration"), [PizzaPi](https://pizzaface.github.io/PizzaPi/customization/subagents/).
+
+Encouragingly, the convention several converge on is **Claude-shaped**: agent definitions as markdown files with YAML frontmatter (`name`, `description`, `tools`, `model`, `thinking`) in `~/.pi/agent/agents/*.md` and `.pi/agents/*.md`, where the body becomes the subagent's system prompt and project agents win on name conflict ([search across pi-subagents docs](https://github.com/nicobailon/pi-subagents)). Our `agents/plan-verifier.md` would port with minimal reshaping — but *which package's* convention to target is a real choice, and none is official.
+
+**Implication:** the plan-verifier fallback ("spawn if subagent capability exists; otherwise run the verification checklist inline in a fresh, skeptical pass") is confirmed as necessary — and the inline fallback will be the *common* case on stock Pi. For mvp, see [recommendations](./recommendations.md): subagents are achievable on Pi but only via a third-party package the user must install.
+
+## Task-List Tooling (Question 6)
+
+Absent in core — "no … to-dos" is in the design statement ([docs/index.md](https://github.com/badlogic/pi-mono/blob/main/packages/coding-agent/docs/index.md)). Packages: [@mjasnikovs/pi-task](https://pi.dev/packages) ("deterministic task planning and spec-orchestration" with verification gates, ~21K/mo), [pi-soly](https://pi.dev/packages) (project management + workflow framework), [@narumitw/pi-goal](https://pi.dev/packages). None is a de-facto standard.
+
+**Implication:** mvp's existing design — canonical state in `.mvp/state.json` + `brainstorm.md`, harness task tools as an optional mirror — is exactly right for Pi. The mirror is simply absent on stock Pi.
+
+## AGENTS.md (Question 7)
+
+Supported (ledger #5): Pi loads `AGENTS.md` **or** `CLAUDE.md` at startup from `~/.pi/agent/` (global), parent directories walking up from cwd, and the current directory, concatenating what it finds ([docs/index.md](https://github.com/badlogic/pi-mono/blob/main/packages/coding-agent/docs/index.md)). Separately, `.pi/SYSTEM.md` / `APPEND_SYSTEM.md` can replace or extend the system prompt.
+
+**Implication:** the dr-init decision (AGENTS.md canonical + thin CLAUDE.md pointer) is validated. The "or" semantics suggest Pi prefers one file rather than loading both — so the pointer shouldn't double-load — but which file wins when both exist in the same directory was not directly verified (see Gaps).
+
+## Frontmatter Tolerance (Question 8 — original numbering)
+
+Source-verified (ledger #4): [skills.ts](https://github.com/badlogic/pi-mono/blob/main/packages/coding-agent/src/core/skills.ts) reads `name`, `description`, `disable-model-invocation`; everything else falls into `[key: string]: unknown` and is silently ignored — no warnings, no errors.
+
+Consequences per field we use:
+- `disable-model-invocation` — **works on Pi natively** (skill hidden from the model, explicit-only)
+- `allowed-tools` — ignored ⇒ **dr-ship's tool-allowlist safety model does not exist on Pi**; every safety rule must be enforced in prose (the Phase 2 audit is confirmed as load-bearing, not belt-and-suspenders)
+- `effort`, `argument-hint` — ignored, harmless to keep
+- `license`, `compatibility`, `metadata` — spec fields, fine everywhere
+
+## Packaging & Bundling (Question 8 — Dion's addition)
+
+The headline: **Pi has exactly the manifest-over-shared-artifacts concept you want** (ledger #6). From [docs/packages.md](https://github.com/badlogic/pi-mono/blob/main/packages/coding-agent/docs/packages.md), verbatim:
+
+```json
+{
+  "name": "my-package",
+  "keywords": ["pi-package"],
+  "pi": {
+    "extensions": ["./extensions"],
+    "skills": ["./skills"],
+    "prompts": ["./prompts"],
+    "themes": ["./themes"]
+  }
+}
+```
+
+- "Paths are relative to the package root. Arrays support glob patterns and `!exclusions`."
+- Without a manifest, conventional directories auto-discover: `extensions/`, `skills/`, `prompts/`, `themes/`
+- Install: `pi install npm:@scope/pkg@1.2.3`, `pi install git:github.com/user/repo@v1` (HTTPS/SSH too), or local paths; installs land under `~/.pi/agent/npm/`
+- Per-resource enable/disable via `pi config`
+- A public package browser exists at [pi.dev/packages](https://pi.dev/packages) (npm keyword `pi-package` is the registry signal)
+
+Artifact-type mapping vs Claude Code:
+
+| Artifact | Claude Code | Pi |
+|---|---|---|
+| Skills | `skills/` dirs in plugin + plugin.json | `pi.skills` globs or `skills/` convention — same SKILL.md format |
+| Slash-command UX | skill name (`/dr-plan`) | `/skill:dr-plan`, or a **prompt template** (`prompts/dr-plan.md`) can provide `/dr-plan` |
+| Agent definitions | `agents/*.md` (plugin manifest) | no core concept; subagent packages read `.pi/agents/*.md` with near-identical frontmatter |
+| Custom tools | MCP servers | TypeScript extensions (`pi.extensions`) |
+| Marketplace | marketplace.json repo | npm/git + pi.dev/packages browser |
+
+**Implication for Stage 3:** one repo can simultaneously be a Claude Code marketplace and a Pi package: keep `.claude-plugin/marketplace.json`, add a root `package.json` with the `pi` key pointing (via globs) at the same skill directories — even the current `project-mgmt-plugin/skills/*` layout would work without moving anything (`"skills": ["./project-mgmt-plugin/skills", "./engineering-tools/skills"]`). Distribution is `pi install git:github.com/dionridley/ai-tools` with zero registry work, or npm later. Detailed layout sketch in [recommendations](./recommendations.md).
+
+## Premise Check (Question 9)
+
+Is targeting Pi ≈ targeting the spec? **Mostly, with two cautions.** Pi is on the official [client showcase](https://agentskills.io/clients) alongside ~40 others (Claude Code, Gemini CLI, Copilot/VS Code, Codex, Cursor, OpenCode, Goose, Amp, …), and its skills subsystem is a lenient superset of the spec. But: (1) Pi *adds* conventions the spec doesn't have (`/skill:name` invocation, argument appending, `disable-model-invocation`) — wording should cite capabilities, not Pi mechanics, or it trades a Claude-ism for a Pi-ism; (2) the spec itself defines **no invocation-with-arguments story at all**, so the lowest common denominator across those 40 clients is "skill activated by description match, no arguments" — conditional prose should degrade gracefully all the way down to that, which the planned "$ARGUMENTS or in the invoking message" phrasing does.
+
+## Community Signal
+
+| Signal | Pi (coding agent) |
+|---|---|
+| Latest release / cadence | 0.80.3; patch releases every 1–3 days ([npm registry](https://registry.npmjs.org/@earendil-works/pi-coding-agent)) — very active, fast-moving |
+| Maintainer | Mario Zechner (badlogic) — monorepo, primary author; bus factor effectively 1 for core |
+| Ecosystem | Dozens of third-party packages on [pi.dev/packages](https://pi.dev/packages); multiple >20K downloads/mo |
+| Spec adoption | Listed on [agentskills.io/clients](https://agentskills.io/clients) |
+| License | Open source on GitHub ([badlogic/pi-mono](https://github.com/badlogic/pi-mono)); exact license not checked in this audit |
+
+## Gaps & Limitations
+
+- **Docs-level verification only for argument appending.** The `User: <args>` append format is stated in official docs but the runtime code path wasn't traced (skills.ts covers loading, not invocation). Behavior should be confirmed hands-on in portability Phase 8.
+- **AGENTS.md vs CLAUDE.md precedence when both exist in the same directory was not verified** — "or" phrasing implies one wins; test in Phase 8 before relying on the pointer file being ignored.
+- **Package download counts** are as displayed by the pi.dev package browser (2026-07-06), not independently measured.
+- **No hands-on testing.** This entire audit is documentation + source reading; Pi was not installed or exercised. That is Phase 8's job by design.
+- **Pi moves fast** (patches every 1–3 days). Every finding is stamped against main-branch docs as of 2026-07-06; re-check the load-bearing ones at Phase 8.
+- **Worktree isolation** (mvp Phase 6 concern): only [pi-crew](https://pi.dev/packages)'s description mentions worktrees; not investigated in depth.
+- The exact settings mechanism for cross-importing Claude Code skill directories was noted but not detailed.
+
+## Open Questions
+
+- Which subagent package (if any) should mvp target as its documented Pi requirement — and does its `agents/*.md` frontmatter accept our plan-verifier definition as-is?
+- Does the `rpiv-ask-user-question` tool surface to the model under a stable tool name our conditional prose could mention?
+- What does Pi's project-trust prompt look like for a freshly `pi install`ed git package — any friction for the install story?
+- **Premise:** given Pi's package model, is capability-conditional *prose* even the right lever for the Pi port — or should the Stage 3 Pi package simply *depend on/bundle* the missing capabilities (web, questions, subagents) as extensions, making the conditional branches nearly dead code on Pi? If the latter, Phase 2's wording effort should stay minimal (which the plan's "don't over-invest" principle already demands).
+
+## Related Documents
+
+- [Index](./index.md) — research overview
+- [Capability Matrix](./capability-matrix.md) — the appendable artifact
+- [Recommendations](./recommendations.md) — implications per portability-plan phase and for Stage 3
+- [Resources](./resources.md) — all sources consulted

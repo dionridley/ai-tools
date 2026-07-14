@@ -205,3 +205,11 @@ Each bundle is a self-contained folder (e.g., `bundles/project-management/`) wit
 - `bundles/project-management/` - Project management with research, PRDs, and implementation plans
 - `bundles/engineering-tools/` - Frontend-design and React 19 skills
 - `bundles/experimental/` - Experimental capabilities (MVP builder)
+
+---
+
+<!-- Plugin: project-management — pointer added by /dr-init -->
+
+Read AGENTS.md and follow all of its guidance. It is the canonical
+instruction file for every coding agent working in this repository,
+including Claude Code.
