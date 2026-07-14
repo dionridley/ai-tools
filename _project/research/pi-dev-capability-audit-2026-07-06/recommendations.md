@@ -1,0 +1,67 @@
+# Research Recommendations: Pi.dev Capability Audit
+
+**Date:** 2026-07-06
+
+[← Back to Index](./index.md)
+
+## Recommendation
+
+**Proceed with the portability plan as designed — Pi supports it well — and design Stage 3 around a dual-manifest repo (Claude marketplace.json + Pi `package.json` `pi` key over shared artifact directories), which Pi supports natively today.** The single genuinely open call is mvp's subagent strategy (see Priority 3). One premise-level alternative deserves a decision before Phase 2 wording work begins: on Pi, missing capabilities can be *installed* (packages), not just worded around — the Stage 3 Pi package could bundle or document required packages, keeping Phase 2's conditional prose minimal.
+
+## Next Steps
+
+### Priority 1: Append the capability matrix to the plan and close Phase 0
+**Why:** Phase 0 was the everything-blocker; it's done.
+**What:** Append [capability-matrix.md](./capability-matrix.md) to `.research/skill-portability-plan.md`; mark Phase 0 complete. Update the plan's Phase 2/6 assumptions with the three facts that sharpen them: `allowed-tools` is unenforced on Pi (dr-ship prose audit is load-bearing), `disable-model-invocation` works natively on Pi, and args arrive as an appended user message (the planned `$ARGUMENTS` phrasing is exactly right).
+
+### Priority 2: Settle the "wording vs. bundling" split before Phase 2
+**Why:** Pi's package model means conditional prose isn't the only lever; deciding now prevents over-writing conditionals that the Pi package would make moot.
+**What:** Adopt the split: **prose stays capability-conditional and names one concrete Pi remedy** (e.g. "requires web search/fetch — built into Claude Code; on Pi: `pi install npm:pi-web-access`"), and the Stage 3 Pi package documents recommended companion packages rather than silently assuming them. One sentence per capability, per the don't-over-invest principle.
+
+### Priority 3: Decide mvp's subagent stance (Phase 6 gate)
+**Why:** Subagents exist on Pi only via third-party packages — at least seven competing ones, none official.
+**What:** Recommended: **document "requires a subagent-capable harness" as mvp's stated requirement, with reduced sequential mode as the in-skill fallback** — do NOT couple mvp's prose to any specific Pi package's conventions yet (fragmented, fast-moving). Revisit at Phase 8 with hands-on testing; nicobailon/pi-subagents (~103K/mo) is the candidate to test first. Background/PID management prose becomes "if your harness supports background processes; on Pi use tmux or run sequentially."
+
+### Priority 4: Feed the Stage 3 PRD with the dual-manifest layout
+**Why:** This research confirms the target architecture is buildable with zero Pi-side invention.
+**What:** Sketch for the PRD:
+
+```
+ai-tools/
+├── .claude-plugin/marketplace.json      # Claude Code entry point (unchanged concept)
+├── package.json                         # Pi entry point: { "pi": { "skills": [...], "prompts": [...], "extensions": [...] } }
+├── skills/                              # shared, harness-neutral (Agent Skills spec)
+├── agents/                              # agent definitions; Claude native, Pi via subagent-package conventions
+├── prompts/                             # Pi prompt templates (optional /dr-plan UX shim)
+└── extensions/                          # Pi-only TypeScript extensions
+```
+
+Notes: `pi.skills` glob arrays mean the *current* layout also works without moving anything (`"skills": ["./project-mgmt-plugin/skills", "./engineering-tools/skills"]`); install story is `pi install git:github.com/dionridley/ai-tools` immediately, npm publishing optional later; a thin `prompts/dr-plan.md` template (`$ARGUMENTS` supported there) can restore Claude-style `/dr-plan` invocation on Pi.
+
+## What to Avoid
+
+- **Trading Claude-isms for Pi-isms.** Phrase prose as capabilities ("a structured question tool", "web search") with harness examples in parentheses — never "use ctx.ui.select" or "/skill:…" as the instruction itself. The spec's floor (description-match activation, no arguments) is the real portability target; Pi is the reference implementation, not the contract.
+- **Coupling to one subagent package's frontmatter now.** The ecosystem is fragmented and Pi core evolves every 1–3 days; defer until Phase 8 testing.
+- **Assuming `allowed-tools` protects anything outside Claude Code.** On Pi it's parsed and discarded. Every dr-ship guardrail must be a sentence, not a manifest entry.
+- **Relying on dialogs existing even on Pi.** Pi runs headless (`rpc`/`json`/`print`); "if available" phrasing is required, not decorative.
+
+## Risks & Decision Gates
+
+| Risk | Impact | Gate / Exit Criterion |
+|------|--------|----------------------|
+| Pi's fast release cadence (patches every 1–3 days) invalidates a finding before Phase 8 | Med | At Phase 8 start, re-check the 6 ledger claims against current docs; if any flipped, patch skills before testing |
+| Argument-append behavior differs in practice from docs (`User: <args>`) | Med | Phase 8 test: invoke `/skill:dr-plan create test` on Pi; if args don't arrive, fall back to "ask for the request in conversation" wording |
+| AGENTS.md + CLAUDE.md pointer double-loads on Pi (precedence unverified) | Low | Phase 8 test with both files present; if double-loaded, make the CLAUDE.md pointer one line so duplication is harmless |
+| Subagent package fragmentation strands mvp-on-Pi | Med | If no package passes the Phase 8 mvp smoke test, ship mvp with "sequential reduced mode" documented as the Pi experience |
+| Repo/org naming flux (badlogic/pi-mono ↔ earendil-works, npm scope changes) breaks doc links | Low | Cite GitHub main-branch paths (they redirect); re-resolve at Phase 8 |
+
+## Open Questions
+
+- Should the Stage 3 Pi package *bundle* a question-tool extension (making the ~25 AskUserQuestion sites first-class on Pi) rather than degrade to plain text? A small TypeScript extension wrapping `ctx.ui.select` may be cheaper than it sounds — and it's the first candidate "Pi extension" artifact for the new repo.
+- Version/CHANGELOG conventions for a dual-manifest repo (npm semver for the Pi package vs. per-plugin versions for Claude) — flagged for the Stage 3 PRD, per the handoff's note that Stage 3 may reshape the versioning question.
+
+## Related Documents
+
+- [Index](./index.md) — research overview
+- [Findings](./findings.md) — evidence behind each recommendation
+- [Capability Matrix](./capability-matrix.md) — the appendable artifact

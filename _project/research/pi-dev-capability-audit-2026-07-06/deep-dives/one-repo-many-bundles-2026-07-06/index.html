@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Deep Dive: One Repo, Many Bundles — Pi Packaging Options</title>
+<!-- template: dr-research v2 -->
+<link rel="stylesheet" href="../../assets/styles.css">
+<!-- FOUC guard: set palette + mode + width before first paint (URL param -> saved -> default) -->
+<script>
+  (function () {
+    var url = new URLSearchParams(location.search);
+    function pick(key, store, fb) {
+      var v = url.get(key);
+      if (v) { try { localStorage.setItem(store, v); } catch (e) {} return v; }
+      try { v = localStorage.getItem(store); } catch (e) {}
+      return v || fb;
+    }
+    var sysDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    document.documentElement.dataset.palette = pick('palette', 'dr-palette', 'a');
+    document.documentElement.dataset.mode = pick('mode', 'dr-mode', sysDark ? 'dark' : 'light');
+    document.documentElement.dataset.width = pick('width', 'dr-width', 'c');
+  })();
+</script>
+</head>
+<body>
+  <div class="controls widthctl" role="group" aria-label="View settings">
+    <div class="wgroup">
+      <span class="wlabel">width</span>
+      <span class="wbtns" id="dr-width">
+        <button data-width="a" title="800px column">800</button>
+        <button data-width="b" title="1000px column">1000</button>
+        <button data-width="c" title="860px prose, wide tables break out">Breakout</button>
+        <button data-width="d" title="Fill the screen, keeps the contents rail">Full Width</button>
+      </span>
+    </div>
+    <div class="wgroup">
+      <div class="picker" id="dr-picker">
+        <button data-palette="a" aria-pressed="false" title="Black &amp; White"><span class="chip" style="background:linear-gradient(135deg,#fafafa 55%,#111111 55%)"></span></button>
+        <button data-palette="b" aria-pressed="false" title="Stone &amp; Teal"><span class="chip" style="background:linear-gradient(135deg,#f7f6f3 55%,#0f766e 55%)"></span></button>
+        <button data-palette="c" aria-pressed="false" title="Slate &amp; Amber"><span class="chip" style="background:linear-gradient(135deg,#f5f6f8 55%,#b45309 55%)"></span></button>
+        <button data-palette="d" aria-pressed="false" title="Paper &amp; Rust"><span class="chip" style="background:linear-gradient(135deg,#faf6f0 55%,#b5442d 55%)"></span></button>
+        <button data-palette="e" aria-pressed="false" title="Mist &amp; Indigo"><span class="chip" style="background:linear-gradient(135deg,#f6f5fa 55%,#4f46e5 55%)"></span></button>
+      </div>
+      <div class="sep"></div>
+      <button class="modebtn" id="dr-mode" title="Toggle light/dark" aria-label="Toggle light/dark">◐</button>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <article id="content" class="doc"></article>
+    <footer class="doc-footer">Generated 2026-07-06 · dr-research · canonical source: index.md</footer>
+  </div>
+
+  <div id="zoom" aria-hidden="true"><div class="stage"></div><div class="hint">click anywhere or press Esc to close</div></div>
+
+  <!-- CONTENT: canonical markdown, inert (browser does not execute type="text/markdown") -->
+  <script type="text/markdown" id="dr-content-src"># Deep Dive: One Repo, Many Bundles — Pi Packaging Options
+
+**Date:** 2026-07-06
+**Parent Research:** [Pi.dev Agent Harness Capability Audit](../../index.md) (2026-07-06)
+**Research Question:** With separate repos ruled out, how does Pi package a repo containing multiple plugin-like bundles (skills/agents/extensions), and which mechanisms let a user take some bundles but not others — the way Claude Code's marketplace lets users pick plugins?
+
+> **Answer: One repo works — layer three mechanisms: a root `package.json` `pi` manifest for the single-command whole-repo git install, settings-level filters for per-user/per-project plugin selection, and per-plugin `package.json` files that stay inert until installed by local path (dev) or published to npm (true selective install, deferrable).** Confidence: High.
+> **Exceptions:** git installs can never fetch a subdirectory — selective *install* (as opposed to selective *use*) requires either npm publishing per plugin or a local clone; and the fresh-install default is everything-on (opt-out filtering), not opt-in.
+> **Verification (Deep path):** rests on claims 1–6, all Confirmed, most at source-code level — see the [Claim Ledger](./findings.md#claim-ledger).
+
+## Why this deep dive
+
+The parent audit confirmed the `pi` manifest concept but left packaging granularity at doc-level: no git-subdir syntax, per-resource `pi config` — one source each, options unmapped. This dive verifies the mechanics in `package-manager.ts`, surfaces the settings object-form filters (the piece that makes plugin-level selection real), finds the officially documented workspaces monorepo pattern, and confirms a production example ([gotgenes/pi-packages](https://github.com/gotgenes/pi-packages)) running the exact dual model this repo needs.
+
+## How this differs from the parent
+
+The parent answered "can Pi consume our skills and manifest at all?" This answers "how does one repo serve *selectable* bundles?" — install anatomy, filter syntax, update/pinning, dependency resolution, and five composition options scored against the one-repo constraint. Nothing in the parent is overturned; the parent's packaging findings are extended, not superseded.
+
+## Key Takeaways
+
+1. **Selective *use* is first-class; selective *install* costs a publish step** — settings filters give per-plugin selection from one git install today, therefore npm publishing (Option B) can stay dormant until someone actually wants a standalone plugin.
+2. **Subfolder `package.json` files are inert in a whole-repo install** (root-only manifest reading, source-verified) — therefore per-plugin manifests, the root manifest, `marketplace.json`, and `plugin.json` all coexist in one repo with zero interference.
+3. **Local installs are live references, not copies** — therefore the Phase 8 dev loop is `pi install <repo-path>` once, then edit-and-test against the working tree.
+4. **Pi auto-runs `npm install` on installed packages** — therefore future TypeScript extensions with dependencies ship from this repo with no extra install instructions.
+5. **Plugin boundaries must stay directory boundaries** in the Stage 3 taxonomy — filters, manifests, and future publishing all key off folder paths.
+
+## Research Files
+
+- **[Findings](./findings.md)** — claim ledger, install mechanics, the five options (git+filters, workspaces+npm, local paths, raw paths, meta-packages) with scored comparison and current-repo mapping
+- **[Recommendations](./recommendations.md)** — the layered A+C-now/B-later architecture, Stage 3 PRD inputs, risk gates
+- **[Resources](./resources.md)** — sources for this deep dive
+
+## Related Documents
+
+- [← Parent Research: Pi.dev Agent Harness Capability Audit](../../index.md)
+</script>
+
+  <script src="../../assets/vendor/marked.min.js"></script>
+  <script src="../../assets/vendor/highlight.min.js"></script>
+
+  <script src="../../assets/render.js"></script>
+  <script src="../../assets/theme.js"></script>
+</body>
+</html>
