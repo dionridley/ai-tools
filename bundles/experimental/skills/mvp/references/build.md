@@ -1142,6 +1142,7 @@ When all phases complete:
    ```
 
    Also verify and kill dev/express server PIDs the same way — check command matches before killing.
+   If a server PID is `null` but a managed server may still be running (bookkeeping was missed mid-build), locate it by command match instead — `ps` output grepped for the stored `command` fragment — verify, kill, and note the bookkeeping miss in the session log.
    Write `state.json`.
 
 2. **Final test run:**

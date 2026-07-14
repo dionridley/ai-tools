@@ -5,6 +5,14 @@ All notable changes to the Project Management Plugin will be documented in this 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.1] - 2026-07-12
+
+Skill portability (test-in-Pi): live validation on Pi 0.80.6 found one guard a model could bypass; hardened.
+
+### Fixed
+
+- **dr-research: the web-access requirement is now Phase 0 — a blocking first step** — instead of a preamble note. Live Pi testing (plan 006) showed a model could sail past the prose guard and fabricate a complete research product — including a bibliography of sources never fetched — on a harness with no web tools. The check now runs before the research prompt is even read, with an explicit stop and a named remedy (Pi: `pi install npm:pi-web-access`).
+
 ## [3.1.0] - 2026-07-12
 
 Skill portability (packaging polish): explicit environment requirements in spec-blessed frontmatter. All five skills validated against the Agent Skills reference validator (`skills-ref validate`); the three Claude Code extension fields (`argument-hint`, `disable-model-invocation`, `effort`) are documented accepted deviations — they are consumed by Claude Code from the top level and ignored by spec-lenient harnesses like Pi.
