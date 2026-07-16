@@ -11,7 +11,8 @@
   to this file. It will integrate cleanly alongside the plugin-managed
   sections below.
 
-  Sections managed by the plugin have version markers (e.g. <!-- section: name v1 -->).
+  Sections managed by the plugin have version markers — HTML comments
+  like "section: name v1" placed directly under the section heading.
   Running /dr-init will check these markers and offer to update outdated sections.
   Content outside the plugin-managed sections is never modified by /dr-init.
 -->

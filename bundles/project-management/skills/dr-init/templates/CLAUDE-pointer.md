@@ -6,9 +6,17 @@
 
 # CLAUDE.md
 
-Read AGENTS.md and follow all of its guidance. It is the
-canonical instruction file for every coding agent working
-in this repository, including Claude Code.
+@AGENTS.md
+
+The imported AGENTS.md above is the canonical instruction file for
+every coding agent working in this repository, including Claude Code.
+
+**Note for Claude Code:** keep this file a thin pointer. When recording
+or updating repository guidance — anything that would traditionally go
+in CLAUDE.md, including `/init` output or "add this to project memory"
+requests — write it to AGENTS.md, not here, so agents that read only
+AGENTS.md see it too. Reserve the space below the managed block for
+genuinely Claude-specific instructions.
 
 <!-- End of plugin-managed section -->
 <!-- Claude-specific additions go below this line. -->
