@@ -5,6 +5,19 @@ All notable changes to the Project Management Plugin will be documented in this 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.2] - 2026-07-14
+
+dr-init generated-output fixes, all found by dogfooding in this repo.
+
+### Fixed
+
+- **The generated CLAUDE.md pointer now uses the `@AGENTS.md` import instead of a prose instruction** — Claude Code never loads AGENTS.md natively; the import inlines it mechanically at load time, where the old "Read AGENTS.md and follow all of its guidance" relied on the model obeying prose. Both pointer forms are updated (the CLAUDE-pointer template and the State C append-note), and State C's "already points at AGENTS.md" recognition now also counts an `@AGENTS.md` import line, so re-runs don't append a redundant note.
+- **The AGENTS-template header comment no longer terminates itself early** — it embedded a literal `<!-- section: name v1 -->` example, and since HTML comments cannot nest, the inner closer ended the header comment mid-sentence, leaving stray text (`).`, two orphaned lines, and a dangling closer) rendering at the top of every generated AGENTS.md. The example is now reworded delimiter-free.
+
+### Added
+
+- **A write-redirect note in both generated pointer forms**: new repository guidance — `/init` output, "add this to project memory" requests — belongs in AGENTS.md, not CLAUDE.md, so harnesses that read only AGENTS.md (e.g., Pi) see it too.
+
 ## [3.1.1] - 2026-07-12
 
 Skill portability (test-in-Pi): live validation on Pi 0.80.6 found one guard a model could bypass; hardened.

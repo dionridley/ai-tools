@@ -3,7 +3,7 @@
 ## Metadata
 
 - **Number:** 007
-- **Status:** draft
+- **Status:** completed
 - **Created:** 2026-07-14
 - **Last refreshed:** 2026-07-14
 - **Refinement count:** 2
@@ -64,11 +64,11 @@ Can resolve during implementation.
 
 ## Success Criteria
 
-- [ ] A fresh generation from the updated templates produces an AGENTS.md whose header comment closes exactly once — no stray `).` or `-->` visible in rendered markdown — and a CLAUDE.md whose managed block contains the `@AGENTS.md` import.
-- [ ] Both generated pointer forms (the template and the State C append-note) carry the write-redirect instruction: new repository guidance goes to AGENTS.md, not CLAUDE.md.
-- [ ] State C recognizes a CLAUDE.md containing an `@AGENTS.md` line as "already points at AGENTS.md" (no duplicate note on re-runs).
-- [ ] This repo's own AGENTS.md header renders clean, and its CLAUDE.md matches the final template shape.
-- [ ] project-management reads **3.1.2** in plugin.json, the bundle package.json, and marketplace.json, with a matching CHANGELOG entry.
+- [x] A fresh generation from the updated templates produces an AGENTS.md whose header comment closes exactly once — no stray `).` or `-->` visible in rendered markdown — and a CLAUDE.md whose managed block contains the `@AGENTS.md` import.
+- [x] Both generated pointer forms (the template and the State C append-note) carry the write-redirect instruction: new repository guidance goes to AGENTS.md, not CLAUDE.md.
+- [x] State C recognizes a CLAUDE.md containing an `@AGENTS.md` line as "already points at AGENTS.md" (no duplicate note on re-runs).
+- [x] This repo's own AGENTS.md header renders clean, and its CLAUDE.md matches the final template shape.
+- [x] project-management reads **3.1.2** in plugin.json, the bundle package.json, and marketplace.json, with a matching CHANGELOG entry.
 
 ## Definition of Done
 
@@ -84,7 +84,7 @@ Every Phase Exit Gate must confirm these before flipping any `[x]` in the phase:
 
 #### Tasks
 
-- [ ] **`templates/CLAUDE-pointer.md`** — replace the prose body (lines 9–11) with the import form plus the write-redirect note, both inside the managed block. Header comment and trailing managed-section markers stay as-is. Target body:
+- [x] **`templates/CLAUDE-pointer.md`** — replace the prose body (lines 9–11) with the import form plus the write-redirect note, both inside the managed block. Header comment and trailing managed-section markers stay as-is. Target body:
 
   ```markdown
   # CLAUDE.md
@@ -102,7 +102,7 @@ Every Phase Exit Gate must confirm these before flipping any `[x]` in the phase:
   genuinely Claude-specific instructions.
   ```
 
-- [ ] **`references/state-c-uninitialized.md`** — four changes:
+- [x] **`references/state-c-uninitialized.md`** — four changes:
   - Replace the pointer-note block (~lines 79–88) with the import form (same `---` separator and `<!-- Plugin: project-management — pointer added by /dr-init -->` comment), including a one-sentence redirect. Target note body:
 
     ```markdown
@@ -117,16 +117,16 @@ Every Phase Exit Gate must confirm these before flipping any `[x]` in the phase:
   - Update the "doesn't already tell the agent to read AGENTS.md" wording at Case 1 (~line 9) and the assembly step (~line 77) so that **either** the prose note **or** an `@AGENTS.md` import line counts as already pointing.
   - Confirm the preview label (~line 109) and apply step (~line 139) read naturally with the broadened recognition (adjust wording only if needed).
   - Reword the instructional placeholder at ~line 72 to drop its embedded `-->` (e.g., `<plugin sections — from ## Project Structure through the end-of-managed-section marker>`).
-- [ ] **`templates/AGENTS-template.md:14`** — reword the version-marker example so no literal `<!--` or `-->` appears inside the header comment, e.g.: `Sections managed by the plugin have version markers — HTML comments like "section: name v1" placed directly under the section heading.`
-- [ ] **Repo cleanup** — apply the same line-14 rewording to this repo's own `AGENTS.md` (its header is not version-tracked, so this is a manual fix, not a State B update). Align this repo's `CLAUDE.md` with the final template shape — its hand-written write-redirect note moves into the managed block with the template wording; anything genuinely Claude-specific stays below the block.
-- [ ] **Sweep** — grep the dr-init skill for any remaining comment block that would land in generated output with a nested `-->`. Expected: zero after the fixes. (Instructional examples inside code fences that are *not* wrapped in an outer comment are fine.)
+- [x] **`templates/AGENTS-template.md:14`** — reword the version-marker example so no literal `<!--` or `-->` appears inside the header comment, e.g.: `Sections managed by the plugin have version markers — HTML comments like "section: name v1" placed directly under the section heading.`
+- [x] **Repo cleanup** — apply the same line-14 rewording to this repo's own `AGENTS.md` (its header is not version-tracked, so this is a manual fix, not a State B update). Align this repo's `CLAUDE.md` with the final template shape — its hand-written write-redirect note moves into the managed block with the template wording; anything genuinely Claude-specific stays below the block.
+- [x] **Sweep** — grep the dr-init skill for any remaining comment block that would land in generated output with a nested `-->`. Expected: zero after the fixes. (Instructional examples inside code fences that are *not* wrapped in an outer comment are fine.)
 
 #### Verification
 
-- [ ] Read `templates/CLAUDE-pointer.md` and `templates/AGENTS-template.md` (lines 1–20) — each header comment closes exactly once; the pointer body contains `@AGENTS.md`.
-- [ ] Grep the write-redirect wording (e.g., `write it to AGENTS.md` / `Record new repository guidance`) in `templates/CLAUDE-pointer.md` and `references/state-c-uninitialized.md` — both pointer forms carry it.
-- [ ] Grep `Read AGENTS.md and follow` across `bundles/` — expected: zero hits. (Hits under `_project/plans/completed/` are historical record — never edit those.)
-- [ ] Read this repo's `AGENTS.md` lines 1–20 — header comment closes exactly once, no stray `).`. Read this repo's `CLAUDE.md` — matches the final template shape.
+- [x] Read `templates/CLAUDE-pointer.md` and `templates/AGENTS-template.md` (lines 1–20) — each header comment closes exactly once; the pointer body contains `@AGENTS.md`.
+- [x] Grep the write-redirect wording (e.g., `write it to AGENTS.md` / `Record new repository guidance`) in `templates/CLAUDE-pointer.md` and `references/state-c-uninitialized.md` — both pointer forms carry it.
+- [x] Grep `Read AGENTS.md and follow` across `bundles/` — expected: zero hits. (Hits under `_project/plans/completed/` are historical record — never edit those.)
+- [x] Read this repo's `AGENTS.md` lines 1–20 — header comment closes exactly once, no stray `).`. Read this repo's `CLAUDE.md` — matches the final template shape.
 
 #### Acceptance Criteria
 
@@ -139,26 +139,26 @@ Every Phase Exit Gate must confirm these before flipping any `[x]` in the phase:
 
 <!-- verifier-recommendation: yes — the templates are the plan's user-visible contract; subtle text defects (a stray delimiter, a missed recognition site) would not be caught by commands alone -->
 
-- [ ] Run Definition of Done commands (see plan header). All must pass.
-- [ ] **Spawn plan-verifier.** Invoke `subagent_type="project-management:plan-verifier"` with the plan file path and phase number. Wait for its report. If the harness cannot spawn subagents, run this phase's Verification checklist yourself in a fresh, skeptical pass and record PASS/FAIL per item.
-- [ ] **Apply verification report.** Flip `[x]` only for tasks the verifier reports as PASS. Keep `[ ]` for FAIL and UNVERIFIED with a note referencing the verifier's reasoning.
-- [ ] **Agent self-review.** Re-read Tasks above, confirm the verifier's recommendations are reflected, note any UNVERIFIEDs that need follow-up in future phases or the Retro.
+- [x] Run Definition of Done commands (see plan header). All must pass.
+- [x] **Spawn plan-verifier.** Invoke `subagent_type="project-management:plan-verifier"` with the plan file path and phase number. Wait for its report. If the harness cannot spawn subagents, run this phase's Verification checklist yourself in a fresh, skeptical pass and record PASS/FAIL per item.
+- [x] **Apply verification report.** Flip `[x]` only for tasks the verifier reports as PASS. Keep `[ ]` for FAIL and UNVERIFIED with a note referencing the verifier's reasoning.
+- [x] **Agent self-review.** Re-read Tasks above, confirm the verifier's recommendations are reflected, note any UNVERIFIEDs that need follow-up in future phases or the Retro.
 
 ### Phase 2: Version Ritual and Fixture Verification
 
 #### Tasks
 
-- [ ] Bump `version` to `3.1.2` in `bundles/project-management/.claude-plugin/plugin.json`.
-- [ ] Bump `version` to `3.1.2` in `bundles/project-management/package.json`.
-- [ ] Bump the project-management entry to `3.1.2` in `.claude-plugin/marketplace.json`.
-- [ ] Add a `## [3.1.2] - <current date>` entry to `bundles/project-management/CHANGELOG.md`: under **Fixed**, both defects (pointer → `@AGENTS.md` import + State C recognition; header comment no longer self-terminating); under **Added**, the write-redirect note in both generated pointer forms (rationale: keep repository guidance flowing into AGENTS.md so AGENTS.md-only harnesses see it). Use the actual current date from conversation context.
-- [ ] **Fixture regeneration check** in `.research/fixtures/pm-3.1.2/` (gitignored scratch home): simulate a State A generation — substitute `{{CURRENT_DATE}}` into the updated `AGENTS-template.md` and write it plus the new `CLAUDE-pointer.md` verbatim as `AGENTS.md`/`CLAUDE.md` in the fixture. Inspect: header comment closes exactly once (no visible `).`/`-->` when rendered), `@AGENTS.md` line and write-redirect note present in CLAUDE.md.
+- [x] Bump `version` to `3.1.2` in `bundles/project-management/.claude-plugin/plugin.json`.
+- [x] Bump `version` to `3.1.2` in `bundles/project-management/package.json`.
+- [x] Bump the project-management entry to `3.1.2` in `.claude-plugin/marketplace.json`.
+- [x] Add a `## [3.1.2] - <current date>` entry to `bundles/project-management/CHANGELOG.md`: under **Fixed**, both defects (pointer → `@AGENTS.md` import + State C recognition; header comment no longer self-terminating); under **Added**, the write-redirect note in both generated pointer forms (rationale: keep repository guidance flowing into AGENTS.md so AGENTS.md-only harnesses see it). Use the actual current date from conversation context.
+- [x] **Fixture regeneration check** in `.research/fixtures/pm-3.1.2/` (gitignored scratch home): simulate a State A generation — substitute `{{CURRENT_DATE}}` into the updated `AGENTS-template.md` and write it plus the new `CLAUDE-pointer.md` verbatim as `AGENTS.md`/`CLAUDE.md` in the fixture. Inspect: header comment closes exactly once (no visible `).`/`-->` when rendered), `@AGENTS.md` line and write-redirect note present in CLAUDE.md.
 
 #### Verification
 
-- [ ] Parse all three JSON manifests — no syntax errors.
-- [ ] Grep `3.1.1` across the three manifest files — expected: zero hits.
-- [ ] Read the fixture `AGENTS.md` (lines 1–20) and `CLAUDE.md` — clean header, import and redirect note present, date substituted.
+- [x] Parse all three JSON manifests — no syntax errors.
+- [x] Grep `3.1.1` across the three manifest files — expected: zero hits.
+- [x] Read the fixture `AGENTS.md` (lines 1–20) and `CLAUDE.md` — clean header, import and redirect note present, date substituted.
 
 #### Acceptance Criteria
 
@@ -170,8 +170,8 @@ Every Phase Exit Gate must confirm these before flipping any `[x]` in the phase:
 
 <!-- verifier-recommendation: no — mechanical version bumps and a file-inspection check; the Verification commands cover the surface -->
 
-- [ ] Run Definition of Done commands (see plan header). All must pass.
-- [ ] **Agent self-review.** Re-read all Tasks above. Flip `[x]` only for tasks whose Verification passed. Any failing or skipped task stays `[ ]` with a short note explaining why. Under-report beats over-report.
+- [x] Run Definition of Done commands (see plan header). All must pass.
+- [x] **Agent self-review.** Re-read all Tasks above. Flip `[x]` only for tasks whose Verification passed. Any failing or skipped task stays `[ ]` with a short note explaining why. Under-report beats over-report.
 
 ## Refinement History
 
@@ -195,12 +195,16 @@ If the final phase's Exit Gate has unresolved FAILs or UNVERIFIEDs after the all
 
 ### What worked
 
-- [Populated at completion]
+- Freezing exact target markdown in the plan tasks made every edit mechanical — the verifier could assert byte-identity (repo CLAUDE.md vs. template) instead of exercising judgment.
+- Adaptive verification split correctly: plan-verifier on Phase 1 (independent full-PASS with git-diff evidence) and self-review only on Phase 2's mechanical bumps.
+- Fixture generation via verbatim copy + string substitution (not retyping) kept the pair byte-faithful to a real State A run; the gitignore check-ignore confirmation closed the "nothing staged" criterion cheaply.
+- Both phases passed on the first attempt — no gate retries needed.
 
 ### What didn't
 
-- [Populated at completion]
+- Nothing failed. Minor friction: the two "Run Definition of Done" exit-gate lines are textually identical across phases, so checkbox edits needed multi-line anchors to hit the right one.
 
 ### Learnings
 
-- [Populated at completion — things a future plan would do differently]
+- Never place a literal `-->` (or `<!--`) inside an HTML comment in any template — reword examples delimiter-free. A per-file opener/closer balance count is a cheap sweep that catches this whole defect class.
+- Prefer the `@import` mechanism over prose instructions wherever the harness offers one — mechanical inlining beats hoping the model obeys a sentence, and the same lesson generalizes (the write-redirect note remains prose-only because no mechanism exists for it).

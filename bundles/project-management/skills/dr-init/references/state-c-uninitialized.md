@@ -6,7 +6,7 @@ There's no conflict to resolve: the plugin-managed sections describe plugin-spec
 
 Two cases, by which files exist:
 
-- **Case 1 — user has their own AGENTS.md** (with or without a CLAUDE.md): append the plugin sections to their AGENTS.md. If a CLAUDE.md exists and doesn't already tell the agent to read AGENTS.md, also offer to append the short pointer note to it (same approval gate).
+- **Case 1 — user has their own AGENTS.md** (with or without a CLAUDE.md): append the plugin sections to their AGENTS.md. If a CLAUDE.md exists and doesn't already point at AGENTS.md — an `@AGENTS.md` import line or a prose note telling the agent to read AGENTS.md both count — also offer to append the short pointer note to it (same approval gate).
 - **Case 2 — user has only a CLAUDE.md**: create AGENTS.md fresh from the template, and append the short pointer note to their CLAUDE.md.
 
 ## Steps
@@ -69,12 +69,12 @@ If not a git repo, skip this check silently.
 
   <version marker from above>
 
-  <plugin sections — from ## Project Structure through <!-- End of plugin-managed section --> -->
+  <plugin sections — from ## Project Structure through the end-of-managed-section marker>
   ```
 
 - **Case 2 (no AGENTS.md):** the full processed template (`{{CURRENT_DATE}}` substituted), written as a new file.
 
-**Assemble the CLAUDE.md pointer note** (both cases, when a CLAUDE.md exists and doesn't already tell the agent to read AGENTS.md):
+**Assemble the CLAUDE.md pointer note** (both cases, when a CLAUDE.md exists and doesn't already point at AGENTS.md — an `@AGENTS.md` import line or a prose read-AGENTS.md note both count as already pointing):
 
 ```markdown
 
@@ -82,9 +82,12 @@ If not a git repo, skip this check silently.
 
 <!-- Plugin: project-management — pointer added by /dr-init -->
 
-Read AGENTS.md and follow all of its guidance. It is the canonical
-instruction file for every coding agent working in this repository,
-including Claude Code.
+@AGENTS.md
+
+The imported AGENTS.md above is the canonical instruction file for
+every coding agent working in this repository, including Claude Code.
+Record new repository guidance in AGENTS.md — not here — so agents
+that read only AGENTS.md see it too.
 ```
 
 (When no CLAUDE.md exists at all in Case 1, create it from `templates/CLAUDE-pointer.md` verbatim instead.)
