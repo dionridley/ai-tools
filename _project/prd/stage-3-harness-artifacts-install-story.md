@@ -102,7 +102,7 @@ Ships as ordinary PRs to main; a bundle version bump only occurs if a bundle's o
 ## Open Questions
 
 - [x] Folder disposition when a spike yields no production artifact — **DECIDED 2026-07-16:** `.gitkeep` placeholders + pattern docs; amend the AGENTS.md escape-hatch rule accordingly.
-- [ ] How do Pi manifests reference extensions (the `pi.skills` analog), and is a build/transpile step required? — owner: Pi spike, needs by: Pi spike exit
+- [x] How do Pi manifests reference extensions (the `pi.skills` analog), and is a build/transpile step required? — **ANSWERED 2026-07-16 (Pi spike, plan 008):** a `pi.extensions` array in the root `pi` manifest (paths/globs relative to the package root; must be explicit since the repo has a `pi` manifest — convention-dir auto-discovery doesn't apply); **no build step** — Pi loads TypeScript at runtime via jiti. Proven live: install → load → execute, with skills coexisting. Recipe: `_project/docs/pi-extension-pattern.md`.
 - [x] Which Claude artifact type is the spike candidate — **DECIDED 2026-07-16:** hook (inert/read-only for the spike); statusline/output style are fallbacks only if hooks prove unworkable.
 - [x] Time-box length per spike — **DECIDED 2026-07-16:** two working sessions each, chosen over the one-session default to give the Pi extension API room.
 
