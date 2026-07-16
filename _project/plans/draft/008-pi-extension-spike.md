@@ -6,7 +6,7 @@
 - **Status:** draft
 - **Created:** 2026-07-16
 - **Last refreshed:** 2026-07-16
-- **Refinement count:** 0
+- **Refinement count:** 1
 - **Plan type:** spike
 - **Verification Policy:** Adaptive (default)
 - **Related PRD:** _project/prd/stage-3-harness-artifacts-install-story.md
@@ -62,8 +62,12 @@ Must resolve before implementation starts.
 
 Can resolve during implementation.
 
-- [ ] [OPEN] Which channel serves the live test — local-path install or a git install of the spike branch? Decided in Phase 1 once pi-mono confirms what Pi supports.
-- [ ] [OPEN] What should the demo extension observably do? Smallest observable behavior wins (e.g., a log line or trivial command). Decided in Phase 1's design task.
+- [x] [DECIDED: 2026-07-16] Which channel serves the live test — local-path install or a git install of the spike branch?
+  > **Decision:** Local path first, then git confirm.
+  > **Rationale:** Iterate fast with a local-path install (a documented Pi capability); once the extension runs, confirm it also rides the git-package channel — the one production Pi actually uses (pushed spike branch if Pi supports branch refs, otherwise recorded as a post-merge check).
+- [x] [DECIDED: 2026-07-16] What should the demo extension observably do?
+  > **Decision:** Smallest observable thing — a log line or trivial registered command.
+  > **Rationale:** Purely proves load + execute. The concrete form is picked in Phase 1 from whatever API surface pi-mono actually exposes (events, commands, tools).
 
 ## Questions to Answer
 
@@ -101,8 +105,8 @@ Target: first half of working session 1.
 
 - [ ] Locate the extension API in the pi-mono source (github.com/badlogic/pi-mono) via WebFetch/WebSearch/`gh`, or a clone in the session scratchpad. Identify: (a) the manifest field that references extensions (the `pi.skills` analog), (b) the shape of an extension file (entry point, exports, runtime API), (c) whether Pi loads TypeScript directly or requires a build/transpile step, (d) which install channels deliver extensions.
 - [ ] Cross-check against the local Pi installation (installed packages, config) for real-world examples of extension wiring. **Never read `~/.pi/agent/auth.json`** — it holds credentials.
-- [ ] Choose the Phase 2 live-test channel (local-path install vs git install of the branch) based on what Pi actually supports; record the choice and flip the corresponding [OPEN] question.
-- [ ] Design the minimal demo: smallest observable behavior, file location under `pi/extensions/`, and exact manifest wiring; record the design and flip the corresponding [OPEN] question.
+- [ ] Confirm the decided live-test channel (local path first, git confirm after) against what pi-mono actually supports; note any needed adjustment in the findings file.
+- [ ] Design the minimal demo per the decided shape (smallest observable behavior — log line or trivial command): pick the concrete form from the actual API surface, plus file location under `pi/extensions/` and exact manifest wiring; record the design in the findings file.
 - [ ] Write findings to `.research/pi-extension-spike/findings.md` with source citations (pi-mono file paths or URLs) for every claim.
 
 #### Verification
@@ -130,7 +134,7 @@ Target: end of session 1 through session 2. This phase carries the time-box: no 
 
 - [ ] Create the demo TypeScript extension under `pi/extensions/` per the Phase 1 design.
 - [ ] Wire the manifest reference per the Phase 1 findings (expected: root `package.json`; adjust to what pi-mono actually requires). The `pi.skills` glob must remain untouched.
-- [ ] Install into Pi via the channel chosen in Phase 1.
+- [ ] Install into Pi via local-path install; once the extension executes, confirm the git-package channel too (pushed spike branch if Pi supports branch refs, otherwise record as a post-merge check).
 - [ ] Execute the extension in a live Pi session and capture the evidence (transcript excerpts/notes) to `.research/pi-extension-spike/evidence.md`. Where agent-driven execution isn't possible, ask Dion to drive the Pi session (`!` prefix or a separate terminal) and capture what it showed.
 - [ ] Edge case: run a whole-repo install with the extension artifacts present and confirm skill discovery still works (skills list unchanged, no manifest conflict). Record the result in the evidence file.
 - [ ] **Blocked path (only if triggered):** if there is no install-and-execute signal by the end of session 2, stop building — write blockers and partial findings to `.research/pi-extension-spike/findings.md`, record a revisit decision, and proceed to Phase 3 in blocked mode. Never silently dropped.
@@ -191,6 +195,7 @@ Target: session 2.
 ## Refinement History
 
 - **2026-07-16:** Initial plan creation.
+- **2026-07-16:** Resolved 0 blocking + 2 non-blocking questions (test channel: local path then git confirm; demo behavior: smallest observable thing), 2 uncertain assumptions skipped — left for Phase 1's empirical verification; Verification Policy unchanged (Adaptive).
 
 ## Completion
 
