@@ -170,7 +170,7 @@ ai-tools/
 │   ├── engineering-tools/         # Same shape: skills/{frontend-design, react-19}
 │   └── experimental/              # Same shape: skills/{mvp}
 ├── pi/                            # Cross-cutting Pi-only artifacts (extensions/, prompts/) — .gitkeep until first content
-└── claude/                        # Cross-cutting Claude-only artifacts (hooks/ …) — .gitkeep until first content
+└── claude/                        # Cross-cutting Claude-only artifacts wired via settings (plugin hooks are bundle-owned) — .gitkeep until first content
 ```
 
 Note: `/dr-init`, `/dr-research`, and `/dr-ship` are implemented as Skills 2.0 with `disable-model-invocation: true` — they are invoked explicitly via their slash-command names, not auto-discovered by Claude (`/dr-ship` especially, because it pushes and publishes). `/dr-plan` and `/dr-prd` are also Skills 2.0 but use `disable-model-invocation: false` paired with a **Trigger Validation** gate: the model invokes them only when the user writes the literal `/dr-plan` or `/dr-prd` token anywhere in their message (not only at the start), and the gate stops conversational drift from auto-firing them.
@@ -181,7 +181,7 @@ Two root-forced catalogs anchor the repo; everything else lives in bundles:
 
 - **Root `package.json` is the Pi catalog** — the only manifest Pi reads on a whole-repo `pi install git:…`. It is `"private": true` (the root never publishes to npm) and its `pi.skills` glob (`bundles/*/skills/*`) must cover exactly the skill directories.
 - **Per-bundle `package.json` mirrors that bundle's `plugin.json`** — npm-scoped name (`@dionridley/<bundle>`), same version as the bundle's semver. These are inert during whole-repo installs and activate only for local-path installs or future npm publishing.
-- **Escape hatches:** root `pi/` and `claude/` hold cross-cutting harness-exclusive artifacts. Rule: *exclusivity determines which manifest references an artifact; ownership determines where it lives* — bundle-owned harness-specific artifacts stay inside their bundle. Both folders exist with `.gitkeep` placeholders until they gain real content (amended 2026-07-16, Stage 3 spikes). The Pi extension mechanism is proven and documented in `_project/docs/pi-extension-pattern.md` — adding the first real extension is a known-working recipe, not archaeology.
+- **Escape hatches:** root `pi/` and `claude/` hold cross-cutting harness-exclusive artifacts. Rule: *exclusivity determines which manifest references an artifact; ownership determines where it lives* — bundle-owned harness-specific artifacts stay inside their bundle. Both folders exist with `.gitkeep` placeholders until they gain real content (amended 2026-07-16, Stage 3 spikes). The Pi extension mechanism is proven and documented in `_project/docs/pi-extension-pattern.md` — adding the first real extension is a known-working recipe, not archaeology. The Claude hook mechanism is likewise proven and documented in `_project/docs/claude-hook-pattern.md` (2026-07-16, plan 009) — plugin-channel hooks are necessarily bundle-owned (`bundles/<bundle>/hooks/hooks.json`, auto-discovered, no manifest change), so root `claude/` serves only non-plugin artifacts wired via user/project settings.
 
 ## Plugin Architecture
 
