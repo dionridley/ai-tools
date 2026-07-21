@@ -2,6 +2,10 @@
 
 Work in Progress Tools — experimental capabilities under active development and testing.
 
+## Installation
+
+See the [repository README](../../README.md) for per-harness installation instructions (Claude Code marketplace add, Pi git install).
+
 ## Skills
 
 | Skill | Description |
@@ -134,3 +138,7 @@ skills/mvp/
 ```
 
 Stack-specific conventions in `references/conventions/` are injected into every agent prompt during build. The `elixir-patterns.md` file (LiveView, Context, test, factory, and DaisyUI patterns) is loaded only for screen-building agents in the `core` and `polish` phases.
+
+## License
+
+MIT

@@ -4,7 +4,7 @@ Skills and commands to assist with software engineering and coding tasks.
 
 ## Installation
 
-See the [marketplace README](../README.md#installation) for installation instructions.
+See the [repository README](../../README.md) for per-harness installation instructions (Claude Code marketplace add, Pi git install).
 
 ## Features
 

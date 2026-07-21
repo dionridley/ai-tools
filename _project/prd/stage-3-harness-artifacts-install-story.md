@@ -1,10 +1,10 @@
 # PRD: Stage 3 — Harness-Exclusive Artifacts & Install Story
 
-**Status:** Draft
-**Version:** 1.1
+**Status:** Delivered (all acceptance criteria met — plans 008, 009, 010)
+**Version:** 1.2
 **Created:** 2026-07-16
 **Author:** Claude Code
-**Last Updated:** 2026-07-16
+**Last Updated:** 2026-07-21
 **Feature Type:** infra (with embedded spikes)
 
 ## Problem Statement
@@ -53,14 +53,14 @@ Testable signal: each spike produces a demo artifact that installs and executes 
 
 Testable bullets — `/dr-plan` consumes these as test-first tasks:
 
-- [ ] A TypeScript extension from this repo installs into Pi and demonstrably executes in a live session, with the evidence (transcript/notes) captured under `.research/`.
-- [ ] A Claude Code-exclusive artifact from this repo loads and fires in a live Claude Code session served from this working tree.
-- [ ] Each pattern doc is accurate against what its spike actually did — location, manifest wiring, build step, install path — not against pre-spike assumptions.
-- [ ] A from-scratch install on each harness succeeds following only repo docs (dry-run performed and noted).
-- [ ] Edge case: a whole-repo Pi install (`pi install git:…`) still works with extension artifacts present — the root `pi.skills` glob and extension packaging don't conflict.
-- [ ] Failure mode: a spike that can't prove its mechanism within the time-box exits with findings written to `.research/` and a revisit decision recorded — never silently dropped.
-- [ ] `pi/` and `claude/` exist with `.gitkeep` placeholders (or real content) after the spikes, and the AGENTS.md escape-hatch rule text reflects the amended convention.
-- [ ] Nothing added in Stage 3 references `dionridley/claude-plugins` — Stage 4 remains unblocked.
+- [x] A TypeScript extension from this repo installs into Pi and demonstrably executes in a live session, with the evidence (transcript/notes) captured under `.research/`. *(Plan 008, PR #10 — `.research/pi-extension-spike/`.)*
+- [x] A Claude Code-exclusive artifact from this repo loads and fires in a live Claude Code session served from this working tree. *(Plan 009, PR #11 — SessionStart hook, headless + interactive proof.)*
+- [x] Each pattern doc is accurate against what its spike actually did — location, manifest wiring, build step, install path — not against pre-spike assumptions. *(`_project/docs/pi-extension-pattern.md` + `claude-hook-pattern.md`, both verifier-checked at their spikes.)*
+- [x] A from-scratch install on each harness succeeds following only repo docs (dry-run performed and noted). *(Plan 010, 2026-07-21 — isolated dry-runs on both harnesses, evidence in `.research/install-discovery/`.)*
+- [x] Edge case: a whole-repo Pi install (`pi install git:…`) still works with extension artifacts present — the root `pi.skills` glob and extension packaging don't conflict. *(Proven in plan 008; re-confirmed by plan 010's dry-run: 8 skill dirs discovered from a fresh clone.)*
+- [x] Failure mode: a spike that can't prove its mechanism within the time-box exits with findings written to `.research/` and a revisit decision recorded — never silently dropped. *(Not triggered — both spikes proved their mechanism inside the time-box.)*
+- [x] `pi/` and `claude/` exist with `.gitkeep` placeholders (or real content) after the spikes, and the AGENTS.md escape-hatch rule text reflects the amended convention. *(PRs #10/#11; root README layout line aligned by plan 010.)*
+- [x] Nothing added in Stage 3 references `dionridley/claude-plugins` — Stage 4 remains unblocked. *(Only the pre-existing intentional supersession note in the root README references it.)*
 
 ## Technical Considerations
 
@@ -115,6 +115,9 @@ Ships as ordinary PRs to main; a bundle version bump only occurs if a bundle's o
 ---
 
 ## Refinement History
+
+**Version 1.2** — 2026-07-21
+- Status → Delivered. All eight acceptance criteria checked with per-plan evidence notes: FR1 (plan 008, PR #10), FR2 (plan 009, PR #11), FR3 (both pattern docs), FR4 (disposition + AGENTS.md amendment), FR5 (plan 010 — docs audit, three-bundle version ritual, isolated from-scratch dry-runs on both harnesses). Stage 3 scope complete.
 
 **Version 1.1** — 2026-07-16
 - Resolved 3 of 4 open questions with Dion: folder disposition (`.gitkeep` + docs, amending the AGENTS.md start-absent rule), Claude spike artifact (hook), spike time-box (two working sessions each). The Pi manifest/build-step question stays open by design — it's the Pi spike's exit deliverable.

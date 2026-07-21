@@ -47,7 +47,7 @@ claude plugin marketplace remove ai-tools      # remove the marketplace
 claude plugin list
 ```
 
-With the project-management plugin enabled you should see skills like `/dr-init`, `/dr-research`, `/dr-prd`, `/dr-plan`, and `/dr-ship`. The experimental plugin provides `/mvp`.
+All three plugins should show as `enabled`. The skills then appear inside a Claude Code session as slash commands — the project-management plugin provides `/dr-init`, `/dr-research`, `/dr-prd`, `/dr-plan`, and `/dr-ship`; the experimental plugin provides `/mvp`.
 
 ## Pi
 
@@ -61,7 +61,7 @@ pi install git:github.com/dionridley/ai-tools
 
 Skills auto-discover by description; explicit invocation is `/skill:<name>` (e.g. `/skill:dr-plan`). Skills marked `disable-model-invocation: true` (`dr-init`, `dr-research`, `dr-ship`, `mvp`) load but are explicit-only — hidden from auto-discovery by design.
 
-Update installed packages:
+Update pi itself and all installed packages:
 
 ```bash
 pi update --all
@@ -111,12 +111,12 @@ The skills are written capability-conditionally: Claude Code features are used w
 .claude-plugin/marketplace.json   # Claude catalog — sources point at ./bundles/*
 package.json                      # Pi catalog (private) — pi.skills globs bundles/*/skills/*
 bundles/<name>/                   # one bundle = one plugin: skills/, agents/, both manifests
-pi/ · claude/                     # cross-cutting harness-exclusive artifacts (absent until needed)
+pi/ · claude/                     # cross-cutting harness-exclusive artifacts (.gitkeep until first content)
 ```
 
 ## Contributing
 
-See [CLAUDE.md](./CLAUDE.md) for development guidelines, the repository structure, and the release ritual.
+See [AGENTS.md](./AGENTS.md) for development guidelines, the repository structure, and the release ritual — it is the canonical instruction file for every coding agent working here ([CLAUDE.md](./CLAUDE.md) is a thin pointer to it).
 
 ## License
 

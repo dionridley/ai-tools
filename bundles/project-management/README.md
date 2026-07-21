@@ -1,6 +1,6 @@
-# Project Management Plugin for Claude Code
+# Project Management Plugin
 
-A structured project management system for Claude Code that provides organized workflows for research, requirements documentation (PRDs), and implementation planning.
+A structured project management system for coding agents — Claude Code and other Agent Skills harnesses such as Pi — that provides organized workflows for research, requirements documentation (PRDs), and implementation planning.
 
 ## Features
 
@@ -16,7 +16,7 @@ A structured project management system for Claude Code that provides organized w
 
 ## Installation
 
-See the [marketplace README](../README.md#installation) for installation instructions.
+See the [repository README](../../README.md) for per-harness installation instructions (Claude Code marketplace add, Pi git install).
 
 ## Quick Start
 
@@ -624,15 +624,14 @@ See [CHANGELOG.md](CHANGELOG.md) for version history and release notes.
 
 ## Troubleshooting
 
-### Commands not appearing in `/help`
+### Skills not appearing after installation
 
-**Problem**: After installation, the `dr-*` commands don't show up.
+**Problem**: After installation, the `dr-*` skills don't show up.
 
 **Solutions**:
-1. Verify plugin is in correct directory: `~/.claude/plugins/project-management/`
-2. Check that `plugin.json` exists in `.claude-plugin/` subdirectory
-3. Restart Claude Code session
-4. Run `/plugin list` to verify plugin is recognized
+1. Verify the plugin is installed and enabled: run `claude plugin list` (CLI) or open `/plugins` (in-session UI)
+2. Refresh the marketplace catalog: `claude plugin marketplace update ai-tools`
+3. Restart the Claude Code session — plugins load at session start
 
 ### `/dr-init` says "already initialized" but structure is incomplete
 
@@ -708,4 +707,4 @@ For issues, questions, or suggestions:
 
 ---
 
-**Built for Claude Code** - Structured project management for modern software development
+**Built for Claude Code, portable to Agent Skills harnesses** - Structured project management for modern software development
