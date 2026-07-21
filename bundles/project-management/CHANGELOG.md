@@ -5,6 +5,19 @@ All notable changes to the Project Management Plugin will be documented in this 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.3] - 2026-07-21
+
+README accuracy pass (plan 010, Stage 3 install & discovery slice). No skill behavior changes.
+
+### Fixed
+
+- **README install link** — `../README.md#installation` pointed at a nonexistent `bundles/README.md` and an anchor the repository README never had; it now points at the repository README's per-harness install instructions (`../../README.md`).
+- **Stale pre-marketplace troubleshooting entry** — the "commands not appearing" fix still told users to check the manual-install path `~/.claude/plugins/project-management/` and run `/plugin list`; replaced with the marketplace-era checks (`claude plugin list` / `/plugins` UI, `claude plugin marketplace update ai-tools`, session restart).
+
+### Changed
+
+- **Cross-harness framing** — title and footer no longer describe the plugin as Claude Code-only; it serves Claude Code and other Agent Skills harnesses (e.g., Pi).
+
 ## [3.1.2] - 2026-07-14
 
 dr-init generated-output fixes, all found by dogfooding in this repo.

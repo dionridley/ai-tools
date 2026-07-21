@@ -5,6 +5,12 @@ All notable changes to the Experimental plugin will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.10.2] - 2026-07-21
+
+### Added
+
+- **README Installation and License sections** — a pointer to the repository README's per-harness install instructions and an MIT license note, matching the other bundles. Added by the Stage 3 install & discovery pass (plan 010). No skill changes.
+
 ## [0.10.1] - 2026-07-12
 
 ### Fixed
