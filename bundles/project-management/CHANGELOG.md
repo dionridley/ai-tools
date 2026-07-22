@@ -5,6 +5,21 @@ All notable changes to the Project Management Plugin will be documented in this 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.2.0] - 2026-07-22
+
+dr-research microsite asset overhaul (plan 011).
+
+### Added
+
+- **Pan-zoom diagram overlay** — clicking a diagram (rendered Mermaid or hand-authored SVG) opens a viewport-covering overlay with wheel-zoom, drag-pan, and a top-right + / − / reset / close toolbar. Vendored `svg-pan-zoom` 3.6.2 (BSD-2-Clause); pages rendered without the library degrade to the previous static overlay.
+- **Corpus index** — `_project/research/index.md` + `index.html` landing page listing every report newest-first (linked title, date, one-line answer); created on the corpus's first run and kept current by every research run.
+- **`/dr-research repair` mode** — filesystem-only maintenance that bypasses the Phase 0 web gate: verifies/restores the current-version shared assets against the skill template (restore adds missing files only — frozen versions are never overwritten) and brings the corpus index to completeness, including entries for legacy self-contained reports. Older asset versions and legacy report assets are reported, never modified.
+
+### Changed
+
+- **Shared versioned corpus assets replace per-report copies** — one `_project/research/assets/v1/` (version from the template's new `VERSION` file) serves all reports; pages reference it relatively (`../assets/v1`, deep dives `../../../assets/v1`). Copy-once on first run; `mermaid.min.js` is still copied lazily, but once per corpus instead of per report. Published versions are frozen — future template overhauls mint `v2` while existing research keeps rendering against `v1`. Tradeoff: a single report folder is no longer standalone-copyable (sharing means taking `_project/research/assets/` along). Reports generated before 3.2.0 keep their self-contained assets and keep working untouched.
+- **Mermaid upgraded 11.4.1 → 11.16.0** (bundled `vendor/mermaid.min.js`, now ~3.6 MB); theme re-rendering on palette and light/dark switches verified against the new version.
+
 ## [3.1.3] - 2026-07-21
 
 README accuracy pass (plan 010, Stage 3 install & discovery slice). No skill behavior changes.
