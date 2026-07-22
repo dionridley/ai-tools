@@ -166,6 +166,21 @@ body { margin:0; background:var(--bg); color:var(--fg); font-family:var(--sans);
                max-width:96vw; max-height:92vh; display:flex; align-items:center; justify-content:center; overflow:auto; }
 #zoom .stage svg { width:min(90vw, 1500px); height:auto; max-height:84vh; max-width:none; }
 #zoom .hint { position:fixed; bottom:18px; left:0; right:0; text-align:center; color:#cfd3da; font-family:var(--mono); font-size:13px; }
+#zoom .stage { cursor:default; position:relative; } /* backdrop-only close; positioning context for the toolbar */
+
+/* pan-zoom mode (svg-pan-zoom loaded): stage fills the viewport, panning replaces scrolling */
+#zoom.panzoom .stage { width:96vw; height:92vh; padding:0; overflow:hidden; cursor:grab; }
+#zoom.panzoom .stage:active { cursor:grabbing; }
+#zoom.panzoom .stage svg { width:100%; height:100%; max-height:none; max-width:none; }
+
+/* overlay toolbar — top-right cluster INSIDE the stage: + / − / reset / close.
+   Inverted fg/bg so the buttons read clearly against the stage in every palette + mode. */
+.zoom-toolbar { position:absolute; top:12px; right:12px; display:flex; gap:6px; z-index:101; }
+.zoom-toolbar button { width:36px; height:36px; border-radius:9px; border:1px solid var(--fg);
+  background:var(--fg); color:var(--bg); font-family:var(--mono); font-size:16px; line-height:1;
+  cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0;
+  box-shadow:0 2px 8px rgba(0,0,0,.35); opacity:.92; }
+.zoom-toolbar button:hover { opacity:1; border-color:var(--accent); }
 
 /* footer */
 .doc-footer { margin-top:56px; padding-top:20px; border-top:1px solid var(--border); color:var(--muted);

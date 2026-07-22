@@ -96,7 +96,7 @@ Initializes or updates project with the standard directory structure, a canonica
 
 ### `/dr-research`
 
-Conducts structured research and produces canonical markdown plus a **portable HTML microsite** view. As of v2.0.0 there are two research paths — **Standard** (fast, default) and **Deep** (adds discovery and claim verification) — sharing the same mandatory output discipline.
+Conducts structured research and produces canonical markdown plus a **portable HTML microsite** view. As of v2.0.0 there are two research paths — **Standard** (fast, default) and **Deep** (adds discovery and claim verification) — sharing the same mandatory output discipline. As of v3.2.0 the microsite uses **shared versioned corpus assets** (one `_project/research/assets/v1/` serving every report), maintains a **corpus index** landing page, opens diagrams in a **pan-zoom overlay**, and adds a filesystem-only **repair mode**.
 
 **Usage:**
 ```bash
@@ -119,6 +119,11 @@ Claude will ask for research details.
 /dr-research go deeper on webhook reliability _project/research/stripe-integration-2026-01-15/
 ```
 
+**Repair mode** (filesystem-only, no web access — verifies/restores the shared assets and brings the corpus index to completeness):
+```bash
+/dr-research repair
+```
+
 **Example:**
 ```bash
 /dr-research Research microservices architecture patterns for e-commerce platforms.
@@ -137,7 +142,7 @@ Include case studies from major platforms and common pitfalls to avoid.
 
 3. **Synthesis** — Mandatory discipline on both paths: the index opens with a direct answer block (verdict + confidence + exceptions); decision-bearing facts are cited where asserted; unmeasured numbers are tagged `(estimated, not measured)`; Gaps & Limitations and Open Questions (including at least one premise-level question) are required. Deep adds a claim ledger table with per-claim verdicts. Diagrams must earn their place (no TOC mindmaps, no speculative Gantt charts).
 
-4. **HTML generation** — Every `.md` gets a `.html` sibling and the report folder gets its own frozen `assets/` copy. The microsite works offline over `file://`, with three color palettes, light/dark mode, an in-page TOC on long pages, and click-to-zoom diagrams. Markdown stays canonical — `/dr-prd` and `/dr-plan` keep consuming the `.md` files.
+4. **HTML generation** — Every `.md` gets a `.html` sibling. All reports share one versioned assets folder (`_project/research/assets/v1/` — created on the corpus's first run, frozen once published; future template overhauls mint `v2` while old reports keep rendering against `v1`), and the corpus index (`_project/research/index.md` + `.html`) gains or updates this report's entry on every run. The microsite works offline over `file://`, with five color palettes, light/dark mode, width modes, an in-page TOC on long pages, and a pan-zoom overlay for diagrams (wheel-zoom, drag-pan, + / − / reset controls). Markdown stays canonical — `/dr-prd` and `/dr-plan` keep consuming the `.md` files.
 
 5. **Summary** — A concise completion message with the answer, key findings, a "What surprised me" insight, suggested deep-dive topics (when warranted), and contextual follow-up actions.
 
@@ -147,7 +152,8 @@ Include case studies from major platforms and common pitfalls to avoid.
 - `findings.md` / `findings.html` — Core analysis with point-of-claim citations, claim ledger (Deep), gaps, open questions
 - `resources.md` / `resources.html` — Bibliography of all sources consulted
 - `recommendations.md` / `recommendations.html` — Decision research only: recommendation, risk table, decision gates
-- `assets/` — The report's own copy of styles, scripts, and fonts (old reports never break when the template evolves)
+- `_project/research/assets/v1/` — Shared corpus assets (styles, scripts, fonts — versioned and frozen, reused by every report; reports generated before 3.2.0 keep their own untouched `assets/` copy)
+- `_project/research/index.md` / `index.html` — Corpus index: every report, newest first (linked title, date, one-line answer)
 - Topic files only when they carry a standalone artifact (scored matrix, schema, runnable guide) or you ask for one
 
 **Deep-dive follow-ups** produce a `deep-dives/[slug]-[date]/` subfolder within the original research, with back-links to the parent, a "Deep Dives" section added to the parent's `index.md`, and supersession patches when the deep dive overturns a parent conclusion.

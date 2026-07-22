@@ -96,10 +96,13 @@
     // Canonical markdown links to sibling .md files; the HTML view navigates
     // between the generated .html pairs instead.
     if (!root) return;
+    // hub behavior: on the corpus index, reports open in their own tab
+    var newTab = document.body.classList.contains('corpus-index');
     root.querySelectorAll('a[href]').forEach(function (a) {
       var href = a.getAttribute('href');
       if (!href || /^(https?:|mailto:|javascript:|#)/i.test(href)) return;
       a.setAttribute('href', href.replace(/\.md(?=$|#|\?)/i, '.html'));
+      if (newTab) { a.setAttribute('target', '_blank'); a.setAttribute('rel', 'noopener'); }
     });
   }
 
@@ -198,18 +201,84 @@
     var overlay = document.getElementById('zoom');
     var stage = overlay ? overlay.querySelector('.stage') : null;
     if (!overlay || !stage) return;
-    function close() { overlay.classList.remove('open'); overlay.setAttribute('aria-hidden', 'true'); stage.innerHTML = ''; }
+    var hint = overlay.querySelector('.hint');
+    var panzoom = null; // svg-pan-zoom instance while the overlay is open
+
+    function close() {
+      if (panzoom) { try { panzoom.destroy(); } catch (e) {} panzoom = null; }
+      overlay.classList.remove('open', 'panzoom');
+      overlay.setAttribute('aria-hidden', 'true');
+      stage.innerHTML = ''; // clears the cloned svg and the toolbar (both live in the stage)
+    }
+
+    function toolbarButton(label, title, onClick) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = label;
+      b.title = title;
+      b.setAttribute('aria-label', title);
+      b.addEventListener('click', function (e) { e.stopPropagation(); onClick(); });
+      return b;
+    }
+
+    function buildToolbar(withPanZoom) {
+      var tb = document.createElement('div');
+      tb.className = 'zoom-toolbar';
+      if (withPanZoom) {
+        tb.appendChild(toolbarButton('+', 'Zoom in', function () { if (panzoom) panzoom.zoomIn(); }));
+        tb.appendChild(toolbarButton('−', 'Zoom out', function () { if (panzoom) panzoom.zoomOut(); }));
+        tb.appendChild(toolbarButton('⟲', 'Reset view', function () {
+          if (panzoom) { panzoom.resetZoom(); panzoom.resetPan(); panzoom.fit(); panzoom.center(); }
+        }));
+      }
+      tb.appendChild(toolbarButton('✕', 'Close', close));
+      stage.appendChild(tb); // inside the stage window, pinned to its top-right corner
+    }
+
+    function open(svg) {
+      close();
+      var clone = svg.cloneNode(true);
+      var usePZ = !!window.svgPanZoom;
+      // classes first: svg-pan-zoom measures its container, so the stage must
+      // have its open (and panzoom) dimensions before init runs
+      overlay.classList.add('open');
+      if (usePZ) overlay.classList.add('panzoom');
+      overlay.setAttribute('aria-hidden', 'false');
+      if (usePZ) {
+        clone.removeAttribute('width');
+        clone.removeAttribute('height');
+        clone.style.maxWidth = 'none';
+        clone.style.width = '100%';
+        clone.style.height = '100%';
+        stage.appendChild(clone);
+        try {
+          panzoom = svgPanZoom(clone, {
+            zoomEnabled: true, panEnabled: true, controlIconsEnabled: false,
+            dblClickZoomEnabled: true, mouseWheelZoomEnabled: true,
+            fit: true, center: true,
+            minZoom: 0.2, maxZoom: 40, zoomScaleSensitivity: 0.3
+          });
+        } catch (e) { panzoom = null; overlay.classList.remove('panzoom'); }
+      } else {
+        stage.appendChild(clone); // no library: static clone, scroll if oversized
+      }
+      buildToolbar(!!panzoom);
+      if (hint) {
+        hint.textContent = panzoom
+          ? 'scroll to zoom · drag to pan · Esc or ✕ to close'
+          : 'click outside or press Esc to close';
+      }
+    }
+
     document.addEventListener('click', function (e) {
       var fig = e.target.closest && e.target.closest('figure.zoomable');
       if (!fig) return;
       var svg = fig.querySelector('svg');
       if (!svg) return;
-      stage.innerHTML = '';
-      stage.appendChild(svg.cloneNode(true));
-      overlay.classList.add('open');
-      overlay.setAttribute('aria-hidden', 'false');
+      open(svg);
     });
-    overlay.addEventListener('click', close);
+    // backdrop-only close: a stage click must not fight drag-pan
+    overlay.addEventListener('click', function (e) { if (e.target === overlay || e.target === hint) close(); });
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape') close(); });
     document.addEventListener('dr:themechange', function () { if (overlay.classList.contains('open')) close(); });
   }

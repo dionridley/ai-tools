@@ -25,6 +25,7 @@ This document guides how to structure research output files. Read this during Ph
 4. `recommendations.md` — decision research only
 5. `index.md` — overview and navigation (written last so it reflects everything produced)
 6. `.html` siblings for every page (SKILL.md Phase 3.5)
+7. Corpus index entry + regenerated `_project/research/index.html` (SKILL.md Phase 3.5)
 
 ## The Answer Block
 
@@ -348,17 +349,21 @@ When research is a follow-up deep dive on existing research:
 
 **Directory structure:**
 ```
-_project/research/[parent-slug]-[date]/
-├── index.md / index.html                 (updated with deep-dive link)
-├── findings.md / findings.html
-├── resources.md / resources.html
-├── assets/                               (shared by parent + deep dives)
-└── deep-dives/
-    └── [deep-dive-slug]-[date]/
-        ├── index.md / index.html         (assets via ../../assets)
-        ├── findings.md / findings.html
-        └── resources.md / resources.html
+_project/research/
+├── assets/v1/                            (shared corpus assets — versioned, frozen)
+├── index.md / index.html                 (corpus index — lists every report)
+└── [parent-slug]-[date]/
+    ├── index.md / index.html             (updated with deep-dive link; assets via ../assets/v1)
+    ├── findings.md / findings.html
+    ├── resources.md / resources.html
+    └── deep-dives/
+        └── [deep-dive-slug]-[date]/
+            ├── index.md / index.html     (assets via ../../../assets/v1)
+            ├── findings.md / findings.html
+            └── resources.md / resources.html
 ```
+
+Reports don't carry their own assets — all pages reference the shared, versioned corpus assets (`assets/v1` at the research root; the version segment comes from the skill's `assets/template/VERSION`). Reports generated before the shared scheme keep their local `assets/` folder untouched, but newly generated or regenerated pages always reference the corpus assets.
 
 **Deep-dive index.md additions:**
 - Link back to the parent research index: `[← Back to [Parent Title]](../../index.md)`

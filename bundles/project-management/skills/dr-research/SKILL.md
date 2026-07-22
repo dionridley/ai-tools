@@ -5,16 +5,20 @@ compatibility: Requires web search and fetch tools (built into Claude Code; othe
 disable-model-invocation: true
 allowed-tools: WebSearch, WebFetch, Read, Write, Glob, Bash(cp:*), Bash(mkdir:*)
 effort: max
-argument-hint: [research prompt — reference an existing research path for a deep dive; ask for "deep research" to get the verified path]
+argument-hint: [research prompt — reference an existing research path for a deep dive; ask for "deep research" to get the verified path; or "repair" to verify/restore shared assets and the corpus index]
 ---
 
 # Deep Research
 
 Conduct research on a topic and produce structured, high-quality documentation: canonical markdown plus a portable HTML microsite view.
 
+## Mode Routing: repair
+
+Check this **before Phase 0**. If `$ARGUMENTS` starts with the literal token `repair`, this is a **maintenance run, not research**: read `references/repair-mode.md` and follow it end-to-end, then stop. Repair is filesystem-only — explicitly SKIP Phase 0's web-access gate (no web tools are needed or used) and every research phase below. Anything else in `$ARGUMENTS` is a research prompt; continue to Phase 0.
+
 ## Phase 0: Verify Web Access (blocking)
 
-The research loop depends on web search and page fetching (`WebSearch`/`WebFetch` in Claude Code; a web-access package on other harnesses). Before anything else — before even reading the research prompt — confirm this session actually has working web tools:
+The research loop depends on web search and page fetching (`WebSearch`/`WebFetch` in Claude Code; a web-access package on other harnesses). Before anything else on a research run — before even reading the research prompt — confirm this session actually has working web tools:
 
 - **Available** → proceed to Phase 1.
 - **Not available** → STOP. Tell the user this skill cannot run without web tools, name a remedy if one is known (Pi: `pi install npm:pi-web-access`), and end the turn. Produce nothing else: no research plan, no findings, no bibliography. Research written from memory with a sources list that was never fetched is a false record — worse than no answer — no matter how confident you are in the underlying facts.
@@ -123,7 +127,7 @@ Would you like to adjust the focus, add questions, or change the output structur
 
 **Planned Output:**
 - `deep-dives/[slug]-[date]/index.md`, `findings.md`, `resources.md`
-- Plus `.html` views (shares the parent report's assets)
+- Plus `.html` views (shares the corpus assets)
 
 Shall I proceed, or would you like to adjust the focus?
 ```
@@ -240,29 +244,33 @@ When this is a deep-dive follow-up:
 
 ## Phase 3.5: Generate the HTML microsite
 
-Every `.md` page gets a portable `.html` sibling. The report folder carries its own frozen copy of the assets, so it keeps working (offline, over `file://`) no matter how the template evolves later.
+Every `.md` page gets a portable `.html` sibling. Assets are **shared at the corpus level and versioned**: one `_project/research/assets/<ver>/` folder serves every report, where `<ver>` is the content of this skill's `assets/template/VERSION` file (currently `v1`). A published version folder is **frozen** — never edited after creation (the lazy mermaid copy below is the only exception, and it only adds a file, never overwrites); when the template is overhauled later, the skill mints the next version folder while existing research keeps rendering against the old one, so reports keep working offline over `file://` forever. Accepted tradeoff: a single report folder is not standalone-copyable — sharing a report means taking `_project/research/assets/` along.
 
-### Copy the assets (new research only)
+### Ensure the corpus assets exist (copy-once)
 
-Copy the template assets into the report root using Bash with **absolute paths**. `<skill-dir>` below is this skill's root directory — substitute its absolute path (announced by the harness when the skill loads) before running; a bare relative path would resolve against the shell's working directory, not the skill:
+Read `<skill-dir>/assets/template/VERSION` for the current asset version (`v1`). If `_project/research/assets/v1/` does not exist, create it from the template using Bash with **absolute paths**. `<skill-dir>` below is this skill's root directory — substitute its absolute path (announced by the harness when the skill loads) before running; `<research-root>` is the absolute path of `_project/research`:
 
 ```bash
-mkdir -p "<report-dir>/assets/vendor"
-cp -r "<skill-dir>/assets/template/fonts" "<report-dir>/assets/"
+mkdir -p "<research-root>/assets/v1/vendor"
+cp -r "<skill-dir>/assets/template/fonts" "<research-root>/assets/v1/"
 cp "<skill-dir>/assets/template/styles.css" \
    "<skill-dir>/assets/template/render.js" \
-   "<skill-dir>/assets/template/theme.js" "<report-dir>/assets/"
+   "<skill-dir>/assets/template/theme.js" \
+   "<skill-dir>/assets/template/VERSION" "<research-root>/assets/v1/"
 cp "<skill-dir>/assets/template/vendor/marked.min.js" \
-   "<skill-dir>/assets/template/vendor/highlight.min.js" "<report-dir>/assets/vendor/"
+   "<skill-dir>/assets/template/vendor/highlight.min.js" \
+   "<skill-dir>/assets/template/vendor/svg-pan-zoom.min.js" "<research-root>/assets/v1/vendor/"
 ```
 
-**mermaid.min.js is large (~2.5 MB) — copy it only if at least one page in the report renders a Mermaid diagram:**
+If the folder already exists, reuse it as-is — never re-copy over a published version.
+
+**mermaid.min.js is large (~3.6 MB) — lazy, once per corpus:** copy it only when a page generated in this run contains a ```mermaid fence AND the file is not already in the corpus assets:
 
 ```bash
-cp "<skill-dir>/assets/template/vendor/mermaid.min.js" "<report-dir>/assets/vendor/"
+cp "<skill-dir>/assets/template/vendor/mermaid.min.js" "<research-root>/assets/v1/vendor/"
 ```
 
-Deep-dives do **not** get their own assets — their pages reference the parent's via `../../assets`. If the deep dive introduces the report's first Mermaid diagram, copy `mermaid.min.js` into the **parent's** `assets/vendor/`. If the parent predates the HTML format (no `assets/` folder), copy the full assets to the parent root and generate `.html` for the parent's pages too — additive only; the parent's markdown content doesn't change beyond the standard index update.
+Deep dives never get their own assets — their pages reference the corpus assets at a deeper relative path (see the placeholder table). If a deep dive introduces the corpus's first Mermaid diagram, the same lazy copy applies. **Legacy reports** that carry their own `assets/` folder (generated before the shared scheme) keep them untouched — but any page you generate or regenerate from now on references the corpus assets at the appropriate depth, never a report-local copy.
 
 ### Generate each page
 
@@ -271,15 +279,42 @@ For every `.md` file in the report: Read `templates/page-template.html` once, th
 | Placeholder | Value |
 |---|---|
 | `{{TITLE}}` | index → `[Topic]`; others → `[Page] — [Topic]` |
-| `{{ASSETS}}` | `assets` for report-root pages; `../../assets` for deep-dive pages |
+| `{{ASSETS}}` | `../assets/v1` for report-root pages; `../../../assets/v1` for deep-dive pages; `assets/v1` for the corpus index |
 | `{{FOOTER}}` | `Generated [YYYY-MM-DD] · dr-research · canonical source: [file].md` |
 | `{{MERMAID_SCRIPT}}` | `<script src="[assets-path]/vendor/mermaid.min.js"></script>` if this page's markdown contains a ```mermaid fence; empty string otherwise |
+| `{{PAGE_CLASS}}` | `corpus-index` for the corpus index page; empty string for every other page |
 | `{{CONTENT_MARKDOWN}}` | the page's full markdown, verbatim |
 
 Notes:
+- The `v1` segment in the `{{ASSETS}}` values is the current content of `assets/template/VERSION` — substitute whatever it says.
 - The markdown is embedded inert in a `<script type="text/markdown">` block and rendered client-side; if the content ever contains a literal `</script`, escape it as `<\/script`.
 - Keep `.md` links in the markdown — the renderer rewrites relative `.md` hrefs to `.html` in the browser.
 - **Whenever you edit any `.md` after generation (including parent-index updates from a deep dive), regenerate its `.html`.** An HTML page must never be staler than its markdown.
+
+### Update the corpus index
+
+`_project/research/index.md` (+ `index.html`) is the corpus landing page listing every report. Every research run keeps it current. Unlike the asset folders it is **not frozen** — `index.html` is regenerated on every run.
+
+1. If `<research-root>/index.md` doesn't exist, create it:
+
+   ```markdown
+   # Research
+
+   Research corpus — newest first. Each entry links to a report's landing page.
+
+   ## Reports
+   ```
+
+2. Add this research's entry under `## Reports` (or update it, if re-running the same report), keeping entries **newest first**. One list entry per report — linked title, date, one-line answer taken from the report's answer block (for non-decision research, its one-line purpose):
+
+   ```markdown
+   - **[[Report Title]](./[slug]-[date]/index.md)** — [YYYY-MM-DD]
+     [One-line answer/verdict.]
+   ```
+
+   Deep dives don't get top-level entries — they're reachable via their parent's Deep Dives section. A deep-dive run still updates the parent's entry line if the answer changed (supersession) and still regenerates `index.html`.
+
+3. **ALWAYS regenerate `index.html`** beside it from the page template: `{{TITLE}}` = `Research`, `{{ASSETS}}` = `assets/v1`, `{{MERMAID_SCRIPT}}` empty, `{{PAGE_CLASS}}` = `corpus-index`, `{{CONTENT_MARKDOWN}}` = the index markdown. The `corpus-index` body class makes report links open in a new tab (the renderer adds `target="_blank"`) and is the hook for index-specific styling. The index is a designed landing page, not a data dump — keep entries scannable (title, date, one-line answer; no metadata tables).
 
 ## Phase 4: Summary
 
@@ -297,6 +332,7 @@ Created: _project/research/[slug]-[date]/
   - resources.md (bibliography — N sources)
   - HTML microsite: open index.html in a browser
     (width + palette + light/dark controls in the top bar; works offline)
+  - Corpus index updated: _project/research/index.md (+ index.html)
 
 Answer: [the one-sentence verdict with its confidence word]
 
