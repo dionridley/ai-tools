@@ -168,7 +168,7 @@ ai-tools/
 │   │       ├── dr-plan/           # Implementation plans: CREATE, REFINE, SUMMARY, QUESTION RESOLUTION
 │   │       └── dr-ship/           # Ship a finished plan: verify → close out → commit → push → PR (invoked as /dr-ship)
 │   ├── engineering-tools/         # Same shape: skills/{frontend-design, react-19}
-│   └── experimental/              # Same shape: skills/{mvp}
+│   └── experimental/              # Same shape: skills/{mvp, pencil}
 ├── pi/                            # Cross-cutting Pi-only artifacts (extensions/, prompts/) — .gitkeep until first content
 └── claude/                        # Cross-cutting Claude-only artifacts wired via settings (plugin hooks are bundle-owned) — .gitkeep until first content
 ```
@@ -346,4 +346,4 @@ Each bundle is a self-contained folder (e.g., `bundles/project-management/`) wit
 ### Current Bundles
 - `bundles/project-management/` - Project management with research, PRDs, and implementation plans
 - `bundles/engineering-tools/` - Frontend-design and React 19 skills
-- `bundles/experimental/` - Experimental capabilities (MVP builder)
+- `bundles/experimental/` - Experimental capabilities (MVP builder; Pencil `.pen` design files)

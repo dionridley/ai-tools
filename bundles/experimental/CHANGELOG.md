@@ -5,6 +5,25 @@ All notable changes to the Experimental plugin will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.11.0] - 2026-07-27
+
+### Added
+
+- **`pencil` skill** — work with Pencil / pen.dev `.pen` design files through the Pencil MCP tools.
+
+  **Why it is built the way it is.** `filePath` is a required parameter on every Pencil MCP tool, which makes it look authoritative. It is not: point it at a `.pen` file the app has not opened and Pencil **silently returns the active document instead** — no error, no warning. An agent told to edit `checkout.pen` reads and writes `homepage.pen`, and the transcript reads as complete success. Every rule in the skill exists to make that impossible.
+
+  - **Preflight binding.** Before the first write, the skill proves it reached the document you named by comparing a live probe of the target against a probe of the active editor. Identical responses mean the fallback fired — it aborts rather than guessing. Verified live against a document the app had never opened.
+  - **Visual decisions.** When a design choice has real alternatives, it draws 2–3 labelled variants into a temporary `[decision]` frame, verifies its own work with a screenshot, and tells you the frame name *and canvas position* so you can find it. It applies the winner, deletes the frame, and confirms removal. Minor changes are never drawn.
+  - **Authoring-time capture.** Fires while a plan, PRD, or spec involving design work is being written, to capture the target `.pen` path while a human is present — because by the time a plan runs unattended there is nobody to ask. Keyed on the *activity*, never on a named planning tool, so it works with any of them or with none.
+  - **Never claims a file was written.** MCP edits are in-memory; the `.pen` on disk is unchanged until you save. The skill reports edits as unsaved.
+
+  Routing is description-based and measured against a 75-prompt regression corpus (`_project/docs/pencil-routing-corpus.md`) — 36 negatives across ten categories, half held out. It does not fire on database design, API design, system design, design patterns, or the unrelated `pen-lang` / `open-pencil` projects sharing the `.pen` extension.
+
+  **Built against the MCP surface as of 2026-07-27.** The tool surface changed during development — `get_editor_state` → `get_app_state`, `batch_design` → `execute`, and `batch_get` / `snapshot_layout` / `get_variables` folded into `execute`'s `Get` and `GetVariables`. The skill targets the new surface. Every *behavioural* finding survived the change unaltered — the silent `filePath` fallback, memory-only writes, id collisions, the self-reported issues block — which suggests those are properties of the app's document dispatch rather than of any tool. If the surface moves again, expect to retarget call sites and keep the rules.
+
+  **Requires** the Pencil MCP server with the desktop app running and the target file open. macOS is untested; the skill encodes no platform-specific paths or transports, and a verification checklist ships at `_project/docs/pencil-macos-verification.md`.
+
 ## [0.10.2] - 2026-07-21
 
 ### Added
