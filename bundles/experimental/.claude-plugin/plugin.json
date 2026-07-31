@@ -1,6 +1,6 @@
 {
   "name": "experimental",
-  "version": "0.10.2",
+  "version": "0.11.0",
   "description": "Work in Progress Tools — experimental capabilities under active development and testing",
   "author": {
     "name": "Dion Ridley",
@@ -11,11 +11,15 @@
     "scaffolding",
     "autonomous",
     "prototype",
-    "web-development"
+    "web-development",
+    "design",
+    "pencil",
+    "pen.dev"
   ],
   "license": "MIT",
   "commands": [],
   "skills": [
-    "./skills/mvp"
+    "./skills/mvp",
+    "./skills/pencil"
   ]
 }
