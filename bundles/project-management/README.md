@@ -375,6 +375,28 @@ When a PR URL is provided:
 
 The agent is a deliberate iteration surface. Common tuning dimensions: skepticism level (how readily `UNVERIFIED` is chosen over `PASS`), evidence thresholds (what counts as direct evidence vs. inference), and the scope boundary (keeping it out of architecture advice). Contributions welcome via PR.
 
+#### When the verifier can't run
+
+**Independent verification is the outcome; delegating to the agent is the preferred mechanism, not the definition.** Not every harness has subagents — Pi has no built-in primitive — and a session can withhold delegation even where one exists. So the gate has three branches: delegate if you can, otherwise verify inline against the shared rubric at `skills/dr-plan/references/verification-rubric.md`, and if a mechanism exists but you're unsure you may use it, **ask** rather than assume.
+
+An inline verification **labels itself** in the plan, immediately after the gate task's checkbox:
+
+```
+- [x] [INLINE FALLBACK 2026-07-31: agent not registered] **Run this phase's independent verification.** …
+```
+
+`<condition>` is one of `no subagent mechanism`, `agent not registered`, `spawn attempted and rejected`, `delegation withheld`, or `permission uncertain, not resolved`.
+
+This label is the point of the whole arrangement. A check that silently didn't happen leaves a plan asserting a verification it never got — and nothing downstream re-examines it, so a false record of a check is worse than a missing one. The label turns that into something you can find:
+
+```
+\[INLINE FALLBACK [0-9]{4}-[0-9]{2}-[0-9]{2}:
+```
+
+Anchor on a real date. Every plan with a verifier-bearing phase carries a worked example containing the literal text `[INLINE FALLBACK YYYY-MM-DD: …]`, so a bare substring search matches plans where nothing ever fell back. `/dr-ship` runs this audit for you and reports it in the Ship Report's `Fallbacks` row — always present, so a clean run confirms the audit actually looked.
+
+On Pi the inline branch is the **normal** path, not a degradation. The label there records which route ran, not that anything went wrong.
+
 ### `/dr-ship`
 
 Ships a finished plan end-to-end: verifies completion, closes the plan out, commits, pushes, and opens a GitHub PR populated from the plan summary. Explicit invocation only — it never auto-triggers, because it pushes and publishes.
@@ -387,14 +409,14 @@ Ships a finished plan end-to-end: verifies completion, closes the plan out, comm
 # Explicit plan file
 /dr-ship @_project/plans/in_progress/003-database-migration.md
 
-# Add independent verification by the plan-verifier agent before closing out
+# Add independent verification of the final phase before closing out
 /dr-ship --verify
 ```
 
 **What it does:**
 
-1. **Read-only preflight** — audits every Tasks / Verification / Phase Exit Gate / Success Criteria checkbox and unresolved `[AWAITING]` questions (done plans only: there is no WIP mode), and gathers all git state (branch, changes, remote, upstream, `gh`, existing PR). With `--verify`, the plan-verifier agent independently checks the final phase too. Nothing is edited or committed yet. If you're on `main`/`master` it stops and offers to create a branch first.
-2. **Ship Report** — a deterministic, fixed-shape status panel: READINESS (checkbox counts, open questions, retro state) and SHIP PLAN (branch, staged files, push target, PR action). Same shape every run, so you can scan it in seconds.
+1. **Read-only preflight** — audits every Tasks / Verification / Phase Exit Gate / Success Criteria checkbox and unresolved `[AWAITING]` questions (done plans only: there is no WIP mode), and gathers all git state (branch, changes, remote, upstream, `gh`, existing PR). With `--verify`, the final phase is independently verified too — delegated to the plan-verifier agent where the harness supports subagents, run inline against the shared rubric where it doesn't, with the Ship Report stating which. Nothing is edited or committed yet. If you're on `main`/`master` it stops and offers to create a branch first.
+2. **Ship Report** — a deterministic, fixed-shape status panel: READINESS (checkbox counts, open questions, retro state, and any phase that fell back to inline verification) and SHIP PLAN (branch, staged files, push target, PR action). Same shape every run, so you can scan it in seconds.
 3. **One short gate question** — just "Ship it / Adjust / Abort". With blocking items it becomes **Ship anyway** (the escape hatch: bulk-waives them with a dated `[WAIVED ...: shipped via /dr-ship escape hatch]` tag; checkboxes honestly stay unchecked) / **Finish first** / **Adjust** (individually-reasoned waivers, staging tweaks) / **Abort**. Aborting leaves the repo exactly as it was found.
 4. **Closes out and ships** — after approval, with no further prompts: backfills the Retro from the plan's accumulated notes (auto-drafted, no extra question), sets `Status: completed`, moves the file to `completed/` so the archived plan rides in the same commit, then commits, pushes, and opens the PR. The PR body is generated with the same format rules as `/dr-plan summary` (single source of truth); if an open PR already exists for the branch, it's updated instead.
 5. **Displays the squash-merge commit message** — always, at the end. Copy it into GitHub's merge box after reviewing the PR.

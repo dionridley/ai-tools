@@ -132,7 +132,7 @@ Only when restructuring is genuinely impossible (e.g., a schema rename truly has
 
 ## Phase 7: Annotate Phase Exit Gates (Adaptive Verifier)
 
-For each phase, decide whether spawning `project-management:plan-verifier` is worth the cost, given the Adaptive default Verification Policy.
+For each phase, decide whether independent verification is worth the cost, given the Adaptive default Verification Policy. Judge the *outcome* — an independent pass over this phase's claims — not the mechanism: it runs as `project-management:plan-verifier` where the harness supports subagents, and inline against the plan's Inline Verification Rubric where it does not.
 
 Write a single HTML comment in each phase's Phase Exit Gate block:
 
@@ -173,9 +173,12 @@ Based on the recommendation and the Verification Policy (`Adaptive` by default):
 <!-- verifier-recommendation: yes — [reasoning] -->
 
 - [ ] Run Definition of Done commands (see plan header). All must pass.
-- [ ] **Spawn plan-verifier.** Invoke `subagent_type="project-management:plan-verifier"` with the plan file path and phase number. Wait for its report. If the harness cannot spawn subagents, run this phase's Verification checklist yourself in a fresh, skeptical pass and record PASS/FAIL per item.
-- [ ] **Apply verification report.** Flip `[x]` only for tasks the verifier reports as PASS. Keep `[ ]` for FAIL and UNVERIFIED with a note referencing the verifier's reasoning.
-- [ ] **Agent self-review.** Re-read Tasks above, confirm the verifier's recommendations are reflected, note any UNVERIFIEDs that need follow-up in future phases or the Retro.
+- [ ] **Run this phase's independent verification.** The Verification Policy in this plan's header is the user's standing request for independent verification — for the outcome, not for any particular mechanism. The plan is not what withholds permission, so never skip on the plan's account; if your harness withholds delegation, that is branch 2.
+  1. **Delegated (preferred)** — if the harness supports subagents, `plan-verifier` is registered, and the session does not withhold delegation: delegate with this plan's path and phase number, then wait for the report. *(Claude Code: `subagent_type="project-management:plan-verifier"`.)*
+  2. **Inline fallback** — otherwise verify this phase yourself against the **Inline Verification Rubric** in this plan's header: a fresh, skeptical pass that **records a verdict per item** — PASS / FAIL / UNVERIFIED for every task, Verification item, and Acceptance Criterion, each with its evidence. Then tag this task immediately after its checkbox: `[INLINE FALLBACK YYYY-MM-DD: <condition>]`. The rubric defines the condition values and how to choose between them.
+  3. **Never silently self-pass** — if a mechanism exists but you are unsure you may use it, ask. Uncertainty about permission is not inability. If you do not ask, branch 2 with its label is still required: an unannotated pass is the one outcome this gate exists to prevent.
+- [ ] **Apply the verification result.** Flip `[x]` only for items the verification returned PASS — whether that came from the verifier or from your own inline pass. Keep `[ ]` for FAIL and UNVERIFIED with a short note referencing the reasoning.
+- [ ] **Agent self-review.** Re-read Tasks above, confirm the verification's findings are reflected, note any UNVERIFIEDs that need follow-up in future phases or the Retro.
 ```
 
 **If `verifier-recommendation: no`** (and Policy is not Always), render the gate as:
@@ -189,7 +192,9 @@ Based on the recommendation and the Verification Policy (`Adaptive` by default):
 - [ ] **Agent self-review.** Re-read all Tasks above. Flip `[x]` only for tasks whose Verification passed. Any failing or skipped task stays `[ ]` with a short note explaining why. Under-report beats over-report.
 ```
 
-Leave the `Spawn plan-verifier` and `Apply verification report` tasks out entirely when the recommendation is `no` — don't render them as skipped.
+Leave the `Run this phase's independent verification` and `Apply the verification result` tasks out entirely when the recommendation is `no` — don't render them as skipped.
+
+**The `## Inline Verification Rubric` section renders on the same condition, plan-wide.** Include it in the plan header if *any* phase carries the verification task; omit it entirely if none does (every phase `no`, or Policy = Never). It is what branch 2 points at, so a plan carrying the gate task without it would send a falling-back agent to a section that isn't there. Generate it from `references/verification-rubric.md` — everything above that file's `## Report` heading, with headings demoted one level — and **never retype it**; the two must stay verbatim-identical, which is checkable by `diff` and is not checkable by reading.
 
 ## Phase 8: Compose the Template
 

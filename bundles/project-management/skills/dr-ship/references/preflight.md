@@ -18,16 +18,47 @@ Read the plan and collect every incomplete item:
 - **Assumptions** — their validation state is informational, not a shipping gate.
 - **Non-blocking** open questions tagged `[OPEN]`.
 - Retro placeholder bullets — the retro is auto-drafted at close-out; the report's `Retro` row notes it.
+- **Anything inside a fenced code block** (``` or `~~~`). Plans quote gate text, templates, and example checklists as illustrations; those `- [ ]` lines are sample text, not work. Counting them reports phantom blocking items on exactly the plans that document this skill.
+
+**Inline-fallback labels — informational, but always shown.**
+
+A gate task carrying `[INLINE FALLBACK YYYY-MM-DD: <condition>]` is **not blocking**: it is `[x]`, and the verification genuinely happened. But it did not happen the way the delegated path would have, and that is a fact the person approving a push should see rather than have to go looking for. Collect these alongside the audit and report them in the Ship Report's `Fallbacks` row.
+
+Detect with the **date-anchored** pattern, never a bare substring — via `Grep`, not the shell (principle 11 allows only git, gh, and `rm`):
+
+```
+\[INLINE FALLBACK [0-9]{4}-[0-9]{2}-[0-9]{2}:
+```
+
+**Then discard hits inside fenced blocks, and hits outside a `#### Phase Exit Gate` block.** Both exclusions are load-bearing, and each catches a different false positive:
+
+- **The date anchor** excludes the worked example in every plan's `## Inline Verification Rubric` section, which contains the literal token with a `YYYY-MM-DD` placeholder.
+- **The fence exclusion** excludes *quoted real evidence*. A plan that documents a fallback — a retro, a findings block, a plan about this feature — quotes correctly-dated labels as illustrations. Those are prose about a fallback, not a fallback.
+- **The block scoping** is the backstop: a real label only ever lives on a gate task, so a hit anywhere else is discussion.
+
+A label reported from any of these is a plan being blamed for describing the mechanism rather than using it.
+
+Record the **phase number** with each surviving hit, not just the line — the Ship Report's `Fallbacks` row is keyed by phase, and a line number cannot be turned back into one after the fact.
+
+Every plan with a verifier-bearing phase carries an `## Inline Verification Rubric` section whose worked example contains the literal text `[INLINE FALLBACK YYYY-MM-DD: …]`. A bare `INLINE FALLBACK` match therefore fires on every such plan whether or not a fallback ever occurred, which would make `✅ Fallbacks none` unreachable and the row meaningless. Anchoring on a real date excludes the example by construction.
 
 Do **not** display the audit as its own prose — the results feed the Ship Report's READINESS section. Keep each blocking item's quoted line on hand: the gate's Finish-first and Adjust responses need them.
 
 ## 1b. `--verify` (only when the flag was passed)
 
-Spawn the verifier via the Agent tool with `subagent_type="project-management:plan-verifier"`, passing the plan file path and the final phase number. Wait for its report. If the harness cannot spawn subagents, run the verifier's checklist inline in a fresh, skeptical pass and record PASS/FAIL per item.
+Run independent verification of the final phase. Three branches, in order:
+
+1. **Delegated (preferred)** — if the harness supports subagents, `plan-verifier` is registered, and the session does not withhold delegation: spawn it via the Agent tool with `subagent_type="project-management:plan-verifier"`, passing the plan file path and the final phase number, then wait for its report.
+2. **Inline fallback** — otherwise verify the final phase yourself against `../dr-plan/references/verification-rubric.md` (in the sibling `dr-plan` skill, relative to this skill's root), recording a verdict per item.
+
+   **Do not write an `[INLINE FALLBACK …]` tag here.** The rubric instructs a *Phase Exit Gate* caller to tag its gate task; that instruction does not apply to `/dr-ship`, for two reasons. Preflight is **read-only** (see the top of this file) — it writes nothing before the gate approves. And the tag would be false: a gate task records how *that phase* was verified, not how `/dr-ship` verified it afterwards. Report the branch in the Ship Report's `Verifier` row, which exists for exactly this.
+3. **Never silently self-pass** — if a mechanism exists but you are unsure you may use it, **ask**. Uncertainty about permission is not inability. This flag gates a push and a PR, so an unannotated pass here ships unverified work.
+
+**Read the rubric file — never a plan's `## Inline Verification Rubric` section.** A generated plan carries that section and points its own gates at it, because a plan file sits in the user's repo and cannot resolve a path into a skill. `/dr-ship` is the mirror case: it is a skill, so it *can* resolve the file, and it must — it runs against plans generated before that section existed, and against plans whose phases are all `verifier-recommendation: no`, neither of which has one. The two reach the same rubric by different routes on purpose.
 
 - Every **FAIL** and **UNVERIFIED** verdict is an additional blocking item; keep the verdicts verbatim.
 - Do not soften or reinterpret the verdicts. Under-report beats over-report.
-- The Ship Report gains a `Verifier` row in READINESS.
+- The Ship Report gains a `Verifier` row in READINESS, **stating which branch ran** — a delegated verification and an inline one are not the same evidence, and the reader is about to approve a push.
 
 ## 1c. Git state
 
@@ -72,7 +103,8 @@ READINESS
   ⚠️ Verification       [done]/[total] — [N] unchecked (Phase [M])
   ✅ Open questions     none blocking
   ℹ️ Retro              placeholder — will draft
-  ⚠️ Verifier           [N] FAIL / [M] UNVERIFIED
+  ℹ️ Fallbacks          [N] — Phase [M] ([condition])
+  ⚠️ Verifier           [branch] — [N] FAIL / [M] UNVERIFIED
 
 SHIP PLAN
   Branch   [branch] (existing | created now)
@@ -90,6 +122,8 @@ Template rules — deterministic on purpose; users should see the identical shap
 
 - **Fixed row order, all rows always present** (exceptions: `Verifier` only with `--verify`; `FILES` collapses to a single `nothing to commit` line when empty).
 - **Glyphs:** ✅ nominal · ⚠️ blocking (needs waiving or finishing) · ℹ️ informational, auto-handled (e.g., retro auto-draft — never counts toward the blocking total).
+- **`Fallbacks` row — always present, never blocking.** `✅ Fallbacks  none` when the date-anchored audit (1a) finds no label; otherwise `ℹ️ Fallbacks  [N] — Phase [M] ([condition])`, listing **the two lowest-numbered phases, in phase order**, then `+[K] more`. Lowest-first and not "first found", because the template's whole virtue is that two runs over the same plan print the same thing. It is always present precisely so a clean run *positively confirms the audit looked* — a row that only appears on failure cannot distinguish "no fallbacks" from "nobody checked".
+- **`Verifier` row states its branch first**, then the verdict counts: `delegated — 0 FAIL / 1 UNVERIFIED`, or `inline fallback — 0 FAIL / 2 UNVERIFIED`. The counts alone are not the whole story; a reader approving a push should see how the evidence was obtained, not just what it said. The row still appears only with `--verify`.
 - **READINESS rows** use `done/total` counts. A ⚠️ row appends ` — ` plus the shortest useful locator (phase number, question tag). No quoted plan lines here — those surface only if the user picks Finish first or Adjust.
 - **FILES:** plan move first (status `R`, actual source path; omitted when no move is needed; suffixed `(untracked — filesystem move only)` when applicable), then `git status --porcelain` entries as `[two-letter status]  [path]`, capped at **10 lines**, then `…  (+[K] more)`. No other per-file commentary or annotations — ever.
 - **No prose inside the fence.** After the fence, at most one line: `⚠️ [N] blocking item(s) — "Ship anyway" waives them with a dated tag.` Omit it when clean.

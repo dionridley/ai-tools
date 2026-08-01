@@ -132,10 +132,12 @@ Use `AskUserQuestion` with the three options from the plan:
 
 > Verification Policy controls how Phase Exit Gates verify completion. Current: [value]. Change to?
 
-- **Always** — every phase spawns `plan-verifier`. Highest rigor, highest token cost.
-- **Adaptive (default)** — each phase annotated at create-time; verifier runs only where the model judged it worth the cost.
+- **Always** — every phase gets independent verification. Highest rigor, highest token cost.
+- **Adaptive (default)** — each phase annotated at create-time; verification runs only where the model judged it worth the cost.
 - **Never** — agent self-review only.
 - **Keep current ([value]).**
+
+Independent verification is the outcome; delegation is the preferred mechanism, not the definition. Where the harness supports subagents it runs as `plan-verifier`; where it does not — Pi has no built-in subagent primitive — it runs inline against the plan's Inline Verification Rubric and labels itself `[INLINE FALLBACK …]`. Always and Adaptive are meaningful on both harnesses; Never differs in kind, rendering no verification task at all.
 
 If the user picks "Keep current," skip Phase 5b's downstream effects entirely. Otherwise, store the new policy and trigger Phase 7 (Exit Gate regeneration).
 
@@ -164,7 +166,7 @@ Record the outcome for each.
 
 **Skip this phase entirely if the Verification Policy did not change in Phase 5b.**
 
-When Policy changes, regenerate every phase's Phase Exit Gate block to match. The regeneration touches ONLY the Phase Exit Gate block — Tasks, Verification, Acceptance Criteria, and existing `[x]` progress are preserved verbatim.
+When Policy changes, regenerate every phase's Phase Exit Gate block to match. Regeneration touches exactly two things — **the Phase Exit Gate blocks, and the plan-wide `## Inline Verification Rubric` section** (which the new policy may require adding or removing; see the Preservation rule below). Everything else — Tasks, Verification, Acceptance Criteria, and existing `[x]` progress — is preserved verbatim.
 
 ### Rule per policy
 
@@ -176,9 +178,12 @@ When Policy changes, regenerate every phase's Phase Exit Gate block to match. Th
   <!-- verifier-recommendation: yes — policy: Always (forced) -->
 
   - [ ] Run Definition of Done commands (see plan header). All must pass.
-  - [ ] **Spawn plan-verifier.** Invoke `subagent_type="project-management:plan-verifier"` with the plan file path and phase number. Wait for its report. If the harness cannot spawn subagents, run this phase's Verification checklist yourself in a fresh, skeptical pass and record PASS/FAIL per item.
-  - [ ] **Apply verification report.** Flip `[x]` only for tasks the verifier reports as PASS. Keep `[ ]` for FAIL and UNVERIFIED with a note referencing the verifier's reasoning.
-  - [ ] **Agent self-review.** Re-read Tasks above, confirm the verifier's recommendations are reflected, note any UNVERIFIEDs that need follow-up.
+  - [ ] **Run this phase's independent verification.** The Verification Policy in this plan's header is the user's standing request for independent verification — for the outcome, not for any particular mechanism. The plan is not what withholds permission, so never skip on the plan's account; if your harness withholds delegation, that is branch 2.
+    1. **Delegated (preferred)** — if the harness supports subagents, `plan-verifier` is registered, and the session does not withhold delegation: delegate with this plan's path and phase number, then wait for the report. *(Claude Code: `subagent_type="project-management:plan-verifier"`.)*
+    2. **Inline fallback** — otherwise verify this phase yourself against the **Inline Verification Rubric** in this plan's header: a fresh, skeptical pass that **records a verdict per item** — PASS / FAIL / UNVERIFIED for every task, Verification item, and Acceptance Criterion, each with its evidence. Then tag this task immediately after its checkbox: `[INLINE FALLBACK YYYY-MM-DD: <condition>]`. The rubric defines the condition values and how to choose between them.
+    3. **Never silently self-pass** — if a mechanism exists but you are unsure you may use it, ask. Uncertainty about permission is not inability. If you do not ask, branch 2 with its label is still required: an unannotated pass is the one outcome this gate exists to prevent.
+  - [ ] **Apply the verification result.** Flip `[x]` only for items the verification returned PASS — whether that came from the verifier or from your own inline pass. Keep `[ ]` for FAIL and UNVERIFIED with a short note referencing the reasoning.
+  - [ ] **Agent self-review.** Re-read Tasks above, confirm the verification's findings are reflected, note any UNVERIFIEDs that need follow-up.
   ```
 
   Mechanical — no model judgment required.
@@ -200,11 +205,19 @@ When Policy changes, regenerate every phase's Phase Exit Gate block to match. Th
 
 ### Preservation rule
 
-Regeneration is **non-destructive** of everything except the Phase Exit Gate block itself. In particular:
+Regeneration is **non-destructive** of everything except the Phase Exit Gate blocks and the plan-wide rubric section. In particular:
 
 - `[x]` marks on Tasks, Verification checkboxes, and any other block outside the Exit Gate are untouched.
 - Custom user edits inside Tasks / Verification / Acceptance Criteria are preserved.
-- Only the 4-5 lines of the `#### Phase Exit Gate` block (plus its HTML comment) are replaced.
+- Only the `#### Phase Exit Gate` block (plus its HTML comment) is replaced.
+- **A `[INLINE FALLBACK YYYY-MM-DD: …]` tag on an existing gate task is history — never strip it.** It records that a verification actually happened by the inline path on a date. Regenerating the gate around it is fine; deleting it would erase the only durable evidence of how that phase was verified.
+
+**The `## Inline Verification Rubric` section is plan-wide, so a policy change can add or remove it:**
+
+- **→ Always**, or **→ Adaptive** where at least one phase is `yes`: the section must be present. Add it if missing, generated from `references/verification-rubric.md` (everything above its `## Report` heading, headings demoted one level) — never retyped.
+- **→ Never**, or **→ Adaptive** where every phase is `no`: no gate carries the verification task, so remove the section.
+
+Getting this wrong is not cosmetic: a gate whose branch 2 points at a section that isn't there sends a falling-back agent nowhere, which is the failure this whole mechanism exists to prevent.
 
 ### Preview and confirm
 
@@ -240,6 +253,8 @@ Show a preview of the regenerated Exit Gate blocks (per-phase). Use `AskUserQues
 
 5. **Phase Exit Gate regeneration** (Phase 7, only if Policy changed):
    - Replace each `#### Phase Exit Gate` block per the rule for the new policy.
+   - **Add or remove the plan-wide `## Inline Verification Rubric` section** to match: present if any phase now carries the verification task, absent if none does. Generate it — never retype it — from `references/verification-rubric.md`, everything above that file's `## Report` heading with headings demoted one level. Place it after `## Definition of Done`, before `## Implementation Plan`.
+   - **Never strip an existing `[INLINE FALLBACK YYYY-MM-DD: …]` tag.** It records that a verification actually happened by the inline path on a date; regenerating the gate around it is fine, deleting it erases the only durable evidence of how that phase was verified.
    - Preserve all other per-phase content verbatim.
 
 ### Update metadata and history
