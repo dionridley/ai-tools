@@ -21,7 +21,7 @@ It ships **done plans only**. There is no WIP mode — partial or end-of-day pus
 Inspect `$ARGUMENTS` (the user's arguments — substituted here by Claude Code; on harnesses without substitution they arrive in the invoking message):
 
 - **`@plan-file`** — explicit plan reference (Claude Code auto-expands the content and removes the token; on harnesses without `@` expansion, Read the referenced file yourself). Overrides auto-discovery.
-- **`--verify`** — in addition to the checkbox audit, spawn the `project-management:plan-verifier` agent on the final phase for independent, evidence-based verification. If the harness cannot spawn subagents, run the verifier's checklist inline in a fresh, skeptical pass instead.
+- **`--verify`** — in addition to the checkbox audit, run independent, evidence-based verification of the final phase. Delegate to the `project-management:plan-verifier` agent where the harness supports subagents and the session does not withhold it; otherwise verify inline against `../dr-plan/references/verification-rubric.md`. Either way the Ship Report states which branch ran. If a mechanism exists but you are unsure you may use it, ask — uncertainty about permission is not inability, and this flag gates a push and a PR.
 
 ## Phase 0: Locate the Plan
 

@@ -15,7 +15,16 @@ All plan-file edits happen now, before anything is committed, so the completed p
   ```
 
 - **Adjust waivers:** same tag format, but with the user's stated reason instead of the escape-hatch boilerplate.
-- **Verifier-flagged items whose plan line is already `[x]`:** append the same tag with the verifier's verdict quoted in the reason, leaving the checkbox as the executing agent set it — the tag records that shipping proceeded despite the verdict.
+- **Verification-flagged items whose plan line is already `[x]`:** append the same tag with the verdict quoted in the reason — whether it came from the delegated verifier or from an inline pass — leaving the checkbox as the executing agent set it. The tag records that shipping proceeded despite the verdict.
+- **Never strip an `[INLINE FALLBACK YYYY-MM-DD: …]` tag** while editing a line for any of the above. It is a record of how that phase was actually verified, not a status marker to tidy away.
+
+  **When a line already carries one, the waiver goes second:**
+
+  ```
+  - [x] [INLINE FALLBACK 2026-07-31: agent not registered] [WAIVED 2026-07-31: reason] Original task text
+  ```
+
+  This resolves an ambiguity between the two instructions above: "insert the tag after the checkbox" and "append the same tag" give opposite results on a labelled line. The order is **how it was verified, then what was decided about the result** — chronological, and it keeps the fallback label in the fixed position its own audit pattern expects. Same rule as `../dr-plan/references/verification-rubric.md` states, restated here because this is the file that actually writes waiver tags, and the delegated and escape-hatch paths never read that rubric.
 
 ### Retro backstop
 

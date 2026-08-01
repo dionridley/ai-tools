@@ -5,6 +5,28 @@ All notable changes to the Project Management Plugin will be documented in this 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.3.0] - 2026-07-31
+
+Phase Exit Gate verifier fallback hardening (plan 013). Field report: `planaraid/par` plan 073, where an agent that *could* spawn the verifier — and was authorized to — read the fallback clause as covering its situation, self-verified, and recorded a pass that nobody noticed until the user asked. When the verifier eventually ran it found a real defect the green test suite had missed.
+
+### Changed
+
+- **Phase Exit Gates are now capability-first, with three explicit branches** replacing the single clause *"If the harness cannot spawn subagents, run this phase's Verification checklist yourself."* That clause conflated *cannot* with *may not*, and covered both a defect and a normal operating mode at once — which is why the defect was invisible. Delegate where subagents exist, the agent is registered, and the session does not withhold it; otherwise verify inline; and if a mechanism exists but you are unsure you may use it, **ask**. Applied to all eight sites across `dr-plan` (`plan-base.md`, `create-mode.md`, `questions-mode.md`) and `dr-ship` (`SKILL.md`, `preflight.md`), including three `Apply verification report` sites written in language that had no referent under a fallback.
+- **An inline verification must label itself** with `[INLINE FALLBACK YYYY-MM-DD: <condition>]`, placed immediately after the gate task's checkbox, mirroring the existing `[WAIVED YYYY-MM-DD: reason]` convention. This is the load-bearing change: the other two branches are prose guards, and prose guards are what failed in 073. The label is the only part that leaves a durable, auditable artifact — a missing check is recoverable, a **false record of a check** is not, because nothing downstream ever re-examines it. `<condition>` is one of five values; two of them (`delegation withheld`, `permission uncertain, not resolved`) exist because the first three could not describe the 073 incident itself, and an agent with no legal value to write is an agent that writes nothing.
+- **Verification Policy options reframed around independent verification as the outcome**, with delegation as the preferred mechanism rather than the definition. Option A previously promised *"Every phase spawns `project-management:plan-verifier`"*, which no stock Pi install can satisfy — Pi has no built-in subagent primitive (verified against `@earendil-works/pi-coding-agent` 0.81.1; subagents exist only as an example extension whose discovery does not reach installed packages). On Pi the labelled inline branch is the normal path, not a degradation.
+- **`/dr-ship` surfaces fallbacks before it lets you push.** The Ship Report gains an always-present `Fallbacks` row — `✅ Fallbacks none` on a clean run, so a reader can tell "none found" from "nobody looked" — and the `--verify` `Verifier` row now leads with which branch ran. Detection uses a date-anchored pattern, never a bare substring: every plan with a verifier-bearing phase ships a worked example containing the literal token, so a naive search matches plans where nothing fell back.
+
+### Added
+
+- **`skills/dr-plan/references/verification-rubric.md`** — the rubric the inline branch verifies against: verdict definitions, eight skepticism rules, the condition vocabulary, and a report shape. Written fresh rather than extracted from `agents/plan-verifier.md`, which is **byte-unchanged**: stubbing the agent to share a source would have risked the delegated path that already works in order to fix the fallback one. The two audiences genuinely differ — a fresh subagent needs *"a task marked `[x]` is not evidence"*; an agent grading its own work needs *"you wrote this code; that is a reason for more skepticism, not less."*
+- **A conditional `## Inline Verification Rubric` section in generated plans**, rendered only when at least one phase carries a verification task. A plan sits in the user's repo and cannot resolve a path into an installed skill, so it carries the rubric; `/dr-ship` is a skill and reads the file directly. The two reach the same rubric by different routes on purpose — `/dr-ship` must not depend on the section, since it runs against plans generated before it existed. The section is **generated** from the reference file, never retyped, and the copies are held verbatim-identical by `diff` rather than by inspection: every drift caught while building this was "the same substance", which is exactly why inspection missed them.
+
+### Fixed
+
+- `dr-ship`'s *"run the verifier's checklist inline"* named a document the skill had no legal path to — a pre-existing unresolvable instruction, now pointing at the shared rubric via the same-bundle route already used for `summary-mode.md`.
+- The readiness audit no longer counts `- [ ]` lines inside fenced code blocks, which are quoted examples rather than work.
+- `questions-mode.md` Phase 7 regeneration now maintains the plan-wide rubric section alongside per-phase gates, and never strips an existing `[INLINE FALLBACK …]` tag — that tag is history, not a status marker.
+
 ## [3.2.0] - 2026-07-22
 
 dr-research microsite asset overhaul (plan 011).
