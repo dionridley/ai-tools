@@ -118,19 +118,6 @@ If a category genuinely doesn't apply (e.g., no type system in a pure JS repo, n
 
 Every phase must leave the codebase shippable — tests, lint, and typecheck green at every phase boundary. This is the hard rule.
 
-### Write phases that can be verified on their own
-
-**A phase's Verification items and Acceptance Criteria must be interpretable without reading another phase.** Independent verification reads the target phase plus four named top-matter sections — not the whole plan — so a criterion that silently depends on a sibling phase's text is a criterion the verifier has to go hunting for, or gets wrong.
-
-The distinction is **files versus phases**, and only one of them is a constraint:
-
-- **Spanning files is normal and correct.** *"All six gate/apply sites carry identical three-branch logic"* is a good criterion. Say so plainly; the verifier will go and read all six.
-- **Spanning phases needs the dependency stated inline.** *"The negative-test design for Phase 5 is fixed"* is not evaluable by someone who has not read Phase 5. Either restate what Phase 5 needs — *"…so Phase 5 can run its test without a settings edit"* — or name the cross-reference explicitly so the verifier knows to fetch it.
-
-Where a genuine cross-phase dependency exists — an interim-phase marker, a restoration promised in a later phase, an artifact one phase hands to the next — **write it into the phase body as an entry condition**, in a sentence that stands alone. A reader who opens only that phase should be able to tell what it assumes.
-
-This is a writing rule, not a prohibition. Cross-phase work is legitimate; leaving the dependency implicit is what costs.
-
 ### Restructure to satisfy strict DoD
 
 Analyze your proposed phases. If Phase N as drafted leaves the codebase broken (failing tests, broken build, type errors) with Phase N+1 as the fix, **restructure them.** Combine into one larger phase, reorder work, or extract a prerequisite into an earlier phase. Prefer restructuring over interim phases in ~95% of cases.
@@ -206,61 +193,6 @@ Based on the recommendation and the Verification Policy (`Adaptive` by default):
 ```
 
 Leave the `Run this phase's independent verification` and `Apply the verification result` tasks out entirely when the recommendation is `no` — don't render them as skipped.
-
-### Hold the gate blocks byte-identical across all three files
-
-Both shapes above are reproduced in `references/questions-mode.md` (which regenerates gates when
-Verification Policy changes) and in `templates/plan-base.md` (which the composing model loads).
-That is **three files rendering the same instructions**, and every line of them is text an agent
-will act on.
-
-**State the invariant over the whole gate block, never over a list of lines.** Plan 013 held the
-gate task and the Apply task identical under a criterion that named exactly those six sites. The
-**Agent self-review** line was a seventh site that the list did not reach, and it drifted unseen:
-by 3.3.0 there were five renderings with five distinct texts, including a `no`-shape line sitting
-inside `plan-base.md`'s `yes`-shape gate — so the gate's *last* instruction keyed the `[x]` flip to
-the Verification command block while the line above it keyed the flip to the verification's
-verdict. A criterion scoped to a list stops at the end of the list.
-
-> **Every line of a rendered Phase Exit Gate is byte-identical across every file that renders it,
-> within its shape.**
->
-> Two permitted differences, both structural: `questions-mode.md`'s uniform two-space indent
-> (its copies sit in fenced blocks nested in list items), and a trailing `*(…)*` annotation in
-> `templates/plan-base.md` addressed to the composing model, which never ships into a generated
-> plan.
-
-Checkable by `diff`, and not checkable by reading. From `skills/dr-plan/`:
-
-```bash
-# Normalisation is PER FILE, matching the exemptions above. A shared normaliser would apply
-# plan-base.md's annotation exemption to create-mode.md too — and create-mode.md's block ships
-# verbatim into generated plans, so a trailing annotation there is a defect, not an exemption.
-cm() { grep -hE "$1" references/create-mode.md; }                             # no exemption
-qm() { grep -hE "$1" references/questions-mode.md | sed 's/^ *//'; }          # structural indent
-pb() { grep -hE "$1" templates/plan-base.md | sed 's/ \*([^)]*)\*$//'; }      # template annotation
-
-YES='^ *- \[ \] \*\*Agent self-review\.\*\* Re-read Tasks above,'
-NO='^ *- \[ \] \*\*Agent self-review\.\*\* Re-read all Tasks above\.'
-APPLY='^ *- \[ \] \*\*Apply the verification result\.\*\*'
-
-# Two assertions per line, not one. Identity alone passes when a site is DELETED.
-check() { printf 'present %s (want %s) · distinct %s (want 1)\n' \
-  "$(wc -l <<< "$1")" "$2" "$(sort -u <<< "$1" | wc -l)"; }
-
-check "$( { cm "$YES";   qm "$YES";   pb "$YES";   } )" 3   # yes-shape self-review
-check "$( { cm "$NO";    qm "$NO";                 } )" 2   # no-shape self-review
-check "$( { cm "$APPLY"; qm "$APPLY"; pb "$APPLY"; } )" 3   # Apply line
-```
-
-Anything other than the wanted counts is drift. **Change a gate line in one file and you change it
-in all of them in the same edit** — then run the checks. `refine-mode.md` is a third path that can
-write gate text; if it grows a copy, it joins this list.
-
-**Why two assertions.** `sort -u | wc -l` returning 1 means "every rendering that exists agrees."
-It says nothing about how many exist, so deleting a site outright passes it. Presence and identity
-are different properties and a single number cannot carry both — which is the same shape of error
-as a criterion that names six sites when there are seven.
 
 **The `## Inline Verification Rubric` section renders on the same condition, plan-wide.** Include it in the plan header if *any* phase carries the verification task; omit it entirely if none does (every phase `no`, or Policy = Never). It is what branch 2 points at, so a plan carrying the gate task without it would send a falling-back agent to a section that isn't there. Generate it from `references/verification-rubric.md` — everything above that file's `## Report` heading, with headings demoted one level — and **never retype it**; the two must stay verbatim-identical, which is checkable by `diff` and is not checkable by reading.
 

@@ -199,12 +199,6 @@ path ran, not that something went wrong. Write it plainly and without apology.
 
 <!-- verifier-recommendation: {{YES_OR_NO}} — {{REASONING}} -->
 
-<!-- MAINTAINERS: every line of this gate block is duplicated in references/create-mode.md and
-     references/questions-mode.md. Change one, change all three in the same edit, then run the
-     drift checks in create-mode.md Phase 7, "Hold the gate blocks byte-identical". The last
-     defect here reached 3.3.0 because a fix landed at the two sites the author was looking at
-     and missed the third. -->
-
 - [ ] Run Definition of Done commands (see plan header). All must pass.
 - [ ] **Run this phase's independent verification.** The Verification Policy in this plan's header is the user's standing request for independent verification — for the outcome, not for any particular mechanism. The plan is not what withholds permission, so never skip on the plan's account; if your harness withholds delegation, that is branch 2.
   1. **Delegated (preferred)** — if the harness supports subagents, `plan-verifier` is registered, and the session does not withhold delegation: delegate with this plan's path and phase number, then wait for the report. *(Claude Code: `subagent_type="project-management:plan-verifier"`.)*
@@ -212,7 +206,7 @@ path ran, not that something went wrong. Write it plainly and without apology.
   3. **Never silently self-pass** — if a mechanism exists but you are unsure you may use it, ask. Uncertainty about permission is not inability. If you do not ask, branch 2 with its label is still required: an unannotated pass is the one outcome this gate exists to prevent.
   *(Only present when Verification Policy is Always, or Adaptive + this phase's recommendation is yes. Renders together with the `## Inline Verification Rubric` section in the plan header.)*
 - [ ] **Apply the verification result.** Flip `[x]` only for items the verification returned PASS — whether that came from the verifier or from your own inline pass. Keep `[ ]` for FAIL and UNVERIFIED with a short note referencing the reasoning. *(Paired with the verification task.)*
-- [ ] **Agent self-review.** Re-read Tasks above, confirm the verification's findings are reflected, note any UNVERIFIEDs that need follow-up in future phases or the Retro. *(This is the `yes` shape, paired with the verification task above. When that task is omitted — Policy is Never, or Adaptive + this phase's recommendation is `no` — this line is replaced by the `no` shape given in create-mode.md Phase 7. Do not restate the `no` shape here: a sixth copy is a sixth thing that can drift.)*
+- [ ] **Agent self-review.** Re-read Tasks above. Flip `[x]` only for tasks whose Verification passed. Any failing or skipped task stays `[ ]` with a short note explaining why. Under-report beats over-report.
 
 ### Phase 2: {{PHASE_2_NAME}}
 

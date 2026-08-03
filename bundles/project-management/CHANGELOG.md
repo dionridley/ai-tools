@@ -5,6 +5,27 @@ All notable changes to the Project Management Plugin will be documented in this 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.4.0] - 2026-08-02
+
+Plan-verifier context reduction, a report-shape change, and a correctness fix to generated gate text (plan 014). Origin: a verifier run takes 8–20 minutes per phase, and the obvious explanations were wrong. Tool execution is ~40 ms; the agent already batches independent calls unprompted. The cost is per-turn model work over a plan that is re-sent in full on every turn.
+
+### Added
+
+- **A regression harness for the verifier**, at `_project/fixtures/verifier-regression/` — four fixtures carrying 14 externally-checkable planted defects, one snapshotted from a real defect on `main`, plus committed answer keys and a recorded baseline at `_project/docs/verifier-regression-baseline.md`. Nothing previously existed to ask whether a change to the verifier's instructions cost finding-rate. The doc carries the dimensions, the thresholds, the re-run procedure, and — deliberately — the baseline's own **misses**, so a later run is not scored against a standard the original never met.
+- **A `Range freely` step in `agents/plan-verifier.md`**, stating that `Read`, `Grep` and `Glob` remain unrestricted and that the agent should follow anything the phase points at, including a suspicion. It exists to keep the preload trim below from narrowing curiosity along with context.
+- **A phase-self-containment rule** in `dr-plan`'s create-mode: a phase's Verification items and Acceptance Criteria must be interpretable without reading another phase. Spanning *files* is normal; spanning *phases* needs the dependency stated inline.
+- **A gate-block drift invariant** in create-mode Phase 7, stated over *every line of a rendered Phase Exit Gate* rather than over a list of sites, with per-file normalisation and separate presence/identity assertions. Reciprocal pointers were added to the two files it governs.
+
+### Changed
+
+- **The verifier preloads the target phase plus four named top-matter sections** (`Metadata`, `Definition of Done`, `Success Criteria`, `Execution Policy`) instead of the whole plan — ~18% of a 92KB plan rather than 100%, on every turn. Measured: tokens **−23.1%** on a full-size plan, **+14.1%** on small plans where the added instructions cost more than the trim returns. Detection unchanged across all 14 planted defects, zero false positives. **Wall-clock was not shown to improve**; the measurement was confounded and the baseline document says so rather than netting the biases out.
+- **Report length is now asymmetric by rule.** A PASS is one line carrying its citation; a FAIL or UNVERIFIED is as long as its evidence requires. An uncited PASS is explicitly not a permitted output — compression applies to prose, never evidence.
+
+### Fixed
+
+- **`templates/plan-base.md`'s Phase Exit Gate carried the `no`-shape Agent self-review line inside the `yes`-shape block**, so every generated plan's *final* gate instruction keyed the `[x]` flip to the Verification command block while the line directly above keyed it to the verification's verdict. A task whose command passed but whose verifier verdict was FAIL was flippable under the last thing the gate said, and UNVERIFIEDs were never routed to the Retro. Shipped in 3.3.0 and found by a verifier run against an unrelated, already-complete phase.
+- **The same line had drifted at all five sites that render it** — five instances, five distinct texts. Plan 013 held the *six* gate/apply sites byte-identical under a criterion scoped to exactly those six; this was the seventh, covered by nothing. All five are now identical within their shape and under the invariant above.
+
 ## [3.3.0] - 2026-07-31
 
 Phase Exit Gate verifier fallback hardening (plan 013). Field report: `planaraid/par` plan 073, where an agent that *could* spawn the verifier — and was authorized to — read the fallback clause as covering its situation, self-verified, and recorded a pass that nobody noticed until the user asked. When the verifier eventually ran it found a real defect the green test suite had missed.

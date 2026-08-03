@@ -170,13 +170,6 @@ When Policy changes, regenerate every phase's Phase Exit Gate block to match. Re
 
 ### Rule per policy
 
-> **The gate blocks below are duplicated.** Every line of them also lives in
-> `references/create-mode.md` (Phase 7) and `templates/plan-base.md`. Change one, change all three
-> in the same edit, then run the drift checks in create-mode.md Phase 7 under the heading
-> **Hold the gate blocks byte-identical**.
-> The copies here carry a uniform two-space structural indent because they sit in fenced blocks
-> nested in list items; that indent is the only permitted difference in this file.
-
 - **→ Always** — every phase's Exit Gate renders with the Always shape:
 
   ```
@@ -190,7 +183,7 @@ When Policy changes, regenerate every phase's Phase Exit Gate block to match. Re
     2. **Inline fallback** — otherwise verify this phase yourself against the **Inline Verification Rubric** in this plan's header: a fresh, skeptical pass that **records a verdict per item** — PASS / FAIL / UNVERIFIED for every task, Verification item, and Acceptance Criterion, each with its evidence. Then tag this task immediately after its checkbox: `[INLINE FALLBACK YYYY-MM-DD: <condition>]`. The rubric defines the condition values and how to choose between them.
     3. **Never silently self-pass** — if a mechanism exists but you are unsure you may use it, ask. Uncertainty about permission is not inability. If you do not ask, branch 2 with its label is still required: an unannotated pass is the one outcome this gate exists to prevent.
   - [ ] **Apply the verification result.** Flip `[x]` only for items the verification returned PASS — whether that came from the verifier or from your own inline pass. Keep `[ ]` for FAIL and UNVERIFIED with a short note referencing the reasoning.
-  - [ ] **Agent self-review.** Re-read Tasks above, confirm the verification's findings are reflected, note any UNVERIFIEDs that need follow-up in future phases or the Retro.
+  - [ ] **Agent self-review.** Re-read Tasks above, confirm the verification's findings are reflected, note any UNVERIFIEDs that need follow-up.
   ```
 
   Mechanical — no model judgment required.
@@ -203,7 +196,7 @@ When Policy changes, regenerate every phase's Phase Exit Gate block to match. Re
   <!-- verifier-recommendation: no — policy: Never (forced) -->
 
   - [ ] Run Definition of Done commands (see plan header). All must pass.
-  - [ ] **Agent self-review.** Re-read all Tasks above. Flip `[x]` only for tasks whose Verification passed. Any failing or skipped task stays `[ ]` with a short note explaining why. Under-report beats over-report.
+  - [ ] **Agent self-review.** Re-read all Tasks above. Flip `[x]` only for tasks whose Verification passed. Any failing or skipped task stays `[ ]` with a short note. Under-report beats over-report.
   ```
 
   Mechanical — no model judgment required.
