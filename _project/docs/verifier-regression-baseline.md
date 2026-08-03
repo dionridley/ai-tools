@@ -165,6 +165,52 @@ and reading them as if they could would be measuring the wrong thing.
 
 ---
 
+## The clean-tree re-run, and why it did not clean anything
+
+Committing plan 014 was supposed to remove one confound: the scratchpad worktree the verifier built
+because uncommitted edits made the working tree unrepresentative. **It did the opposite.**
+
+| Run | Latency | vs base | Tokens | vs base | Calls |
+|---|---|---|---|---|---|
+| Baseline (pre-change, clean tree) | 535 s | — | 90,290 | — | 28 |
+| Post-change, **dirty** tree | 594 s | +11.0% | 69,434 | **−23.1%** | 25 |
+| Post-change, **clean** tree (committed) | **698 s** | **+30.5%** | 71,833 | **−20.4%** | 30 |
+
+Before the commit, `HEAD` was plan 013's release and the edits were uncommitted, so the verifier
+extracted one commit to isolate them. After the commit, `HEAD` **is** plan 014 — which permanently
+modifies the three files plan 013 Phase 3 inspects. The verifier now has to reason across two
+commits for every verdict, and it said so explicitly, correcting the invocation's premise:
+
+> *"The invocation stated 'all of its phases landed in a single commit…' That is not the state of
+> this working tree… The amnesty clause covers later phases of plan 013. Plan 014 is a different
+> plan. I therefore pinned all verdicts to `2a23593`… Evaluating against the working tree would
+> have flipped the central finding from FAIL to PASS on the strength of another plan's work."*
+
+**So plan 013 Phase 3 is no longer usable as a latency reference, and committing is what ended it.**
+The comparison target's evidence base has been permanently altered by the change under test. Any
+future re-run repeats the archaeology; the +30.5% is measuring that, not the preload trim.
+
+**The recommendation to commit-then-re-measure was wrong, and is recorded as wrong.** It rested on
+the assumption that a clean tree meant less work for the verifier. The opposite held, for a reason
+that was visible in advance had anyone asked what `HEAD` would contain after the commit.
+
+**What survives, and it is the part that matters:** the token result **replicated** across two
+independent post-change runs — **−23.1%** and **−20.4%**, mean **−21.8%** — under different tree
+states and different amounts of git work. That is the finding, and it is now n=2 rather than n=1.
+
+**A genuine wall-clock A/B would need a full-size target this change never touched** — plan 012
+(115KB, the Pencil skill) is the obvious candidate — and a baseline for it taken at the old agent
+definition, which no longer exists without reverting and restarting. Not attempted; recorded as the
+open path.
+
+**Two things the run confirmed in passing**, both worth keeping: the new drift check catches the
+historical defect at the shipped revision (`present 2 (want 3)`, `distinct 2 (want 1)` at
+`2a23593`) and passes on the working tree — so the invariant demonstrably detects the exact defect
+that escaped plan 013. And it found three recorded numbers in plan 013 that do not reproduce, plus
+an unsound inference: Verification item 2's zero-match grep was claimed to prove a third site had
+been *corrected*, when a zero is equally consistent with that site never having matched the pattern.
+**Absence-of-match evidence only supports claims about sites known to have contained the pattern.**
+
 ## Verdict — the preload trim works on context, and is unproven on wall-clock
 
 **The crossover the design predicted is visible, and it is the clearest result in the study:**
