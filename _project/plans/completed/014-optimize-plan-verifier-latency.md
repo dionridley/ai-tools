@@ -846,3 +846,46 @@ If the final phase's Exit Gate has unresolved FAILs or UNVERIFIEDs after the all
 - **Agent definitions load once per session.** Any measurement whose meaning depends on which definition is live must confirm it first. The check costs one paragraph; skipping it costs the whole measurement, silently.
 - **Fixtures sized to isolate defects cannot measure performance.** They carry the instruction overhead and none of the payload. Keep one full-size reference, and expect the two to disagree.
 - **A harness that flatters the change it was built to test is worth nothing.** F2's D3 was scored MISSED post-change on reasoning that was *closer* than the baseline's — scored strictly, because generosity there would have manufactured an improvement out of a scoring choice.
+
+### Follow-up: the variance study (2026-08-04)
+
+Everything above was written at completion, from n=1 per cell. A 24-run study
+(`_project/docs/verifier-variance-study.md`, run record at
+`_project/fixtures/verifier-regression/_runs/variance-2026-08-04.md`) later measured the spread
+those single draws came from. Kept separate rather than folded in, because the difference between
+what this plan believed at completion and what turned out to be true *is* the lesson.
+
+**What it confirmed**
+
+- **Detection did not regress:** 40/42 in both arms, each ranging 13–14 per round. The primary risk
+  is closed at n=3.
+- **Tokens were the right thing to decide on:** on the large fixture the arms separate cleanly and
+  do not overlap — 34,616–39,314 post-change against 46,193–47,675 pre-change, **19.8% lower**.
+
+**What it overturned**
+
+- **This plan recorded a claim that was backwards, not merely thin.** Phase 5 Findings said the F3
+  `rendered.md` self-contradiction was found post-change and "never at baseline." In fact **all
+  three baseline runs found it** and only two of three post-change runs did, one mis-citing the
+  line. Retracted in place above.
+- **Auditability was a real gain this plan missed.** It scored 100% for both arms and concluded
+  nothing changed; at n=3 the baseline is **82.1%** against **97.3%**. The n=1 measurement drew a
+  lucky baseline and hid the improvement.
+- **"Latency is unproven" understated it.** Consecutive rounds of an *unchanged* definition varied
+  **43–153%** — larger than every delta this plan attributed to the change. The question was not
+  unanswered; it was **unanswerable by that design**.
+
+**Learnings**
+
+- **Silence is not absence.** The wrong entry came from one baseline run not mentioning a finding
+  and that being read as failing to find it. A verifier that does not mention something has not
+  been shown to miss it. This is the single most transferable lesson of the whole plan.
+- **Never record a comparative claim from n=1 as a finding.** Not "record it with a caveat" —
+  the caveat was present and the claim still hardened into the record and into two other documents.
+- **Design the confound controls before the first run, and write down which ones you rejected.**
+  Review before Arm A found that three committed docs — including the study's own design file —
+  described the planted defects in prose, and that the post-change definition's licence to range
+  made the leak *asymmetric* toward the hypothesis. Found afterwards, that is uninterpretable.
+- **Check whether the tidy number is the true one.** The first scoring pass recorded "false
+  positives: 1 each." Re-checking against the keys gave **1 and 0** — and the study's only false
+  positive came from the arm being advocated for.
