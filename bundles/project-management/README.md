@@ -375,6 +375,22 @@ When a PR URL is provided:
 
 The agent is a deliberate iteration surface. Common tuning dimensions: skepticism level (how readily `UNVERIFIED` is chosen over `PASS`), evidence thresholds (what counts as direct evidence vs. inference), and the scope boundary (keeping it out of architecture advice). Contributions welcome via PR.
 
+#### What it loads, and what it may look at
+
+Since 3.4.0 the verifier **preloads the target phase plus four named top-matter sections** — `Metadata`, `Definition of Done`, `Success Criteria`, `Execution Policy` — rather than the whole plan. On a 92KB plan that is ~18% of the file instead of 100%, and the difference is re-sent on every turn, so it compounds.
+
+**This narrows the default, not the remit.** `Read`, `Grep` and `Glob` remain unrestricted, and the agent is told explicitly to follow anything the phase points at — a named file, an interim-phase marker, a cross-site criterion, a claim about another phase — and to follow a suspicion too. Two carve-outs are stated in the file: the plan-wide `## Inline Verification Rubric` is skipped *as instructions* (it belongs to the inline fallback) but read *as an artifact* whenever a task or criterion makes a claim about it; and other phases are out of scope to **evaluate** while remaining in bounds to **read**.
+
+Reports are asymmetric by design: a PASS is one line **with its citation**, a FAIL or UNVERIFIED is as long as its evidence needs. An uncited PASS is not a permitted output — compression applies to prose, never to evidence.
+
+Measured effect (`_project/docs/verifier-regression-baseline.md`, 2026-08-02, `CLAUDE_EFFORT=xhigh`): tokens **−23.1%** on a full-size 92KB plan and **+14.1%** on small plans, where the added instructions cost more than the trimmed preload returns. Detection was unchanged across a 14-defect fixture set, with zero false positives. **Wall-clock was not shown to improve** and the measurement was confounded; the doc says so plainly rather than netting the biases out.
+
+#### Testing a change to the verifier
+
+There is a regression harness at `_project/fixtures/verifier-regression/` — four fixtures carrying 14 externally-checkable planted defects, one of them a real defect snapshotted from `main`. If you change `agents/plan-verifier.md`, run it: record a baseline with the unmodified agent, make the change, re-run, and compare per fixture. The procedure, thresholds and known baseline misses are in `_project/docs/verifier-regression-baseline.md`.
+
+Two things that will waste your time if you skip them. **Claude Code loads the agent definition once per session** — editing the file mid-session changes nothing, and a run against a cached definition completes normally while measuring the wrong thing, so confirm the reload before recording any figure (Step 0 in that doc shows how). And **subagents inherit the session's reasoning effort**, so a baseline taken at one effort level is not comparable to a run at another.
+
 #### When the verifier can't run
 
 **Independent verification is the outcome; delegating to the agent is the preferred mechanism, not the definition.** Not every harness has subagents — Pi has no built-in primitive — and a session can withhold delegation even where one exists. So the gate has three branches: delegate if you can, otherwise verify inline against the shared rubric at `skills/dr-plan/references/verification-rubric.md`, and if a mechanism exists but you're unsure you may use it, **ask** rather than assume.
