@@ -302,10 +302,30 @@ each arm was a single draw from a distribution that also produces 14/14. **The c
 detection — now established at n=3 rather than n=1.** That is the question the harness exists for,
 and it is answered.
 
-False positives: **1 each**. Arm A's is real (a post-change F3 run failed the heading check over a
-"2/2" vs 3-headings count while conceding "the underlying property holds" — and another run in the
-*same arm* hit the identical fact and resolved it correctly). Arm B's is arguable. No run in either
-arm flagged F4's deliberately-true control.
+**False positives — corrected after re-checking against the keys, and the correction goes against
+the post-change arm.**
+
+The first pass recorded "1 each." That does not survive checking:
+
+- **Arm A: 1 genuine false positive.** A post-change F3 run failed Verification item 3 over a "2/2
+  match" claim against `grep -c '^#'` returning 3 — while conceding in the same breath that "the
+  underlying property holds." `_answers/f3.md` states plainly that **all three F3 Verification items
+  are TRUE**, so this is scoreable and it is wrong. Another run in the *same arm* hit the identical
+  3-vs-2 fact and resolved it correctly, which is what makes it an error rather than a defensible
+  reading.
+- **Arm B: 0 scoreable false positives.** The two Arm B runs originally counted both failed F2's
+  Task 1 over the guide's "every deferral in the tree" claim against a command scoped to `docs/`.
+  That overclaim is **factually real** — a whole-fixture grep does hit `plan.md:17` and `:54`. And
+  `_answers/f2.md` **does not adjudicate Task 1**: no planted defect falsifies it. A key that takes
+  no position cannot generate a false positive in either direction. One Arm A run examined the same
+  fact and judged it defensible; that is an interpretive split, not an error.
+
+**So the honest count is Arm A 1, Arm B 0 — the one false positive in this study came from the
+post-change definition.** At n=3 that is a single event and not a finding, but "1 each" would have
+been a tidier number than the evidence supports, and the tidiness ran in the direction I was
+predicting.
+
+No run in either arm flagged F4's deliberately-true control.
 
 ### Auditability: a real, measurable improvement that plan 014 missed
 
