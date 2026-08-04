@@ -228,6 +228,61 @@ declined to open it. **Refinement to the T1 rule, matching how the 2026-08-02 ba
 same behaviour from F1 and F4:** a report is void if it cites *content from* a leaking file, not if
 it discloses noticing one and declining. Disclosure is the behaviour the protocol wants.
 
+### Arm A complete — 12 runs, 0 discards
+
+All twelve were clean on the widened T1 void check; none cited a leaking doc. Several disclosed
+noticing `_answers/` — and one named the regression baseline doc — purely to state they had
+declined to open it. **The T1 leak is reachable, not hypothetical: the verifier knows those files
+are there.** The refined rule held: disclosure of a refusal is not contamination.
+
+*Findings are deliberately NOT recorded here.* Writing them into the repo before Arm B runs would
+make this file a fresh answer key for Arm B — the exact failure T1 and T5 exist to prevent. They
+stay in the session scratchpad until both arms are done. **The timing data below leaks nothing
+about the fixtures and is safe to commit now.**
+
+#### The round effect swamps latency
+
+| Fixture | R1 | R2 | R3 | min→max |
+|---|---|---|---|---|
+| F1 | 252.0 | 234.5 | 363.5 | +55.0% |
+| F2 | 249.4 | 220.5 | 423.7 | +92.2% |
+| F3 | 178.7 | 129.9 | 328.7 | **+153.0%** |
+| F4 | 216.5 | 254.7 | 430.7 | +98.9% |
+| **round mean** | **224.2** | **209.9** | **386.7** | |
+
+Round 3 was slower on **all four** fixtures, by 43–153%. That is a whole-round shift — system load
+or serving conditions — not fixture noise, and it is far larger than any effect plan 014 attributed
+to the definition change.
+
+**Two consequences, the first landing on the plan-014 record:**
+
+1. **The per-fixture latency comparison in `verifier-regression-baseline.md` is not
+   interpretable.** Its post-change deltas were +12.5%, +25.1%, −25.5%, +28.5%; every one sits
+   inside the same-arm spread above, and the whole-batch +11.4% is smaller than the gap between two
+   consecutive rounds of the *same definition*. This conclusion does not depend on how extra
+   findings score.
+2. **Arm-vs-arm latency is unrecoverable by this design.** Arms run sequentially because the reload
+   is user-gated, so an arm-level latency difference cannot be separated from a round-level one.
+   **No A-vs-B latency comparison will be reported.** T4 listed this as acknowledged-not-controlled;
+   it turns out to be the dominant term.
+
+#### Tokens are stable, and that vindicates the metric the decision rests on
+
+| Fixture | R1 | R2 | R3 | spread |
+|---|---|---|---|---|
+| F1 | 34,616 | 39,314 | 39,014 | 13.6% |
+| F2 | 29,557 | 27,947 | 29,773 | 6.5% |
+| F3 | 27,781 | 24,312 | 26,686 | 14.3% |
+| F4 | 30,316 | 31,615 | 33,244 | 9.7% |
+| **total** | **122,270** | **123,188** | **128,717** | **5.3%** |
+
+Round totals vary by **5.3%** while round latency varies by **84%**. **Tokens track the work;
+wall-clock tracks the weather.** The −21.8% token result that the keep-the-change decision rests on
+was measured on the metric that reproduces; the latency figures never could have been.
+
+Extra findings — the study's actual question — should be unaffected by load, so Arm B is still
+worth running.
+
 ## If the result is null
 
 Then the plan-014 record needs a correction, not a footnote: the "found more" observations in
