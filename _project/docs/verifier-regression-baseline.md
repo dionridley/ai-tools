@@ -142,6 +142,23 @@ uncited-PASS rule present. (A solo F3 probe also ran during Step 0; its 195 s fi
 **Totals: detection 13/14 (identical, and identical per fixture) · false positives 0 · auditability
 14/14 (100%) · latency 963 s → 1,073 s (+11.4%) · tokens 111,101 → 126,791 (+14.1%).**
 
+> ### ⚠ Superseded in part — read `verifier-variance-study.md` before using these numbers
+>
+> Every figure in this section is **n=1 per cell**. A 24-run variance study on 2026-08-04 measured
+> the spread these single draws came from, and three of the readings above do not survive it:
+>
+> - **The latency figures are not interpretable.** Consecutive rounds of an *unchanged* definition
+>   varied by **43–153%** — larger than every per-fixture delta in the table above (+12.5%, +25.1%,
+>   −25.5%, +28.5%) and larger than the +11.4% batch figure. Do not compare latency across these
+>   runs, or across any two runs not executed concurrently.
+> - **Auditability was not "unchanged at 100%."** At n=3 the pre-change arm scores **82.1%** against
+>   post-change **97.3%**. Both arms drawing 100% here was luck, and it hid a real improvement.
+> - **Detection 13/14 is one draw from a 13–14 range.** Both arms totalled **40/42** over three
+>   rounds. The equality is real; the specific number is not load-bearing.
+>
+> The tokens column survives and strengthens: on the large fixture the arms separate cleanly,
+> **19.8% fewer tokens post-change with non-overlapping ranges.**
+
 ### The honest headline: rigour held, cost went up
 
 **Detection did not regress anywhere.** Every fixture scored exactly what it scored at baseline —
@@ -306,11 +323,14 @@ tests, and it is why a full-size reference was kept rather than relying on the f
   it: a render command that can be re-run."* Under under-report-beats-over-report the second is the
   more conservative verdict, and both planted defects were still found. Recorded because a verdict
   that softens is the shape a real regression would take, and it should not pass unremarked.
-- **The post-change run found a defect the baseline did not.** It reported that `rendered.md`
-  **contradicts itself** — the shared bullet at line 11 fires "on suspicion, however unlikely" while
-  its own prose at line 14 says escalate "once you are confident." Not in the answer key, not found
-  at baseline, found twice post-change (solo probe and batch run). Early evidence against the worry
-  that a narrower default preload would make the verifier incurious.
+- ~~**The post-change run found a defect the baseline did not.**~~ **RETRACTED 2026-08-04 — the
+  claim was backwards, and the line number was wrong too.** `rendered.md` does contradict itself,
+  but the trigger bullet is at **line 10**, not line 11. On the substance: the variance study
+  (`verifier-variance-study.md`) ran F3 three times per arm and **all three baseline runs found the
+  self-contradiction**, against two of three post-change runs.
+
+  **A single baseline run had simply not mentioned it, and that silence was read as absence.**
+  Nothing about the arms distinguished them here.
 
 ### The one baseline miss — F2 / D3
 

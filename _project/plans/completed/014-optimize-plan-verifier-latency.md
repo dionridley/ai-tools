@@ -757,12 +757,23 @@ unmodified tree.
   conservative verdict, and both planted defects were still found. Recorded because **a softening
   verdict is the shape a real regression would take**, and it should not pass unremarked merely
   because this instance is defensible.
-- **The post-change runs found things the baseline did not.** F3 caught `rendered.md` contradicting
-  *itself* — its shared bullet fires "on suspicion, however unlikely" while its own prose nine lines
-  later says escalate "once you are confident" — found twice post-change, never at baseline. The
-  reference run found three further non-reproducing counts in plan 013's annotations and confirmed
-  the grep-poisoning fix works live (naive pattern 6 matches, date-anchored 0). Evidence against the
-  worry that a narrower default preload would make the verifier incurious.
+- ~~**The post-change runs found things the baseline did not.**~~ **RETRACTED 2026-08-04 — this was
+  backwards.** The original claim was that F3 caught `rendered.md` contradicting *itself* "found
+  twice post-change, never at baseline."
+
+  The variance study (`_project/docs/verifier-variance-study.md`, 24 runs, blind-scored) ran F3
+  three times per arm. **All three baseline runs found the self-contradiction** — one calling it its
+  "sharpest evidence," another "more seriously" than the cross-file drift. **Only two of three
+  post-change runs found it, and one of those mis-cited the line** (`:11`; the trigger is at `:10`).
+
+  **The error was not a small sample. It was treating one baseline run's silence as evidence of
+  absence.** A verifier that does not mention something has not been shown to have missed it. The
+  broader "found more" claim is also unsupported: extra findings came out mixed across fixtures,
+  with the baseline arm *ahead* on F3, and round-level ranges overlapping.
+
+  What the study *did* confirm, and what this bullet should have said: **detection is unchanged
+  (40/42 both arms) and auditability is measurably better (97.3% vs 82.1%)** — the latter being a
+  real gain that the n=1 measurement missed entirely, because it recorded 100% for both arms.
 
 **F2's D3 was scored MISSED again, strictly.** The post-change run came closer — it named
 `audit-guide.md:9` as *"a complete, **dated**, reason-bearing tag… indistinguishable from a live

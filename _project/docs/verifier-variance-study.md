@@ -283,6 +283,120 @@ was measured on the metric that reproduces; the latency figures never could have
 Extra findings — the study's actual question — should be unaffected by load, so Arm B is still
 worth running.
 
+## RESULTS — both arms complete, scored blind
+
+24 runs, 0 discards. Scored by a subagent that saw report text and answer keys only — no arm
+labels, no statement of the predicted direction. Mapping joined afterward.
+
+Arm A = post-change (current). Arm B = baseline (`30ba775`).
+
+### Detection: dead even, and the 2026-08-02 figure sits inside the noise
+
+| | Round 1 | Round 2 | Round 3 | **Total** |
+|---|---|---|---|---|
+| **Arm A** | 14/14 | 13/14 | 13/14 | **40/42** |
+| **Arm B** | 13/14 | 13/14 | 14/14 | **40/42** |
+
+**Identical totals.** Both arms range 13–14 per round, so the 13/14 recorded on 2026-08-02 for
+each arm was a single draw from a distribution that also produces 14/14. **The change costs no
+detection — now established at n=3 rather than n=1.** That is the question the harness exists for,
+and it is answered.
+
+False positives: **1 each**. Arm A's is real (a post-change F3 run failed the heading check over a
+"2/2" vs 3-headings count while conceding "the underlying property holds" — and another run in the
+*same arm* hit the identical fact and resolved it correctly). Arm B's is arguable. No run in either
+arm flagged F4's deliberately-true control.
+
+### Auditability: a real, measurable improvement that plan 014 missed
+
+| | PASS verdicts carrying `file:line` or command output |
+|---|---|
+| **Arm A** | **36/37 — 97.3%** |
+| **Arm B** | **32/39 — 82.1%** |
+
+**Phase 4's "an uncited PASS is not a permitted output" rule is doing measurable work.** Plan 014
+recorded 100% for *both* arms and concluded auditability was unchanged — that was n=1 on small
+fixtures getting a lucky baseline draw. At n=3 the baseline is 82%, and the gap is one of only two
+places in this study where the arms cleanly separate.
+
+### Tokens: clean separation on the large fixture, nothing on the small ones
+
+F1 is the largest fixture and the only one built from real snapshotted files.
+
+| | run 1 | run 2 | run 3 | range |
+|---|---|---|---|---|
+| **Arm A** | 34,616 | 39,314 | 39,014 | **34,616–39,314** |
+| **Arm B** | 46,193 | 47,675 | 46,945 | **46,193–47,675** |
+
+**Non-overlapping, ~6,900 tokens apart. Mean 37,648 vs 46,938 — the post-change definition spends
+19.8% fewer tokens.** Consistent with the −21.8% measured on the 92KB plan, and it is the metric
+the keep-the-change decision rests on. The three small fixtures show no gap, matching the +14.1%
+already recorded.
+
+### Latency: not reported, as committed before Arm B ran
+
+Arm A's round effect was 43–153% between consecutive rounds of an *unchanged* definition. Arms run
+sequentially. The two cannot be separated. See the Arm A section above.
+
+### Extra findings: mixed, and the direction is not uniform
+
+| Fixture | Arm A | Arm B | overlap? |
+|---|---|---|---|
+| F1 | 2, 3, 5 | 1, 3, 3 | yes |
+| F2 | 4, 4, 5 | 2, 3, 3 | **no — A higher** |
+| F3 | 2, 3, 4 | 4, 4, 4 | **B at the top of A's range** |
+| F4 | 4, 4, 4 | 2, 3, 3 | **no — A higher** |
+| **round totals** | **13, 15, 16** | **11, 11, 13** | **overlap at 13** |
+
+Arm A found more overall (44 vs 35) and separates cleanly on two fixtures — **but Arm B beats it on
+F3, and the round-level ranges touch.** This is a lean, not a result. **The hypothesis as written —
+"post-change runs surface more substantive findings" — is not supported as a general claim.**
+
+## The plan-014 correction, and it is sharper than "within variance"
+
+> **The claim that the F3 `rendered.md` self-contradiction was found only post-change is not
+> merely unsupported. It is backwards.**
+
+Blinded scoring, cross-checked against the files:
+
+- **All three Arm B (baseline) runs found it**, one calling it its "sharpest evidence" and another
+  "more seriously" than the cross-file drift.
+- **Only two of three Arm A runs found it**, and one of those **mis-cited the line** (`:11`; the
+  suspicion-keyed trigger is at `:10`).
+
+Plan 014 recorded it as *"not found at baseline, found in two post-change runs."* The second half
+was right by count and wrong by implication; the first half is false. A single baseline run had
+simply not mentioned it.
+
+**This is the failure mode the whole study was built to catch** — and it is worth naming precisely,
+because it is not the failure mode that was anticipated. The anticipated risk was that a real
+difference would be too small to see at n=1. The actual failure was **treating one run's silence as
+evidence of absence.** A verifier not mentioning something is not a verifier failing to find it.
+
+### Two factual errors, one per arm — neither is a definition effect
+
+- **Arm B, F1:** a run asserted `plan-base.md:209` is "byte-identical" to `create-mode.md:192`.
+  **It is not** — they differ by the word `all` (`Re-read Tasks above` vs `Re-read all Tasks
+  above`). The run **contradicted itself**: its own md5 table lists the two lines under different
+  hashes. Scoring reproduced all five hashes; the table is right and the prose is wrong.
+- **Arm A, F2:** a run claimed `audit-guide.md:6-10` gives the abstract form
+  `[NEEDS REVIEW YYYY-MM-DD: reason]`. **The guide contains zero occurrences of `YYYY-MM-DD`** —
+  that form lives only in `plan.md:17`. The irony is that this is precisely the fact that would
+  have carried it to the defect it missed.
+
+One error per arm, both self-inflicted, neither attributable to the definition.
+
+## What this study actually settled
+
+| Claim | Verdict |
+|---|---|
+| The change costs detection | **No** — 40/42 both arms |
+| The change improves auditability | **Yes** — 97.3% vs 82.1% |
+| The change saves tokens on large plans | **Yes** — 19.8%, non-overlapping ranges |
+| The change makes runs faster | **Unmeasurable** by this design |
+| The change surfaces more findings | **Not supported** — mixed, ranges touch |
+| F3 self-contradiction was post-change-only | **False** — baseline found it 3/3 |
+
 ## If the result is null
 
 Then the plan-014 record needs a correction, not a footnote: the "found more" observations in
