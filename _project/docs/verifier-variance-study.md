@@ -205,6 +205,29 @@ p-value; report ranges and say plainly whether they overlap.
 plus scoring. Each report is 2–4k tokens to read and score, so **budget ~100k context** and prefer
 a fresh session.
 
+## Execution log
+
+**Started 2026-08-04.** Conditions at start: `CLAUDE_EFFORT=xhigh`, Claude Code **2.1.221**,
+`plan-verifier.md` clean against `HEAD` (10,548 bytes = post-change), working tree clean at
+`78c50c0`.
+
+### Arm A Step 0 — passed
+
+Solo F3 probe with the instructions-check appendix returned the **post-change** signature:
+
+- step 1 reads the target phase plus the four named top-matter sections, **not** the whole plan
+- the ranging step is present ("Range freely the moment the phase points somewhere")
+- first ten words of step 1: *"Read the target phase and four named sections — not the"*
+- **7** numbered top-level steps
+
+The probe is **excluded from the arms** — solo rather than 4-concurrent, and its prompt carried the
+appendix, so neither its latency nor its findings are comparable to a round.
+
+It was also clean on the widened void check. It *mentioned* `_answers/f3.md` only to state it had
+declined to open it. **Refinement to the T1 rule, matching how the 2026-08-02 baseline treated the
+same behaviour from F1 and F4:** a report is void if it cites *content from* a leaking file, not if
+it discloses noticing one and declining. Disclosure is the behaviour the protocol wants.
+
 ## If the result is null
 
 Then the plan-014 record needs a correction, not a footnote: the "found more" observations in
