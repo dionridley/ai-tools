@@ -36,10 +36,106 @@ executed end-to-end without the user at two points.
 Verified working on 2026-08-02: `/reload-plugins` does reload agent definitions mid-session; a full
 restart is not required.
 
+## Threats to validity, and what this design does about them
+
+Three of these were found by review *before* Arm A ran. They are recorded because a reader who
+only sees the results cannot tell which confounds were controlled and which were never considered.
+
+### T1 — The answer keys leak outside `_answers/`, and they leak asymmetrically
+
+`_answers/` and `_runs/` are not the only files that hand a verifier the answers. Three committed
+files describe the planted defects and the extra findings in prose:
+
+| File | What it leaks |
+|---|---|
+| `_project/docs/verifier-variance-study.md` (this file) | names F3's `rendered.md` self-contradiction — *the exact extra finding the hypothesis turns on* |
+| `_project/docs/verifier-regression-baseline.md` | "Findings exceeded the keys in three places" names F1's `plan-base.md:209` referent, F2's three-way AC3 contradiction, F4's Task 2 split |
+| `_project/plans/completed/014-optimize-plan-verifier-latency.md` | Phase 5 findings |
+
+And `_project/fixtures/verifier-regression/README.md` points a reader straight at the second one.
+
+**This is not a symmetric nuisance. The post-change definition explicitly licenses ranging freely;
+the pre-change one does not.** So Arm A is structurally more likely to wander into the leaking docs
+than Arm B — and if it does, "it read the write-up" explains a higher extra-findings count just as
+well as "it verifies better." The confound points in the same direction as the hypothesis, which is
+the worst kind.
+
+Note also that the baseline doc leaked *less* on 2026-08-02 than it does now: its post-change
+results and findings sections were appended after those baseline runs. The 2026-08-02 baseline arm
+therefore ran against a cleaner tree than a baseline arm run today would.
+
+**Control:** the void grep widens from `_answers|_runs` to:
+
+```
+_answers | _runs | verifier-regression-baseline | verifier-variance-study | 014-optimize-plan-verifier
+```
+
+Applied to all 24 reports and to the Step 0 probe. **Log which files each report cites, not just
+pass/fail** — a report citing only the fixture directory is clean; one citing `_project/docs/` is
+discarded and re-run. Report the discard count per arm: a large asymmetry there is itself a finding.
+
+*Rejected alternative:* temporarily moving the three docs out of the tree would be experimentally
+cleaner, but it stacks a second must-restore hazard on top of the `plan-verifier.md` swap. The grep
+is auditable and reversible; file-shuffling under a study that already reverts a live agent
+definition is not worth the risk.
+
+### T2 — Scoring cannot be done by whoever ran the arms
+
+The runs are sequential by necessity (each swap is user-gated), so at scoring time the arm of every
+report is known, and plan 014 already records "post-change found more" as the expected direction.
+That is precisely the setup where a judgment metric absorbs the expectation.
+
+**Control:**
+
+1. Each report is written to `<scratchpad>/variance/r<NN>.md` under an **opaque sequential ID** as
+   it completes. The ID→(arm, fixture, round) mapping goes to a separate file that is not opened
+   until scoring is finished.
+2. **Scoring is delegated to a fresh subagent** that receives report text and `_answers/` only —
+   no arm labels, **and no statement of which direction the hypothesis predicts.**
+3. Only after scores are fixed is the mapping joined.
+
+**Blinding is imperfect and saying otherwise would be a lie.** The two definitions produce
+differently-shaped reports — Phase 4's asymmetric length and uncited-PASS rule are visible in the
+output — so a careful scorer may infer the arm from shape. What the control actually removes is
+knowledge of *which arm is expected to win*. That is the part that biases a count.
+
+### T3 — "Extra findings" currently confounds detection with citation policy
+
+Phase 4 added *"an uncited PASS is not a permitted output."* The post-change definition is
+**instructed** to emit `file:line`. The counting rule requires "names a specific file and location."
+Arm A therefore has an instruction-level advantage at producing findings that satisfy the rule,
+independent of whether it noticed anything more.
+
+**Control:** for every extra finding, record a discriminator — *does the other arm's report contain
+the same observation in uncited or informal form?* If Arm B mentions it in passing and Arm A
+formalises it, that is **report shape, not detection**, and must be logged as such. Decide this per
+finding during scoring, never at aggregation.
+
+### T4 — Confounds that are acknowledged but not controlled
+
+- **Sequential arms.** Any time-varying factor — system load, model serving, cache state — is
+  aliased with arm. Randomising or interleaving would need a user-gated `/reload-plugins` per run,
+  which is impractical. **Stated, not fixed.** It is a reason to distrust a small difference.
+- **Version drift.** This study runs on **Claude Code 2.1.221**; the 2026-08-02 baseline table
+  records **2.1.220**. Both arms run here, so the *within-study* A-vs-B comparison is unaffected.
+  But absolute latency and token figures from this study are **not** directly comparable to the
+  2026-08-02 tables.
+
+### T5 — In-flight reports must live outside the repo
+
+Writing the 24 reports into the repo as they complete would create a fresh answer key for runs 2–24
+— `.research/` being gitignored does not stop a verifier from reading it. In-flight reports
+therefore go to the **session scratchpad, outside the repo entirely.** The scored summary lands in
+`_runs/` only after the last run, where the existing "do not read during a run" rule covers it.
+
+Cost of this choice: if the session dies mid-study the in-flight reports are lost and the study
+restarts. That is the correct trade against contaminating the thing being measured.
+
 ## Procedure
 
-Conditions must match `verifier-regression-baseline.md`: `CLAUDE_EFFORT=xhigh`, Claude Code
-2.1.220. Subagents inherit session effort — check it before each arm, not once at the start.
+Conditions must match `verifier-regression-baseline.md`: `CLAUDE_EFFORT=xhigh`. Subagents inherit
+session effort — check it before each arm, not once at the start. Record the Claude Code version
+with the results; see T4 on version drift.
 
 ### Arm A — post-change (current definition)
 
@@ -51,6 +147,11 @@ Conditions must match `verifier-regression-baseline.md`: `CLAUDE_EFFORT=xhigh`, 
 
 ### Arm B — baseline (pre-change definition)
 
+3b. **Write the revert marker first.** Before touching the file, create
+   `_project/docs/VERIFIER-REVERTED.md` stating that `plan-verifier.md` is deliberately reverted to
+   `30ba775` for this study and giving the exact restore command. **A session that ends mid-Arm-B
+   leaves a live agent definition rolled back with nothing on disk saying so.** The marker is what
+   makes that recoverable by someone with no memory of this study. Delete it at step 8.
 4. `git checkout 30ba775 -- bundles/project-management/agents/plan-verifier.md`
 5. **Ask the user to run `/reload-plugins`.**
 6. Run **Step 0** again. Expect the *stale* signature: step 1 = *"Read the plan. Open the plan
@@ -80,10 +181,14 @@ report a bare count.
 
 ## Scoring discipline
 
-- Score every run against the answer key **independently, before any arm comparison**. Arm labels
-  invite pattern-matching to the expected result.
+- Score every run against the answer key **independently, before any arm comparison**, under the
+  blinding protocol in **T2** — opaque IDs, mapping withheld, hypothesis direction withheld.
 - Whoever scores must not be the run being scored — the rule already in the baseline doc.
-- **Void-run check applies:** any report mentioning `_answers` or `_runs` is discarded and re-run.
+- **Widened void check applies** (see **T1**): any report citing `_answers`, `_runs`,
+  `verifier-regression-baseline`, `verifier-variance-study` or `014-optimize-plan-verifier` is
+  discarded and re-run. Log the discard count per arm.
+- **Every extra finding carries the T3 discriminator** — cited-vs-informal presence in the other
+  arm — recorded per finding, not inferred later.
 - Score strictly and identically across arms. The baseline doc records one case where a
   post-change run came *closer* on F2/D3 and was still scored MISSED for consistency. Do that again.
 
