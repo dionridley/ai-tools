@@ -6,7 +6,7 @@
 - **Status:** draft
 - **Created:** 2026-09-23
 - **Last refreshed:** 2026-09-23
-- **Refinement count:** 1
+- **Refinement count:** 2
 - **Plan type:** standard-feature
 - **Verification Policy:** Adaptive (default)
 - **Related PRD:** N/A
@@ -17,7 +17,7 @@ Since v2.1.277, Claude Code reads `AGENTS.md` on its own when a project has no `
 
 What replaces them is a single migration step that runs first. If a root `CLAUDE.md` exists, dr-init shows a preview and asks one yes/no question before doing anything else. The preview covers what will move to the end of `AGENTS.md`, what plugin-generated content will be dropped, and that `CLAUDE.md` will be deleted. **Yes** applies the move immediately, deletes `CLAUDE.md`, and continues. **No** stops dr-init with zero changes. After the migration, state detection looks at AGENTS.md alone. Every run on an already-set-up project also checks for the two outdated sentences older versions wrote into AGENTS.md (the CLAUDE.md-pointer intro and the `/init` advice) and offers to fix them, whether or not a CLAUDE.md ever existed. So a `/dr-init` run always leaves the project in the intended state.
 
-This is a breaking change to what dr-init produces, so the release is **project-management 4.0.0**. The final phase applies the change to this repo: you run the new `/dr-init` here twice, once answering No (nothing may change) and once answering Yes (this repo's own `CLAUDE.md` pointer is migrated and deleted). Then the repo's own docs are updated.
+This is a breaking change to what dr-init produces, so the release is **project-management 4.0.0**. The final phase tests the real skill before anything else changes. You run `/dr-init` in four throwaway projects outside the repo (L1–L4). Between them they cover moving real content, creating AGENTS.md from a CLAUDE.md-only project, the stale-text fix with no CLAUDE.md, a fresh folder, and a No answer that must change nothing. Then this repo is switched by hand to the same result, because `/dr-init` is never run inside ai-tools, and its docs are updated.
 
 ## Current State
 
@@ -28,7 +28,7 @@ This is a breaking change to what dr-init produces, so the release is **project-
 - **Bundle README:** CLAUDE.md appears at lines 69, 86, 89–93, 334, 479 and 733–743, and `/init` at line 87.
 - **This repo** runs on the 3.x layout: root `CLAUDE.md` is the generated pointer, verbatim and with nothing below its managed block. Root `AGENTS.md` has the plugin marker plus the stale intro (line 22), the `/init` header, and dev guidance that names the pointer template (lines 278, 292). Root `README.md:119` calls CLAUDE.md a thin pointer.
 - **Out of scope and left untouched:** CHANGELOG history, completed plans, `_project/research/`, `_project/prd/`, and `_project/fixtures/verifier-regression/**`. That last one is a frozen defect snapshot whose answer keys depend on its exact bytes.
-- **Environment:** the local Claude Code is 2.1.280. Claude Code serves this plugin live from this working tree (the `ai-tools` directory marketplace). There is no automated test suite: validation is manual, per AGENTS.md.
+- **Environment:** the local Claude Code is 2.1.280. Claude Code serves this plugin live from this working tree (the `ai-tools` directory marketplace). `project-management@ai-tools` is enabled at user scope, so a session opened in any folder runs the working-tree skill. There is no automated test suite: validation is manual, per AGENTS.md. `S:/dev/scratch/` already holds plan 006's live-test projects (`pi-phase8/`).
 
 ## Assumptions
 
@@ -42,7 +42,10 @@ This is a breaking change to what dr-init produces, so the release is **project-
 - [x] The three versioned template sections (`plan-management-workflow` v3, `available-commands` v3, `task-completion-protocol` v1) mention neither CLAUDE.md nor `/init`, confirmed by grep. So **no section version bumps**. Only the unversioned header and intro change.
 - [x] A breaking change to what dr-init produces means a semver major, so **4.0.0**. 3.0.0 set this precedent for the AGENTS.md shape change.
 - [x] Definition of Done has no test or typecheck command. This repo has no automated suite (validation is manual, per AGENTS.md "Testing Commands") and no type system, since it is markdown and JSON. Each phase's Verification block stands in: fixture paper-tests, grep invariants and live runs.
-- [ ] `rm CLAUDE.md` deletes the file from the shell dr-init has on every target: Claude Code's Bash tool (Git Bash on Windows), macOS/Linux shells, and PowerShell, where `rm` is an alias. Validated by the live Yes-run in Phase 3.
+- [ ] `rm CLAUDE.md` deletes the file from the shell dr-init has on every target: Claude Code's Bash tool (Git Bash on Windows), macOS/Linux shells, and PowerShell, where `rm` is an alias. Validated by the L1 Yes-run in Phase 3, which must also show no permission prompt for it.
+- [x] The plugin is available in Claude Code sessions opened outside the repo. `~/.claude/settings.json` enables `project-management@ai-tools` at user scope, and the `ai-tools` marketplace is a `directory` source pointing at this working tree (checked 2026-09-23).
+- [x] `/dr-init` is never run inside ai-tools. This is a standing rule for the repo: work-in-progress skills are tested in scratch projects. The user reaffirmed it on 2026-09-23, replacing this plan's earlier No/Yes runs in this repo with the scratch runs L1–L4 and a hand switch.
+- [x] No `CLAUDE.md`, `CLAUDE.local.md`, `AGENTS.md`, `.claude/CLAUDE.md` or `.claude/AGENTS.md` exists in `S:/`, `S:/dev` or `S:/dev/scratch`, so test projects under `S:/dev/scratch/pm-4.0.0/` behave like standalone projects. `pm-4.0.0/` does not exist yet (checked 2026-09-23).
 - [ ] [?] Edited skill text reaches a running Claude Code session through the live directory marketplace. The frontmatter (`allowed-tools`) may be cached until `/reload-plugins` or a new session. Checked at the start of Phase 3's live runs. If it is stale, the only cost is a permission prompt for `rm`.
 
 ## Open Questions & Decisions
@@ -67,7 +70,7 @@ None. The four plan-shaping questions were resolved with the user before draftin
 
 - [x] **`/init` recommendation:** drop it everywhere and replace it with the neutral tip *"ask your coding agent to scan the codebase and add project-specific documentation to AGENTS.md"*. A CLAUDE.md that `/init` creates later is absorbed by the next `/dr-init` run. (2026-09-23)
 - [x] **Other CLAUDE-family files:** root `CLAUDE.md` only. Warn about `.claude/CLAUDE.md` and `CLAUDE.local.md`, and never move them. (2026-09-23)
-- [x] **This repo:** in scope as the final phase. It gets live `/dr-init` runs plus updates to the repo's docs. (2026-09-23)
+- [x] **This repo:** in scope as the final phase. It is switched by hand to the migration's result, because `/dr-init` is never run inside ai-tools, and the repo's docs are updated. Live testing runs in the scratch projects L1–L4. (2026-09-23, revised the same day)
 - [x] **Where CLAUDE.md may still be mentioned:** only in dr-init's migration step (`SKILL.md` plus `references/claude-md-migration.md`), in **one** bundle-README line describing the migration, and in CHANGELOG history. (2026-09-23)
 
 ### Non-Blocking
@@ -88,7 +91,8 @@ None. The four plan-shaping questions were resolved with the user before draftin
 - [ ] Across `bundles/project-management/` (excluding CHANGELOG.md), CLAUDE.md is mentioned only in `skills/dr-init/SKILL.md`, `skills/dr-init/references/claude-md-migration.md`, and exactly one line of `README.md`.
 - [ ] No `/init` recommendation remains in the bundle. The only `/init` text left is the old header wording quoted inside the migration reference so it can be repaired.
 - [ ] project-management is `4.0.0` in `plugin.json`, the bundle `package.json` and `marketplace.json`, with a `[4.0.0]` CHANGELOG entry.
-- [ ] This repo runs on AGENTS.md alone: `CLAUDE.md` was deleted by a live `/dr-init` Yes-run, and the root README and AGENTS.md no longer mention it.
+- [ ] Five live `/dr-init` runs in scratch projects outside the repo (L1 No, L1 Yes, L2, L3, L4) each end in their expected git state with the final skill text. Together they cover the content-move path, AGENTS.md creation, the no-CLAUDE.md repair and a fresh setup.
+- [ ] This repo runs on AGENTS.md alone. `CLAUDE.md` is deleted and AGENTS.md carries the two repairs, done by hand to match the migration's result. The root README and AGENTS.md no longer mention CLAUDE.md, and a fresh session loads AGENTS.md.
 
 ## Definition of Done
 
@@ -389,41 +393,75 @@ This phase edits files outside `skills/dr-init/` only. It describes dr-init's ne
 - [ ] Run Definition of Done commands (see plan header). All must pass.
 - [ ] **Agent self-review.** Re-read all Tasks above. Flip `[x]` only for tasks whose Verification passed. Any failing or skipped task stays `[ ]` with a short note explaining why. Under-report beats over-report.
 
-### Phase 3: Release 4.0.0 and Dogfood on This Repo
+### Phase 3: Live-Test in Scratch Projects, Release 4.0.0, and Switch This Repo
 
-Entry condition: the bundle's skills already carry the AGENTS.md-only behavior and the migration gate, as Phases 1–2 delivered them. This phase needs the user twice. `/dr-init` has `disable-model-invocation: true`, so only the user can invoke it. Ask them, and wait for them.
+Entry condition: the bundle's skills already carry the AGENTS.md-only behavior, the migration gate and the State B stale-text repairs, as Phases 1–2 delivered them. `/dr-init` has `disable-model-invocation: true`, so only the user can start it. This phase needs the user for five `/dr-init` runs (L1 twice, L2, L3, L4) and one new-session check. Ask them, and wait for them. **Never run `/dr-init` inside ai-tools.** Live tests run in scratch projects outside the repo, and this repo is switched by hand.
 
 #### Tasks
 
+- [ ] **Set up the live test projects** in `S:/dev/scratch/pm-4.0.0/`. They sit outside the repo because Claude Code reads a `CLAUDE.md` in the working directory *or any parent*, so a project under ai-tools would pick up this repo's files. Precedent: plan 006's `S:/dev/scratch/pi-phase8/`. For each folder:
+  1. Create it and add the starting files below.
+  2. Run `git init`, `git add -A` and `git commit -m "start"`. Use `--allow-empty` for L4.
+
+  This way every run's changes show up in `git status`, and a folder resets with `git reset --hard && git clean -fd`. Take the `d167153` files with `git -C S:/dev/repos/dionridley/ai-tools show d167153:<path>`.
+
+  | Folder | Starting files |
+  |---|---|
+  | `l1-pointer-with-content` | `AGENTS.md` = the d167153 `bundles/project-management/skills/dr-init/templates/AGENTS-template.md` with `{{CURRENT_DATE}}` → today. The seven `_project/**/.gitkeep` files. `CLAUDE.md` = the d167153 `…/templates/CLAUDE-pointer.md`, followed by a blank line, `## Claude-only` and `- Prefer the Grep tool.` |
+  | `l2-claude-only` | `CLAUDE.md` = `# CLAUDE.md`, a blank line, `## Build`, and ``- Run `npm test` before committing.`` Nothing else. |
+  | `l3-stale-no-claude` | The same `AGENTS.md` and seven `.gitkeep` files as L1. No `CLAUDE.md`. |
+  | `l4-fresh` | Nothing (an empty commit). |
+
+- [ ] **Live runs L1–L4** (this needs the user). For each run:
+  1. Ask the user to open a new Claude Code session in the folder (`cd S:/dev/scratch/pm-4.0.0/<folder>`, then `claude`), run `/dr-init`, and give the answers below.
+  2. Have them save the transcript with `/export S:/dev/repos/dionridley/ai-tools/.research/pm-4.0.0/transcripts/<run>.txt`. If `/export` isn't available, ask them to paste the final summary into this session.
+  3. Save `git status --porcelain` and `git diff` into `.research/pm-4.0.0/<run>-result.txt` and compare them with the expected result.
+
+  | Run | Answers | Expected |
+  |---|---|---|
+  | `l1-no` | **No** | The migration preview shows the moved block (the provenance comment, `## Claude-only`, `- Prefer the Grep tool.`), the dropped pointer pieces, both repairs and `Deleted: CLAUDE.md`. After **No**, the stop message appears and nothing else runs. `git status --porcelain` is empty. |
+  | `l1-yes` | **Yes** | The same preview. After **Yes**, State B's "nothing to do" message appears (sections current, directories complete, no stale text left), with the line `CLAUDE.md: moved 2 lines into AGENTS.md, then deleted`. `git status` shows ` D CLAUDE.md` and ` M AGENTS.md`. `git diff AGENTS.md` shows only the two repairs and the appended block at the end of the file. There is no permission prompt for `rm CLAUDE.md`. |
+  | `l2` | **Yes**, then **Proceed** | The preview says AGENTS.md will be created and lists `# CLAUDE.md` as dropped. After Yes, State C shows its append preview, with no uncommitted-changes prompt because the migration wrote AGENTS.md in this run. After Proceed: AGENTS.md = the provenance comment, `## Build` and its line, then the plugin block with its marker. `git status` shows ` D CLAUDE.md`, `?? AGENTS.md` and `?? _project/`, and the seven `.gitkeep` files exist. |
+  | `l3` | **Apply** | No migration prompt, since there is no CLAUDE.md. The State B preview lists the two repairs as pending and no section changes. After Apply, `git diff AGENTS.md` shows exactly the two repairs, and lines 7–11 and 21 match the new template. |
+  | `l4` | none | No migration prompt. State A creates AGENTS.md and the seven `.gitkeep` files, and no CLAUDE.md. `git status` shows only `?? AGENTS.md` and `?? _project/`. The success message carries the new "ask your coding agent" tip and no `/init`. |
+
+  If a run differs from its expected result:
+  1. Fix the skill text (the Phase 1 files) and note the change under this task.
+  2. If the fix touches the migration rules, rerun the affected Phase 1 fixture paper-tests.
+  3. Reset the folder, and rerun that case plus any earlier case the fix could affect.
+
+  Don't start switching this repo until all five runs match.
+- [ ] **Switch this repo by hand**, following the migration reference rather than running `/dr-init`. This repo's `CLAUDE.md` is the generated pointer with nothing below its managed block. That is the "nothing to move" case, so nothing is appended to AGENTS.md. Run `rm CLAUDE.md`, then apply the two `## Stale-text repairs` to root `AGENTS.md` exactly as written in `references/claude-md-migration.md`. Copy the old and new text from that file; never retype it.
+- [ ] **Repo docs.** `README.md:119`: delete the parenthetical "([CLAUDE.md](./CLAUDE.md) is a thin pointer to it)". Root `AGENTS.md:278`: the parenthetical becomes "(dr-init's only generated guidance file)", and delete the sentence about the generated CLAUDE.md pointer. `AGENTS.md:292`: "…compares them against the user's AGENTS.md to detect outdated or missing sections". Leave the `${CLAUDE_PLUGIN_ROOT}` and `${CLAUDE_SKILL_DIR}` mentions alone: they are environment variables, not the file.
 - [ ] **Version ritual.** Set `version` to `4.0.0` in `bundles/project-management/.claude-plugin/plugin.json`, in `bundles/project-management/package.json`, and in the project-management entry of `.claude-plugin/marketplace.json`.
-- [ ] **CHANGELOG.** Add `## [4.0.0] - <current date>` at the top of `bundles/project-management/CHANGELOG.md`. Start with a one-paragraph lead: Claude Code v2.1.277 reads AGENTS.md natively and any CLAUDE.md blocks it, so AGENTS.md becomes the only instruction file. **Migration:** run `/dr-init`. It moves CLAUDE.md into AGENTS.md and deletes it; declining stops the run. **Requires Claude Code v2.1.277+.** Sessions that can't read AGENTS.md directly (Bedrock, Vertex, Foundry, telemetry disabled) lose project instructions.
+- [ ] **CHANGELOG.** Write this after the live runs, so it describes the final behavior, including any fixes the runs forced. Add `## [4.0.0] - <current date>` at the top of `bundles/project-management/CHANGELOG.md`. Start with a one-paragraph lead: Claude Code v2.1.277 reads AGENTS.md natively and any CLAUDE.md blocks it, so AGENTS.md becomes the only instruction file. **Migration:** run `/dr-init`. It moves CLAUDE.md into AGENTS.md and deletes it; declining stops the run. **Requires Claude Code v2.1.277+.** Sessions that can't read AGENTS.md directly (Bedrock, Vertex, Foundry, telemetry disabled) lose project instructions.
   - **Removed**: CLAUDE.md pointer generation and `templates/CLAUDE-pointer.md`; the State C pointer note; the pre-3.0.0 Legacy Conversion sub-flow and its keep-legacy option; every `/init` recommendation; CLAUDE.md as a dr-plan Definition-of-Done source.
   - **Changed**: BREAKING, dr-init classifies on AGENTS.md alone; BREAKING, a CLAUDE.md triggers a mandatory yes/no migration gate; the template header and intro wording.
   - **Added**: `references/claude-md-migration.md` (drop/move rules, and exact-match repairs of 3.x text that State B also offers on every run, so projects whose CLAUDE.md was deleted by hand get fixed too); `.claude/CLAUDE.md` and `CLAUDE.local.md` warnings; `rm CLAUDE.md` in `allowed-tools`.
-- [ ] **Live No-run** (this needs the user). Snapshot first: `git status --porcelain > .research/fixtures/pm-4.0.0/before.txt; git hash-object AGENTS.md CLAUDE.md >> .research/fixtures/pm-4.0.0/before.txt`. Ask the user to run `/reload-plugins` if available (otherwise start a new session), then run `/dr-init` in this repo and answer **No**. Then take the same snapshot into `after.txt`.
-- [ ] **Live Yes-run** (this needs the user). Ask the user to run `/dr-init` again and answer **Yes**. Expected in the transcript: the preview says *Nothing to move*, because this repo's CLAUDE.md is the generated pointer with nothing below its managed block. It lists the dropped pointer pieces and both AGENTS.md repairs. Deleted: CLAUDE.md. State B short-circuits: all sections are current, directories are complete, and no stale text is left because the migration already repaired it. The summary carries the migration outcome line. There are no `.claude/CLAUDE.md` or `CLAUDE.local.md` warnings, because neither exists.
-- [ ] **Repo docs.** `README.md:119`: delete the parenthetical "([CLAUDE.md](./CLAUDE.md) is a thin pointer to it)". Root `AGENTS.md:278`: the parenthetical becomes "(dr-init's only generated guidance file)", and delete the sentence about the generated CLAUDE.md pointer. `AGENTS.md:292`: "…compares them against the user's AGENTS.md to detect outdated or missing sections". Leave the `${CLAUDE_PLUGIN_ROOT}` and `${CLAUDE_SKILL_DIR}` mentions alone: they are environment variables, not the file.
 - [ ] **New-session check** (this needs the user). Ask the user to start a fresh Claude Code session in this repo and run `/memory`.
 
 #### Verification
 
 - [ ] `grep -rn '"version"' bundles/project-management/.claude-plugin/plugin.json bundles/project-management/package.json; grep -n -A3 '"name": "project-management"' .claude-plugin/marketplace.json`. Expected: `4.0.0` in all three, and `grep -rn '3\.4\.0'` finds none of the three manifests.
-- [ ] `diff .research/fixtures/pm-4.0.0/before.txt .research/fixtures/pm-4.0.0/after.txt`. Expected: no output. The No-run changed nothing.
-- [ ] After the Yes-run, `git status --porcelain -- CLAUDE.md AGENTS.md` shows ` D CLAUDE.md` and ` M AGENTS.md`, `test ! -e CLAUDE.md` succeeds, and `git diff AGENTS.md` shows exactly the two repairs (intro line and header lines), before the manual repo-doc edits.
+- [ ] `ls S:/dev/scratch/pm-4.0.0/`. Expected: the four folders. In each, `git log --oneline` shows the `start` commit.
+- [ ] Each of `.research/pm-4.0.0/{l1-no,l1-yes,l2,l3,l4}-result.txt` matches its row in the expected-results table. In particular, `l1-no-result.txt` shows an empty `git status --porcelain`, and `l1-yes-result.txt` shows the appended block at the end of AGENTS.md. A transcript (or the pasted summary) exists for all five runs under `.research/pm-4.0.0/transcripts/`.
+- [ ] After the hand switch and before the repo-doc edits: `git status --porcelain -- CLAUDE.md AGENTS.md` shows ` D CLAUDE.md` and ` M AGENTS.md`, `test ! -e CLAUDE.md` succeeds, and `git diff AGENTS.md` shows exactly the two repairs (the intro line and the header lines).
 - [ ] `git grep -nIiE 'claude(\.local)?\.md' -- . ':!_project' ':!**/CHANGELOG.md'`. Expected: hits only in `bundles/project-management/README.md` (one line), `bundles/project-management/skills/dr-init/SKILL.md` and `bundles/project-management/skills/dr-init/references/claude-md-migration.md`.
 - [ ] The user reports that `/memory` in the new session lists `AGENTS.md`, or that session start showed `no CLAUDE.md found; AGENTS.md loaded: …`.
 
 #### Acceptance Criteria
 
 - The three manifests and the CHANGELOG agree on `4.0.0`. The CHANGELOG entry names the Claude Code v2.1.277 requirement and the migration path, and uses Removed / Changed / Added.
-- The live No-run left the working tree byte-identical. This is the user's explicit requirement that "no" does not continue.
-- The live Yes-run migrated this repo exactly as the migration reference predicts for a clean 3.x pointer: nothing moved, two repairs, CLAUDE.md deleted, State B current.
+- All five live runs match their expected results with the final skill text. Each of these paths ran for real, not just on paper: moving content (L1), creating AGENTS.md from a CLAUDE.md-only project (L2), the no-CLAUDE.md repair (L3) and a fresh setup (L4).
+- The L1 No-run left its project byte-identical. This is the user's explicit requirement that "no" does not continue.
+- `rm CLAUDE.md` ran without a permission prompt in the L1 Yes-run.
+- This repo was switched by hand to exactly the migration's result for a clean 3.x pointer: nothing moved, two repairs, CLAUDE.md deleted. `/dr-init` was never run inside ai-tools.
 - Outside `_project/` and the CHANGELOGs, the repo mentions CLAUDE.md only in the three allowed bundle files.
 - A fresh Claude Code session in this repo loads AGENTS.md directly.
 
 #### Phase Exit Gate
 
-<!-- verifier-recommendation: no — version bumps and doc edits are mechanical, and the live-run outcomes are checked directly by the snapshot diff, git status and the repo-wide grep -->
+<!-- verifier-recommendation: no — each live run is checked against a fixed expected result by git status and git diff saved to .research/pm-4.0.0/, and the hand switch, version bumps and doc edits are mechanical; any skill fix a run forces reruns the Phase 1 fixtures it touches -->
 
 - [ ] Run Definition of Done commands (see plan header). All must pass.
 - [ ] **Agent self-review.** Re-read all Tasks above. Flip `[x]` only for tasks whose Verification passed. Any failing or skipped task stays `[ ]` with a short note explaining why. Under-report beats over-report.
@@ -432,6 +470,7 @@ Entry condition: the bundle's skills already carry the AGENTS.md-only behavior a
 
 - **2026-09-23:** Initial plan creation.
 - **2026-09-23:** Resolved 0 blocking + 2 non-blocking questions and verified 0 assumptions (the live-reload assumption was skipped and stays uncertain until Phase 3). Verification Policy kept at Adaptive. Deciding that State B repairs stale 3.x text on every run added the shared `## Stale-text repairs` section, the State B wiring, fixture f9, and a new Success Criterion.
+- **2026-09-23:** Added live `/dr-init` testing in scratch projects outside the repo (`S:/dev/scratch/pm-4.0.0/` L1–L4, following plan 006's layout). There are five runs covering the content-move path, AGENTS.md creation, the no-CLAUDE.md repair, a fresh setup, and a No answer that must change nothing, with evidence in `.research/pm-4.0.0/`. Per the standing "never `/dr-init` inside ai-tools" rule, this repo's No/Yes runs were replaced by a hand switch. Phase 3 was reordered so the CHANGELOG is written last, and three assumptions plus one Success Criterion were added.
 
 ## Completion
 
