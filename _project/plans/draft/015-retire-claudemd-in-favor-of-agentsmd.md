@@ -1,0 +1,460 @@
+# Plan: Retire CLAUDE.md in Favor of AGENTS.md
+
+## Metadata
+
+- **Number:** 015
+- **Status:** draft
+- **Created:** 2026-09-23
+- **Last refreshed:** 2026-09-23
+- **Refinement count:** 1
+- **Plan type:** standard-feature
+- **Verification Policy:** Adaptive (default)
+- **Related PRD:** N/A
+
+## Executive Summary
+
+Since v2.1.277, Claude Code reads `AGENTS.md` on its own when a project has no `CLAUDE.md`. The generated `CLAUDE.md` pointer that project-management has shipped since 3.0.0 used to be required. Now it actively gets in the way: while any `CLAUDE.md` exists, Claude Code reads that file instead of `AGENTS.md`. This plan makes AGENTS.md the plugin's **only** instruction file. dr-init stops creating, appending to, or keeping a `CLAUDE.md`. The CLAUDE.md template, the State C pointer note, the pre-3.0.0 Legacy Conversion sub-flow and its "keep the legacy layout" option are all deleted. dr-plan and dr-prd stop mentioning CLAUDE.md, and so does the bundle README, except for one line describing the migration.
+
+What replaces them is a single migration step that runs first. If a root `CLAUDE.md` exists, dr-init shows a preview and asks one yes/no question before doing anything else. The preview covers what will move to the end of `AGENTS.md`, what plugin-generated content will be dropped, and that `CLAUDE.md` will be deleted. **Yes** applies the move immediately, deletes `CLAUDE.md`, and continues. **No** stops dr-init with zero changes. After the migration, state detection looks at AGENTS.md alone. Every run on an already-set-up project also checks for the two outdated sentences older versions wrote into AGENTS.md (the CLAUDE.md-pointer intro and the `/init` advice) and offers to fix them, whether or not a CLAUDE.md ever existed. So a `/dr-init` run always leaves the project in the intended state.
+
+This is a breaking change to what dr-init produces, so the release is **project-management 4.0.0**. The final phase applies the change to this repo: you run the new `/dr-init` here twice, once answering No (nothing may change) and once answering Yes (this repo's own `CLAUDE.md` pointer is migrated and deleted). Then the repo's own docs are updated.
+
+## Current State
+
+- **dr-init (3.4.0)** creates `AGENTS.md` from `templates/AGENTS-template.md` and `CLAUDE.md` from `templates/CLAUDE-pointer.md` (State A). State C appends a pointer note to an existing `CLAUDE.md`, or creates AGENTS.md when the user has only a CLAUDE.md. State B has a three-way sub-flow: modern, pointer-without-canonical, and legacy. It includes a Legacy Conversion for pre-3.0.0 projects, whose **Skip** option keeps the CLAUDE.md layout. `SKILL.md` classifies states from AGENTS.md *and* CLAUDE.md evidence.
+- **The generated text recommends `/init`**: the `AGENTS-template.md` header comment (lines 7–12), the `state-a-fresh.md` success tip, `SKILL.md:12` and `SKILL.md:73`, and `state-c-uninitialized.md:5`. `/init` still writes `CLAUDE.md` ([memory docs](https://code.claude.com/docs/en/memory): *"Run `/init` to generate a starting CLAUDE.md automatically"*), so following that advice would recreate the file that stops AGENTS.md from loading.
+- **The template's intro line 22** says *"the generated CLAUDE.md is a pointer here"*. It sits outside every versioned section, so State B never updates it, and every existing 3.x project carries it.
+- **Other skills:** `dr-plan/references/create-mode.md:105` lists CLAUDE.md as a Definition-of-Done source, `dr-plan/references/refine-mode.md:119` does the same, and `dr-prd/references/create-mode.md:204` promises "its CLAUDE.md pointer". dr-research and dr-ship have no mentions.
+- **Bundle README:** CLAUDE.md appears at lines 69, 86, 89–93, 334, 479 and 733–743, and `/init` at line 87.
+- **This repo** runs on the 3.x layout: root `CLAUDE.md` is the generated pointer, verbatim and with nothing below its managed block. Root `AGENTS.md` has the plugin marker plus the stale intro (line 22), the `/init` header, and dev guidance that names the pointer template (lines 278, 292). Root `README.md:119` calls CLAUDE.md a thin pointer.
+- **Out of scope and left untouched:** CHANGELOG history, completed plans, `_project/research/`, `_project/prd/`, and `_project/fixtures/verifier-regression/**`. That last one is a frozen defect snapshot whose answer keys depend on its exact bytes.
+- **Environment:** the local Claude Code is 2.1.280. Claude Code serves this plugin live from this working tree (the `ai-tools` directory marketplace). There is no automated test suite: validation is manual, per AGENTS.md.
+
+## Assumptions
+
+- [x] Claude Code reads `AGENTS.md` natively from v2.1.277. Release notes: *"Added AGENTS.md support: in a project with no CLAUDE.md, Claude Code reads AGENTS.md instead"* (https://github.com/anthropics/claude-code/releases/tag/v2.1.277, fetched 2026-09-23).
+- [x] Any `CLAUDE.md`, `.claude/CLAUDE.md` or `CLAUDE.local.md` in the working directory or above it stops AGENTS.md from loading in the default `claude-md-or-agents-md` mode. So `CLAUDE.md` must be **deleted**, not just emptied. Source: memory docs, "When Claude Code reads AGENTS.md": *"By default, Claude reads `AGENTS.md` only when you have no `CLAUDE.md` in your working directory or above it"*.
+- [x] `@path` imports inside AGENTS.md are expanded (memory docs: *"Inside each `AGENTS.md`: `@path` imports are expanded"*). That lets moved `@path` lines keep working.
+- [x] `/init` still generates CLAUDE.md (memory docs, quoted above). That is why every `/init` recommendation is removed. Decided with the user on 2026-09-23.
+- [x] Local CLI is `2.1.280 (Claude Code)`, which is at least 2.1.277. `/memory` lists a directly-read AGENTS.md from 2.1.280 (memory docs, troubleshooting).
+- [x] Some sessions can't read AGENTS.md directly: Bedrock, Vertex and Foundry per the release note, sessions with telemetry disabled, and the first session after an upgrade. There is no fallback for them. The user decided on 2026-09-23 that the plugin keeps no CLAUDE.md-based approach.
+- [x] Root `CLAUDE.md` only. `.claude/CLAUDE.md` and `CLAUDE.local.md` get a one-line warning and are never moved. `CLAUDE.local.md` is personal and usually gitignored, so copying it into a committed file would expose it. Decided with the user on 2026-09-23.
+- [x] The three versioned template sections (`plan-management-workflow` v3, `available-commands` v3, `task-completion-protocol` v1) mention neither CLAUDE.md nor `/init`, confirmed by grep. So **no section version bumps**. Only the unversioned header and intro change.
+- [x] A breaking change to what dr-init produces means a semver major, so **4.0.0**. 3.0.0 set this precedent for the AGENTS.md shape change.
+- [x] Definition of Done has no test or typecheck command. This repo has no automated suite (validation is manual, per AGENTS.md "Testing Commands") and no type system, since it is markdown and JSON. Each phase's Verification block stands in: fixture paper-tests, grep invariants and live runs.
+- [ ] `rm CLAUDE.md` deletes the file from the shell dr-init has on every target: Claude Code's Bash tool (Git Bash on Windows), macOS/Linux shells, and PowerShell, where `rm` is an alias. Validated by the live Yes-run in Phase 3.
+- [ ] [?] Edited skill text reaches a running Claude Code session through the live directory marketplace. The frontmatter (`allowed-tools`) may be cached until `/reload-plugins` or a new session. Checked at the start of Phase 3's live runs. If it is stale, the only cost is a permission prompt for `rm`.
+
+## Open Questions & Decisions
+
+### Execution Policy
+
+These settings control how phases verify completion. They can be changed at any time via `/dr-plan @[this-plan] answer questions` — they are not terminal decisions.
+
+- [ ] **Verification Policy** [OPEN] Current: Adaptive (default)
+  Last changed: never
+
+  How should Phase Exit Gates verify completion?
+  - Option A (Always): Every phase gets independent verification. Highest rigor, highest token cost. Use for high-stakes work or when self-verification has been unreliable.
+  - Option B (Adaptive): Each phase is annotated at create-time with `<!-- verifier-recommendation: yes|no -->`. Verification runs only on phases the model judged worth the cost.
+  - Option C (Never): No independent verification at all. Agent self-review only. Lowest cost, lowest rigor.
+
+  **Independent verification is the outcome; delegation is the preferred mechanism, not the definition.** Where the harness supports subagents, it runs as `project-management:plan-verifier`. Where it does not — Pi has no built-in subagent primitive — it runs inline against the Inline Verification Rubric in this plan's header and labels itself `[INLINE FALLBACK …]`. That is a normal operating mode there, not a degradation, and A and B remain meaningful on both. Option C is different in kind: it renders no verification task at all, so "Never" and "fell back" are distinguishable in the artifact rather than only in intent.
+
+### Blocking
+
+None. The four plan-shaping questions were resolved with the user before drafting:
+
+- [x] **`/init` recommendation:** drop it everywhere and replace it with the neutral tip *"ask your coding agent to scan the codebase and add project-specific documentation to AGENTS.md"*. A CLAUDE.md that `/init` creates later is absorbed by the next `/dr-init` run. (2026-09-23)
+- [x] **Other CLAUDE-family files:** root `CLAUDE.md` only. Warn about `.claude/CLAUDE.md` and `CLAUDE.local.md`, and never move them. (2026-09-23)
+- [x] **This repo:** in scope as the final phase. It gets live `/dr-init` runs plus updates to the repo's docs. (2026-09-23)
+- [x] **Where CLAUDE.md may still be mentioned:** only in dr-init's migration step (`SKILL.md` plus `references/claude-md-migration.md`), in **one** bundle-README line describing the migration, and in CHANGELOG history. (2026-09-23)
+
+### Non-Blocking
+
+- [x] [DECIDED: 2026-09-23] Should State B also repair the stale 3.x intro and header text in projects whose CLAUDE.md was already deleted by hand? Those projects never trigger the migration, so they keep the old text. Default: **no**. The repair wording names CLAUDE.md, and that would spread mentions into `state-b-update.md`. Those users can edit two sentences.
+  > **Decision:** Yes. State B checks and applies the stale-text repairs on every run, not only during the CLAUDE.md move.
+  > **Rationale:** The user wants `/dr-init` to leave any project in the intended working state. The repair wording stays in the `## Stale-text repairs` section of `references/claude-md-migration.md`, and `state-b-update.md` points at that section by path. So the mention scope is unchanged, because the filename doesn't match `claude(\.local)?\.md`.
+- [x] [DECIDED: 2026-09-23] Deletion uses plain `rm CLAUDE.md` rather than `git rm`. It is one command that works on tracked, untracked and non-git files alike, and it leaves staging to the user, matching dr-init's "you handle your own commits" stance. Revisit only if the live run shows a harness where `rm` fails.
+  > **Decision:** Plain `rm CLAUDE.md`.
+  > **Rationale:** One path for tracked, untracked and non-git files. The deletion shows as an unstaged change, and the user stages and commits it.
+
+## Success Criteria
+
+- [ ] dr-init never creates, appends to, or preserves a `CLAUDE.md`. `templates/CLAUDE-pointer.md` is gone, and no flow offers to keep a CLAUDE.md layout.
+- [ ] A root `CLAUDE.md` triggers the migration gate before **any** write, including the `_claude/` rename offer and `.gitkeep` backfill. **Yes** moves the user's content to the end of AGENTS.md and deletes CLAUDE.md. **No** stops the run and leaves the working tree byte-identical.
+- [ ] Plugin-generated CLAUDE.md content is dropped rather than moved: the 3.x pointer, the State C pointer note, pre-3.0.0 plugin sections, and `@AGENTS.md` self-imports. User content is never dropped. The fixture paper-tests in Phase 1 match their expected outcomes.
+- [ ] Any `/dr-init` run on a plugin-marked AGENTS.md leaves no stale 3.x plugin text (the CLAUDE.md-pointer intro and the `/init` header advice), whether or not a CLAUDE.md existed. The repair is shown in the preview and applied only on approval.
+- [ ] Across `bundles/project-management/` (excluding CHANGELOG.md), CLAUDE.md is mentioned only in `skills/dr-init/SKILL.md`, `skills/dr-init/references/claude-md-migration.md`, and exactly one line of `README.md`.
+- [ ] No `/init` recommendation remains in the bundle. The only `/init` text left is the old header wording quoted inside the migration reference so it can be repaired.
+- [ ] project-management is `4.0.0` in `plugin.json`, the bundle `package.json` and `marketplace.json`, with a `[4.0.0]` CHANGELOG entry.
+- [ ] This repo runs on AGENTS.md alone: `CLAUDE.md` was deleted by a live `/dr-init` Yes-run, and the root README and AGENTS.md no longer mention it.
+
+## Definition of Done
+
+Every Phase Exit Gate must confirm these before flipping any `[x]` in the phase. Run them from the repo root in Git Bash:
+
+- ~~Tests pass~~: not applicable (see Assumptions).
+- Manifests parse. Expected output is three `ok` lines:
+  `for f in .claude-plugin/marketplace.json bundles/project-management/.claude-plugin/plugin.json bundles/project-management/package.json; do node -e "JSON.parse(require('fs').readFileSync('$f','utf8'))" && echo "ok $f"; done`
+- Template HTML comments balance. This is the plan-007 learning: a stray delimiter inside the header comment ends it early. Expected: `balanced`.
+  `t=bundles/project-management/skills/dr-init/templates/AGENTS-template.md; [ "$(grep -o '<!--' $t | wc -l)" -eq "$(grep -o -- '-->' $t | wc -l)" ] && echo balanced`
+- ~~Typecheck clean~~: not applicable (see Assumptions).
+
+## Inline Verification Rubric
+
+How to verify a plan phase **yourself**, when independent verification could not be delegated.
+
+This is the fallback branch of a Phase Exit Gate, and of `/dr-ship --verify`. When delegation
+succeeds, the `plan-verifier` agent carries its own copy of these rules and this rubric is not
+used — the two are deliberately separate, because a fresh-context subagent and an agent grading
+its own work need different framing.
+
+**The thing that makes this branch dangerous is not that it is less capable. It is that it is
+not independent.** Everything below exists to supply, deliberately, the independence that
+delegation would have given for free.
+
+### Verdicts
+
+One per task, per Verification item, and per Acceptance Criterion:
+
+- **PASS** — evidence is direct and observable. Cite it (`file:line`, or the command and output).
+- **FAIL** — evidence shows the opposite of what is required. Cite it.
+- **UNVERIFIED** — evidence is missing, ambiguous, or could not be gathered. State why.
+
+**Under-report beats over-report.** When you are unsure, the answer is `UNVERIFIED`, not `PASS`.
+A second pass is cheap. A false `PASS` is silently corrosive: it is a *record* that a check
+happened, and nothing downstream — no later phase, no retro, no `/dr-ship` audit — will ever
+re-examine it. A missing check is recoverable; a false record of a check is not.
+
+### Skepticism rules
+
+- A test file existing is not a test passing. Run it.
+- A function being defined is not the behaviour working. Check a call site or a test.
+- An import being added is not a feature being used. Check for actual use.
+- A config change is not a deployment. Check that the change is loaded.
+- A `TODO` removed does not mean the work behind it is done. Check the replacement.
+- No inference from naming. `login-handler.ts` existing is not login being implemented. Open it.
+- **A task marked `[x]` is not evidence.** That mark is the claim under test, not proof of it.
+- **You wrote this code. That is a reason for more skepticism, not less.** You know what you intended, which makes it easy to read intent into what is actually there. Delegation would have bought that independence for free; inline, you supply it deliberately. Go and look at what is actually there, and actively seek the thing you would rather not find.
+
+### Naming the condition in the label
+
+An inline verification must record that it happened, by tagging the gate task **immediately
+after the checkbox** — the same position `[WAIVED …]` occupies:
+
+```
+- [x] [INLINE FALLBACK YYYY-MM-DD: agent not registered] **Run this phase's independent
+      verification.** …
+```
+
+**The date stays a literal `YYYY-MM-DD` placeholder in this example, deliberately.** These words
+ship verbatim into every generated plan, so a concrete date here would put a string shaped
+exactly like a real label into plans where no fallback ever occurred — making the audit
+unfindable by the very grep that justifies the label. Detection therefore anchors on a real
+date, and this example cannot match it:
+
+```
+grep -rnE '\[INLINE FALLBACK [0-9]{4}-[0-9]{2}-[0-9]{2}:' _project/plans/
+```
+
+Dated the day the fallback occurred — matching the `[WAIVED YYYY-MM-DD: reason]` convention,
+which stamps the action, not the plan. Neither parser matches the other's prefix, and the two
+tags **can** legitimately share a line: `/dr-ship` appends a waiver to an already-`[x]` item
+when shipping proceeds despite an adverse verdict, and that item may be one this label already
+marks. Order them fallback first, waiver second — *how it was verified*, then *what was decided
+about the result*. `<condition>` is exactly one of:
+
+| Value | When |
+|---|---|
+| `no subagent mechanism` | The harness has no delegation tool at all. |
+| `agent not registered` | A spawn was refused, and `plan-verifier` was **not** among the agents the refusal listed. |
+| `spawn attempted and rejected` | A spawn was refused, and `plan-verifier` **was** listed — it exists, something else refused. |
+| `delegation withheld` | A mechanism exists and `plan-verifier` is registered, but the session withholds delegation, so no spawn was attempted. |
+| `permission uncertain, not resolved` | A mechanism exists, you were unsure whether you could use it, and you did not ask. |
+
+**The last two values exist because the first three cannot describe the incident this rubric
+was written for.** In that case a mechanism was present, the agent *was* registered, and no
+spawn was ever attempted — so there was no refusal to read and none of the first three values
+fit. An agent with no legal value to write is an agent that writes nothing, which is the
+unannotated pass this whole mechanism exists to prevent.
+
+`permission uncertain, not resolved` is deliberately uncomfortable to write. Branch 3 tells you
+to ask; this value is the record that you did not. Write it anyway — it is far better than the
+alternative, and a reviewer seeing it knows exactly what to re-check.
+
+**Read the refusal before naming the condition.** This applies to the second and third values,
+which a refusal distinguishes directly, so there is no reason to guess between them. Measured on
+Claude Code 2.1.220: an unregistered `subagent_type` returns
+`Agent type '…' not found. Available agents: …` and runs nothing. The fourth and fifth values
+have no refusal to read — they are reached without an attempt.
+
+**The first four are not admissions of failure.** On a harness with no delegation primitive, or
+a session that withholds it, the label is the normal, correct operating record — it says which
+path ran, not that something went wrong. Write it plainly and without apology.
+
+## Implementation Plan
+
+### Phase 1: Rewrite dr-init Around AGENTS.md Alone
+
+All paths below are relative to `bundles/project-management/skills/dr-init/` unless stated. This phase delivers the plugin's user-visible contract: the migration gate and the rewritten state flows.
+
+#### Tasks
+
+- [ ] **Create `references/claude-md-migration.md`.** This is the only file besides `SKILL.md` that may name CLAUDE.md. Contents, in this order:
+  1. **When and why** (one short paragraph). Runs when a root `CLAUDE.md` exists with any content, including an empty file or a symlink. It runs before state classification, before the `_claude/` rename offer, and before any other write. Why: Claude Code (v2.1.277+) reads AGENTS.md only when there's no CLAUDE.md, so the project must use AGENTS.md alone.
+  2. **Step 1 — Git state (no prompt).** If `Glob .git/**` matches, run `git status --porcelain AGENTS.md CLAUDE.md` and remember any dirty files for the preview.
+  3. **Step 2 — Split CLAUDE.md into *moved* and *dropped*.**
+     - **Nothing to move** when the content is empty or whitespace, is identical to AGENTS.md (a symlink or a copy), or is only the line `AGENTS.md` (a symlink that Git checked out as a text file on Windows).
+     - **Always drop**, whatever the file's origin: a leading `# CLAUDE.md` title; every `@AGENTS.md` line, which would be a self-import; and any paragraph beginning `The imported AGENTS.md above is the canonical instruction file` or `**Note for Claude Code:** keep this file a thin pointer`.
+     - **Drop only when the file contains a `Plugin: project-management` comment.** That comment proves the plugin generated the file or part of it, and AGENTS.md carries the current version of those pieces. Without it, nothing else is dropped: a user's own `## Project Structure` or `## Available Commands` is user content. (a) Every HTML comment containing `Plugin: project-management`. A one-line comment is just that line. A multi-line comment runs from its `<!--` line through the first line that is exactly `-->` after trimming. Pre-3.0.0 headers close early on an inner `-->`, and the stray lines up to the real closer still belong to the header. (b) The generated intro line beginning `This file provides guidance to Claude Code (claude.ai/code)`. (c) The plugin sections `## Project Structure` (including its `###` subsections), `## Plan Management Workflow`, `## Available Commands` and `## Task Completion Protocol`, but **only where they sit between the plugin comment and `<!-- End of plugin-managed section -->`**. Each runs from its heading to the next `##` heading or the end marker. Any other heading inside that range is user content and moves. (d) `<!-- End of plugin-managed section -->`, the one-line comment directly after it, and a `---` line separated from a dropped comment or the end marker only by blank lines.
+     - **Move** everything else verbatim and in order. That includes `@path` imports, which AGENTS.md expands, and any user section sitting *inside* the old plugin-managed block. Trim leading and trailing blank lines, and collapse runs of blank lines left by drops to one.
+     - The rule, stated in the file: **if unsure whether a piece is plugin-generated, move it.** A duplicate in AGENTS.md is easy to delete. A dropped line may be unrecoverable, because CLAUDE.md may be untracked.
+  4. **Step 3 — Repair stale 3.x text in an existing AGENTS.md.** Write this as its own self-contained `## Stale-text repairs` section. The migration uses it here, and State B uses it on every run (see the `state-b-update.md` task), so it must read correctly for both. Exact-match only; if a string is not found, skip it silently.
+     - Intro. Old: `It is the canonical instruction file for this project — the generated CLAUDE.md is a pointer here.` New: `It is the only instruction file for this project — record new repository guidance here.`
+     - Header comment. Old four lines:
+       ```
+         We recommend running your harness's project-bootstrap command (Claude
+         Code: the built-in `/init`) to scan your codebase and add that content
+         to this file. It will integrate cleanly alongside the plugin-managed
+         sections below.
+       ```
+       New three lines, which must match the template byte for byte:
+       ```
+         Ask your coding agent to scan the codebase and add that content to
+         this file. It will integrate cleanly alongside the plugin-managed
+         sections below.
+       ```
+  5. **Step 4 — Preview and gate.** Show this preview, filled with the real content:
+     ~~~markdown
+     ## /dr-init — CLAUDE.md found
+
+     This project will use AGENTS.md as its only instruction file. Claude Code
+     reads AGENTS.md only when there is no CLAUDE.md, so /dr-init moves
+     CLAUDE.md into AGENTS.md before setting anything up.
+
+     **Moves to the end of AGENTS.md** [— AGENTS.md will be created]:
+
+     ```diff
+     + <!-- Moved from CLAUDE.md by /dr-init on YYYY-MM-DD -->
+     +
+     + <every moved line>
+     ```
+
+     **Dropped** (plugin-generated; AGENTS.md already carries the current version):
+       <one line per dropped piece, e.g. "plugin header comment", "## Plan Management Workflow", "@AGENTS.md import">
+
+     **Also updated in AGENTS.md:** <each repair from Step 3 that applies>
+
+     **Deleted:** CLAUDE.md
+     ~~~
+     If there is nothing to move, replace the Moves block with `**Nothing to move** — CLAUDE.md holds only content the plugin generated.` Omit the Dropped and Also-updated lines when they are empty. If Step 1 found dirty files, add `⚠ Uncommitted changes in <files> — they are carried into the result.` Then ask with AskUserQuestion:
+     > **Question:** Move CLAUDE.md into AGENTS.md and continue? This happens right away, before the rest of /dr-init.
+     >
+     > **Options:**
+     > - **Yes** — move it, delete CLAUDE.md, and continue with /dr-init
+     > - **No** — stop; nothing is changed
+
+     Any answer other than Yes counts as No.
+  6. **Step 5 — Apply (Yes).** Two paths:
+     - **Content to move.** Append the moved block to AGENTS.md: a blank line, the `<!-- Moved from CLAUDE.md by /dr-init on {{CURRENT_DATE}} -->` comment, a blank line, then the content. Use `Edit`-append, or read, concatenate and `Write` if a clean anchor is awkward. If AGENTS.md does not exist, `Write` it with the block. Apply the Step 3 repairs. **Re-read AGENTS.md and confirm the moved block is present verbatim. Only then** delete CLAUDE.md. If the write or the confirmation fails, stop, report, and leave CLAUDE.md in place.
+     - **Nothing to move.** Write nothing to AGENTS.md except the Step 3 repairs, and only if AGENTS.md already exists. Never create an AGENTS.md here: a file holding only the provenance comment would be classified as State C instead of State A's clean scaffold. Then delete CLAUDE.md. There is no block to confirm.
+     - **Deleting.** Run exactly `rm CLAUDE.md` with the Bash tool. `allowed-tools` grants that exact string, so any variant (`rm ./CLAUDE.md`, quoting, flags, another shell tool) triggers a permission prompt.
+     - Say that a later Cancel in the state handler does not undo the move. Record the outcome line for SKILL.md Phase 3: `CLAUDE.md: moved <N> lines into AGENTS.md, then deleted` or `CLAUDE.md: nothing to move (plugin-generated only) — deleted`.
+  7. **Step 6 — Stop (No).** Emit this, then end the run: no rename offer, no state handler.
+     ```
+     ℹ️  Stopped — no changes made.
+     /dr-init sets up projects that use AGENTS.md as their only instruction
+     file. Run it again when you're ready to move CLAUDE.md into AGENTS.md.
+     ```
+- [ ] **Rewrite `SKILL.md`.**
+  - `description`: "Initializes or updates a project with the project-management plugin structure. Creates _project/ directories and a versioned AGENTS.md on fresh projects; verifies and updates outdated plugin-managed sections on existing projects; appends plugin sections to an existing AGENTS.md. If a CLAUDE.md exists, first moves its content into AGENTS.md and deletes it (declining stops the run). Offers the legacy _claude/ → _project/ rename. Use when setting up the plugin in a new project or when plugin template sections have been updated."
+  - `allowed-tools`: add `Bash(rm CLAUDE.md)`.
+  - Line 12: replace the `/init` suggestion with "suggest the user ask their coding agent to add that to AGENTS.md".
+  - Line 14 artifact model: "**AGENTS.md is the only generated guidance file.** It carries the plugin marker and the versioned sections, and every supported harness reads it (Claude Code natively since v2.1.277). Output directories live under **`_project/`**."
+  - Phase 1 evidence: `Read AGENTS.md`; `Glob` for `CLAUDE.md`, `.claude/CLAUDE.md` and `CLAUDE.local.md` at the project root; `Glob _project/**`; `Glob _claude/**`; the marker check on AGENTS.md only.
+  - New **"Move CLAUDE.md first"** step, placed after evidence and before classification: if the root `CLAUDE.md` exists, read and follow `references/claude-md-migration.md`. A No ends the run. After a Yes, re-read AGENTS.md and continue.
+  - Classification uses AGENTS.md only. **A**: missing or empty. **B**: plugin marker present. **C**: content without the marker. Keep only two edge cases: marker present but `_project/` missing → B, and AGENTS.md missing but `_project/` present → A.
+  - The legacy `_claude/` check stays, after the migration step.
+  - Phase 2's git-safety bullet covers AGENTS.md only. Add: if the migration modified AGENTS.md during this run, skip the state handler's uncommitted-changes prompt. The migration preview already disclosed and approved those changes.
+  - Phase 3 summary: include the migration outcome line. If `.claude/CLAUDE.md` exists, emit `⚠ .claude/CLAUDE.md exists — Claude Code reads it instead of AGENTS.md. Move what you need into AGENTS.md and delete it.` If `CLAUDE.local.md` exists, emit `⚠ CLAUDE.local.md exists — while it does, Claude Code reads it instead of AGENTS.md. /dr-init leaves it alone (it's personal and usually gitignored); fold what you need into AGENTS.md and delete it.` The follow-up example changes from "run `/init` for State A" to "add project documentation to AGENTS.md for State A".
+  - Cross-Platform Notes: add `rm CLAUDE.md` as the one approved deletion, since no native tool deletes files, run only after the user says Yes.
+- [ ] **`templates/AGENTS-template.md`**: replace header lines 9–12 with the three new lines from the migration Step 3, and line 22 with `This file provides guidance to coding agents when working with code in this repository. It is the only instruction file for this project — record new repository guidance here.` Leave the versioned sections and markers untouched.
+- [ ] **Delete `templates/CLAUDE-pointer.md`** with `git rm`.
+- [ ] **`references/state-a-fresh.md`**: trigger is "no AGENTS.md, or an empty one". Read only the AGENTS template. Create 8 files in parallel instead of 9 (drop the CLAUDE.md row). Remove the CLAUDE.md line from the success message. Replace the `/init` tip with:
+  ```
+  💡 Tip: Ask your coding agent to scan the codebase and add
+     project-specific documentation (architecture notes, build/test
+     commands, coding conventions) to AGENTS.md, alongside the
+     plugin-managed sections we just added.
+  ```
+  Drop the "CLAUDE.md stays a thin pointer…" sentence from the closing note.
+- [ ] **`references/state-b-update.md`**: delete Step 0 and the whole Legacy Conversion section (L1–L4). Remove "offer the conversion…" from the intro. Step 5 short-circuits on sections and directories only: delete the `CLAUDE.md pointer:` lines, the "(or the pointer was missing)" clause and the pointer-recreation paragraph. Delete the pointer line in Step 9. **Add the stale-text repairs to every run.** Step 1 also reads the `## Stale-text repairs` section of `references/claude-md-migration.md`. Step 4 also checks AGENTS.md for each repair's old text. The Step 5 "nothing to do" short-circuit fires only when no repair is pending. Steps 7–8 show each pending repair as its own diff entry (`# --- Stale plugin text (repair) ---`). Step 9 "Apply" applies them under the same approval. Refer to that section by path. Do not copy its old/new text into `state-b-update.md`, so the repair wording lives in one file. If the migration already repaired the text earlier in this run, nothing is pending. Steps 1–9 are otherwise unchanged.
+- [ ] **`references/state-c-uninitialized.md`**: retitle it "Existing AGENTS.md, No Plugin Structure". Keep a single case: append to the user's AGENTS.md (old Case 1 without the CLAUDE.md parts). Delete Case 2, the pointer-note assembly and the "create from pointer template" line. Git safety covers `git status --porcelain AGENTS.md`. The preview, the Proceed option and the success message lose their CLAUDE.md lines. Line 5 becomes "…what the user or their coding agent would typically write."
+- [ ] **`references/section-versioning.md`**: delete the pre-3.0.0 parenthetical on line 3 and the pointer sentence on line 64.
+- [ ] **Fixture paper-tests** in `.research/fixtures/pm-4.0.0/` (gitignored), one folder per case. Build each input exactly as described, including user lines in the ones that need them. Apply the migration reference's Step 2 and Step 3 rules to each by hand, **reading from the new file, not from memory**. Write `moved.md` (the exact block that would be appended) and `outcome.txt` (the dropped list and the repairs) to each folder, then compare against the expected outcome:
+
+  | Folder | Input | Expected |
+  |---|---|---|
+  | `f1-pointer-3x` | CLAUDE.md = `git show d167153:bundles/project-management/skills/dr-init/templates/CLAUDE-pointer.md` plus `## Claude-only` / `- Prefer the Grep tool.` appended below it. AGENTS.md = the d167153 `AGENTS-template.md` with the date substituted. | Moved: only the two appended lines. Both repairs apply. |
+  | `f2-state-c-note` | CLAUDE.md = `# CLAUDE.md`, a blank line, `## Build`, `` `npm test` ``, then the State C pointer note (`git show d167153:…/references/state-c-uninitialized.md`, lines 79–91, fence stripped). | Moved: `## Build` and `` `npm test` `` only. The title, `---`, marker, `@AGENTS.md` and note paragraph are dropped. |
+  | `f3-legacy-pre3` | CLAUDE.md = `git show 0b87efa:bundles/project-management/skills/dr-init/templates/CLAUDE-template.md` with the date substituted, plus `## Architecture` / `- Hexagonal.` inserted between `## Available Commands` and `## Task Completion Protocol`, plus `## Team notes` / `- Ship Fridays.` below the end marker. No AGENTS.md. | Moved: the Architecture and Team-notes sections only. The whole early-closing header, including its stray lines up to the real `-->`, and all four plugin sections are dropped. AGENTS.md would be created. |
+  | `f4-plain-user` | CLAUDE.md = `# CLAUDE.md`, a blank line, `@docs/conventions.md`, a blank line, `## Style`, `- Tabs.` No AGENTS.md. | Moved: the import line and the Style section. The title is dropped. |
+  | `f5-symlink-text` | CLAUDE.md = the single line `AGENTS.md` | Nothing to move |
+  | `f6-identical` | CLAUDE.md = a byte copy of AGENTS.md | Nothing to move |
+  | `f7-empty` | Empty CLAUDE.md | Nothing to move |
+  | `f8-user-generic-headings` | CLAUDE.md with no plugin marker: `# CLAUDE.md`, a blank line, `## Project Structure`, `- src/ and lib/`, a blank line, `## Available Commands`, `- npm test`. No AGENTS.md. | Moved: both sections, because without the marker, plugin-named headings are user content. Only the title is dropped. |
+  | `f9-state-b-stale` | **State B paper-test, no CLAUDE.md.** AGENTS.md = the d167153 `AGENTS-template.md` with the date substituted, sections current, `_project/` complete. Apply `state-b-update.md` as rewritten, not the migration. Write `outcome.txt` only. | The "nothing to do" short-circuit does **not** fire. The preview lists both repairs (intro, header) as pending. After Apply, lines 7–11 and 21 match the new template exactly. |
+
+  A mismatch means the reference's wording is wrong: fix the reference, not the expectation, then rerun the affected fixtures.
+
+#### Verification
+
+- [ ] `grep -rliE 'claude(\.local)?\.md|CLAUDE-pointer|CLAUDE-template' bundles/project-management/skills/dr-init | sort`. Expected: exactly `…/dr-init/SKILL.md` and `…/dr-init/references/claude-md-migration.md`.
+- [ ] `test ! -e bundles/project-management/skills/dr-init/templates/CLAUDE-pointer.md && git status --porcelain bundles/project-management/skills/dr-init/templates/`. Expected: a `D` entry for `CLAUDE-pointer.md`, and `AGENTS-template.md` modified.
+- [ ] `grep -rnE '/init\b' bundles/project-management/skills/dr-init`. Expected: hits only inside `references/claude-md-migration.md`, in the quoted old header text.
+- [ ] `sed -n '7,11p;21p' bundles/project-management/skills/dr-init/templates/AGENTS-template.md`. Expected: the new header lines and the new intro line exactly. The new header lines must be byte-identical to the "New" block in the migration reference: diff the two extracts.
+- [ ] `grep -n "Bash(rm CLAUDE.md)" bundles/project-management/skills/dr-init/SKILL.md`. Expected: one hit, on the `allowed-tools` line.
+- [ ] Read `state-b-update.md`. Expected: no "Legacy Conversion" heading, no Step 0, no pointer text. Read `state-c-uninitialized.md`. Expected: a single-case flow with no "Case 2".
+- [ ] All nine fixtures have output that matches the expected column: `moved.md` and `outcome.txt` for f1–f8, and `outcome.txt` for f9.
+- [ ] `grep -nE 'claude-md-migration\.md|Stale-text repairs' bundles/project-management/skills/dr-init/references/state-b-update.md`. Expected: State B points at the repairs section. `grep -c 'the generated CLAUDE.md is a pointer' bundles/project-management/skills/dr-init/references/state-b-update.md`. Expected: `0`, because the repair wording is not copied.
+
+#### Acceptance Criteria
+
+- In `SKILL.md`, the migration step comes before state classification, before the `_claude/` rename offer and before any write. State classification reads AGENTS.md evidence only.
+- The migration reference's gate has exactly two outcomes. Yes with content to move: it moves, repairs, confirms by re-reading, and only then deletes. Yes with nothing to move: it applies repairs only to an existing AGENTS.md, never creates one, then deletes. No emits the stop message and ends the run with no other step executed.
+- The plugin-specific drops (header comment, generated intro, the four plugin sections, end markers) apply only to a CLAUDE.md carrying a `Plugin: project-management` comment. The four sections are dropped only between that comment and the end marker.
+- No dr-init flow creates, appends to, or offers to keep a CLAUDE.md, and nothing references the deleted pointer template.
+- The drop list covers all three generated shapes (3.x pointer, State C note, pre-3.0.0 file). The "if unsure, move it" rule is stated. All nine fixtures match their expected outcomes when the rules are read from the file, including f8, where plugin-named headings in an unmarked file move.
+- State B checks the stale-text repairs on every run. Pending repairs appear in its preview and apply under the same Apply approval, and "nothing to do" fires only when none are pending (f9). The repair wording lives only in the migration reference's `## Stale-text repairs` section.
+- `.claude/CLAUDE.md` and `CLAUDE.local.md` produce warnings only and are never read for moving.
+- AGENTS-template's versioned sections are byte-unchanged (`git diff` touches only the header lines and line 22), so no section version bump is owed.
+
+#### Phase Exit Gate
+
+<!-- verifier-recommendation: yes — this phase is the plugin's user-visible contract, and the migration deletes a user file; a drop rule that is too broad loses user content, and only a semantic read against the fixtures catches that -->
+
+- [ ] Run Definition of Done commands (see plan header). All must pass.
+- [ ] **Run this phase's independent verification.** The Verification Policy in this plan's header is the user's standing request for independent verification — for the outcome, not for any particular mechanism. The plan is not what withholds permission, so never skip on the plan's account; if your harness withholds delegation, that is branch 2.
+  1. **Delegated (preferred)** — if the harness supports subagents, `plan-verifier` is registered, and the session does not withhold delegation: delegate with this plan's path and phase number, then wait for the report. *(Claude Code: `subagent_type="project-management:plan-verifier"`.)*
+  2. **Inline fallback** — otherwise verify this phase yourself against the **Inline Verification Rubric** in this plan's header: a fresh, skeptical pass that **records a verdict per item** — PASS / FAIL / UNVERIFIED for every task, Verification item, and Acceptance Criterion, each with its evidence. Then tag this task immediately after its checkbox: `[INLINE FALLBACK YYYY-MM-DD: <condition>]`. The rubric defines the condition values and how to choose between them.
+  3. **Never silently self-pass** — if a mechanism exists but you are unsure you may use it, ask. Uncertainty about permission is not inability. If you do not ask, branch 2 with its label is still required: an unannotated pass is the one outcome this gate exists to prevent.
+- [ ] **Apply the verification result.** Flip `[x]` only for items the verification returned PASS — whether that came from the verifier or from your own inline pass. Keep `[ ]` for FAIL and UNVERIFIED with a short note referencing the reasoning.
+- [ ] **Agent self-review.** Re-read Tasks above, confirm the verification's findings are reflected, note any UNVERIFIEDs that need follow-up in future phases or the Retro.
+
+### Phase 2: Sweep the Other Skills and the Bundle README
+
+This phase edits files outside `skills/dr-init/` only. It describes dr-init's new behavior as delivered in Phase 1: AGENTS.md only, plus a CLAUDE.md migration gate where No stops the run.
+
+#### Tasks
+
+- [ ] **`skills/dr-plan/references/create-mode.md` Phase 5**: delete list item 2 (CLAUDE.md) and renumber items 3–6 as 2–5. Item 1's parenthetical becomes "(the project's instruction file)". Do not touch any other part of the file. Its Phase 7 gate blocks are covered by a drift invariant.
+- [ ] **`skills/dr-plan/references/refine-mode.md:119`**: change to "infer commands from `AGENTS.md` / `package.json` / etc."
+- [ ] **`skills/dr-prd/references/create-mode.md:204`**: end the note with "…plus a versioned AGENTS.md."
+- [ ] **Bundle `README.md`.**
+  - Line 69: "…with the standard directory structure and a canonical AGENTS.md."
+  - Line 86: "Generates **AGENTS.md**, the project's only agent-guidance file, carrying the versioned plugin sections. Every supported harness reads it (Claude Code natively since v2.1.277)."
+  - Add a new bullet directly after it. This is the **only** README line that may name CLAUDE.md: "- **Moves an existing `CLAUDE.md` into AGENTS.md first**: Claude Code (v2.1.277+) reads AGENTS.md only when no CLAUDE.md exists, so /dr-init previews what will move, asks yes/no, then deletes CLAUDE.md. Answering no stops /dr-init without changes."
+  - Line 87: end with "…ask your coding agent to add it to AGENTS.md".
+  - Lines 89–91 states: *Fresh*, no `AGENTS.md`. *Already initialized*, plugin marker in AGENTS.md; keep the diff-preview text and offer the `_claude/` → `_project/` rename to pre-3.0.0 layouts. *Has AGENTS.md, no plugin structure*.
+  - Line 93: "warns if `AGENTS.md` has uncommitted changes…".
+  - Line 334: drop `CLAUDE.md` from the list.
+  - Lines 478–479: the tree ends with `└── AGENTS.md              # Canonical agent guidance (plugin-managed sections)`.
+  - Lines 733–743: heading "AGENTS.md was modified unexpectedly". Keep four cases: fresh scaffold, which creates AGENTS.md when none exists; section update; append, without the pointer clause; and "**Instruction-file move**: moves another instruction file's content to the end of AGENTS.md (see `/dr-init` above; always previewed and asked first)". The closing line uses `git log -- AGENTS.md`.
+
+#### Verification
+
+- [ ] `grep -rliE 'claude(\.local)?\.md|CLAUDE-pointer|CLAUDE-template' bundles/project-management --exclude=CHANGELOG.md | sort`. Expected: exactly `bundles/project-management/README.md`, `…/skills/dr-init/SKILL.md` and `…/skills/dr-init/references/claude-md-migration.md`.
+- [ ] `grep -ciE 'claude(\.local)?\.md' bundles/project-management/README.md`. Expected: `1`.
+- [ ] `grep -rnE '/init\b' bundles/project-management --exclude=CHANGELOG.md`. Expected: hits only in `skills/dr-init/references/claude-md-migration.md`.
+- [ ] Gate-block drift check from `create-mode.md` Phase 7, "Hold the gate blocks byte-identical", run from `bundles/project-management/skills/dr-plan/`. Expected output:
+  ```
+  present 3 (want 3) · distinct 1 (want 1)
+  present 2 (want 2) · distinct 1 (want 1)
+  present 3 (want 3) · distinct 1 (want 1)
+  ```
+- [ ] `git diff --stat -- bundles/project-management/skills/dr-plan bundles/project-management/skills/dr-prd`. Expected: only `create-mode.md` (dr-plan), `refine-mode.md` and `create-mode.md` (dr-prd), each with a handful of lines changed.
+
+#### Acceptance Criteria
+
+- The bundle-wide mention scope holds: CLAUDE.md appears only in dr-init's `SKILL.md`, the migration reference and one README line. CHANGELOG.md is excluded because it is history.
+- dr-plan's Definition-of-Done source list reads AGENTS.md → package.json → Cargo.toml → go.mod → pyproject.toml/setup.py, numbered 1–5.
+- The README's dr-init section describes Phase 1's behavior: AGENTS.md only, a migration gate where No stops, and no `/init` advice. The troubleshooting section lists the four ways dr-init writes AGENTS.md.
+- The dr-plan gate blocks are unchanged: the drift check reports the wanted counts.
+
+#### Phase Exit Gate
+
+<!-- verifier-recommendation: no — documentation and one-line reference edits; the grep invariants and the drift check cover the surface mechanically -->
+
+- [ ] Run Definition of Done commands (see plan header). All must pass.
+- [ ] **Agent self-review.** Re-read all Tasks above. Flip `[x]` only for tasks whose Verification passed. Any failing or skipped task stays `[ ]` with a short note explaining why. Under-report beats over-report.
+
+### Phase 3: Release 4.0.0 and Dogfood on This Repo
+
+Entry condition: the bundle's skills already carry the AGENTS.md-only behavior and the migration gate, as Phases 1–2 delivered them. This phase needs the user twice. `/dr-init` has `disable-model-invocation: true`, so only the user can invoke it. Ask them, and wait for them.
+
+#### Tasks
+
+- [ ] **Version ritual.** Set `version` to `4.0.0` in `bundles/project-management/.claude-plugin/plugin.json`, in `bundles/project-management/package.json`, and in the project-management entry of `.claude-plugin/marketplace.json`.
+- [ ] **CHANGELOG.** Add `## [4.0.0] - <current date>` at the top of `bundles/project-management/CHANGELOG.md`. Start with a one-paragraph lead: Claude Code v2.1.277 reads AGENTS.md natively and any CLAUDE.md blocks it, so AGENTS.md becomes the only instruction file. **Migration:** run `/dr-init`. It moves CLAUDE.md into AGENTS.md and deletes it; declining stops the run. **Requires Claude Code v2.1.277+.** Sessions that can't read AGENTS.md directly (Bedrock, Vertex, Foundry, telemetry disabled) lose project instructions.
+  - **Removed**: CLAUDE.md pointer generation and `templates/CLAUDE-pointer.md`; the State C pointer note; the pre-3.0.0 Legacy Conversion sub-flow and its keep-legacy option; every `/init` recommendation; CLAUDE.md as a dr-plan Definition-of-Done source.
+  - **Changed**: BREAKING, dr-init classifies on AGENTS.md alone; BREAKING, a CLAUDE.md triggers a mandatory yes/no migration gate; the template header and intro wording.
+  - **Added**: `references/claude-md-migration.md` (drop/move rules, and exact-match repairs of 3.x text that State B also offers on every run, so projects whose CLAUDE.md was deleted by hand get fixed too); `.claude/CLAUDE.md` and `CLAUDE.local.md` warnings; `rm CLAUDE.md` in `allowed-tools`.
+- [ ] **Live No-run** (this needs the user). Snapshot first: `git status --porcelain > .research/fixtures/pm-4.0.0/before.txt; git hash-object AGENTS.md CLAUDE.md >> .research/fixtures/pm-4.0.0/before.txt`. Ask the user to run `/reload-plugins` if available (otherwise start a new session), then run `/dr-init` in this repo and answer **No**. Then take the same snapshot into `after.txt`.
+- [ ] **Live Yes-run** (this needs the user). Ask the user to run `/dr-init` again and answer **Yes**. Expected in the transcript: the preview says *Nothing to move*, because this repo's CLAUDE.md is the generated pointer with nothing below its managed block. It lists the dropped pointer pieces and both AGENTS.md repairs. Deleted: CLAUDE.md. State B short-circuits: all sections are current, directories are complete, and no stale text is left because the migration already repaired it. The summary carries the migration outcome line. There are no `.claude/CLAUDE.md` or `CLAUDE.local.md` warnings, because neither exists.
+- [ ] **Repo docs.** `README.md:119`: delete the parenthetical "([CLAUDE.md](./CLAUDE.md) is a thin pointer to it)". Root `AGENTS.md:278`: the parenthetical becomes "(dr-init's only generated guidance file)", and delete the sentence about the generated CLAUDE.md pointer. `AGENTS.md:292`: "…compares them against the user's AGENTS.md to detect outdated or missing sections". Leave the `${CLAUDE_PLUGIN_ROOT}` and `${CLAUDE_SKILL_DIR}` mentions alone: they are environment variables, not the file.
+- [ ] **New-session check** (this needs the user). Ask the user to start a fresh Claude Code session in this repo and run `/memory`.
+
+#### Verification
+
+- [ ] `grep -rn '"version"' bundles/project-management/.claude-plugin/plugin.json bundles/project-management/package.json; grep -n -A3 '"name": "project-management"' .claude-plugin/marketplace.json`. Expected: `4.0.0` in all three, and `grep -rn '3\.4\.0'` finds none of the three manifests.
+- [ ] `diff .research/fixtures/pm-4.0.0/before.txt .research/fixtures/pm-4.0.0/after.txt`. Expected: no output. The No-run changed nothing.
+- [ ] After the Yes-run, `git status --porcelain -- CLAUDE.md AGENTS.md` shows ` D CLAUDE.md` and ` M AGENTS.md`, `test ! -e CLAUDE.md` succeeds, and `git diff AGENTS.md` shows exactly the two repairs (intro line and header lines), before the manual repo-doc edits.
+- [ ] `git grep -nIiE 'claude(\.local)?\.md' -- . ':!_project' ':!**/CHANGELOG.md'`. Expected: hits only in `bundles/project-management/README.md` (one line), `bundles/project-management/skills/dr-init/SKILL.md` and `bundles/project-management/skills/dr-init/references/claude-md-migration.md`.
+- [ ] The user reports that `/memory` in the new session lists `AGENTS.md`, or that session start showed `no CLAUDE.md found; AGENTS.md loaded: …`.
+
+#### Acceptance Criteria
+
+- The three manifests and the CHANGELOG agree on `4.0.0`. The CHANGELOG entry names the Claude Code v2.1.277 requirement and the migration path, and uses Removed / Changed / Added.
+- The live No-run left the working tree byte-identical. This is the user's explicit requirement that "no" does not continue.
+- The live Yes-run migrated this repo exactly as the migration reference predicts for a clean 3.x pointer: nothing moved, two repairs, CLAUDE.md deleted, State B current.
+- Outside `_project/` and the CHANGELOGs, the repo mentions CLAUDE.md only in the three allowed bundle files.
+- A fresh Claude Code session in this repo loads AGENTS.md directly.
+
+#### Phase Exit Gate
+
+<!-- verifier-recommendation: no — version bumps and doc edits are mechanical, and the live-run outcomes are checked directly by the snapshot diff, git status and the repo-wide grep -->
+
+- [ ] Run Definition of Done commands (see plan header). All must pass.
+- [ ] **Agent self-review.** Re-read all Tasks above. Flip `[x]` only for tasks whose Verification passed. Any failing or skipped task stays `[ ]` with a short note explaining why. Under-report beats over-report.
+
+## Refinement History
+
+- **2026-09-23:** Initial plan creation.
+- **2026-09-23:** Resolved 0 blocking + 2 non-blocking questions and verified 0 assumptions (the live-reload assumption was skipped and stays uncertain until Phase 3). Verification Policy kept at Adaptive. Deciding that State B repairs stale 3.x text on every run added the shared `## Stale-text repairs` section, the State B wiring, fixture f9, and a new Success Criterion.
+
+## Completion
+
+After the final phase's Exit Gate passes, the executing agent performs these steps without prompting the user:
+
+1. Populate the Retro section below from observable execution signals (what worked, what didn't, learnings). Write in terse bullet form.
+2. Move this plan file from `_project/plans/in_progress/` to `_project/plans/completed/`.
+3. Suggest the user run `/dr-ship` to commit, push, and open a PR populated from this plan. (If steps 1–2 were missed, `/dr-ship` verifies and backstops them.)
+
+If the final phase's Exit Gate has unresolved FAILs or UNVERIFIEDs after the allowed retries, do NOT move the file or write the retro. Escalate to the user with full context and stop.
+
+## Retro
+
+<!-- populated at completion — do not hand-edit before execution finishes -->
+
+### What worked
+
+- [Populated at completion]
+
+### What didn't
+
+- [Populated at completion]
+
+### Learnings
+
+- [Populated at completion — things a future plan would do differently]
