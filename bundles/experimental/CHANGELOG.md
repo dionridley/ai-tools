@@ -5,6 +5,12 @@ All notable changes to the Experimental plugin will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.12.0] - 2026-09-23
+
+### Removed
+
+- **`pencil` skill** — removed along with its README section and manifest entries (the `./skills/pencil` path and the `design`, `pencil`, and `pen.dev` keywords). Pencil has since fixed the behaviour the skill worked around, and a dedicated Pencil MCP now covers this workflow, so the skill's safeguards — the preflight binding against the silent `filePath` fallback and the rest — are no longer needed. `mvp` is unchanged.
+
 ## [0.11.0] - 2026-07-27
 
 ### Added
