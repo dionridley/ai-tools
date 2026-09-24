@@ -6,9 +6,8 @@
 
   Project-specific documentation (architecture, build/test/lint commands,
   coding conventions, etc.) is NOT the responsibility of this plugin.
-  We recommend running your harness's project-bootstrap command (Claude
-  Code: the built-in `/init`) to scan your codebase and add that content
-  to this file. It will integrate cleanly alongside the plugin-managed
+  Ask your coding agent to scan the codebase and add that content to
+  this file. It will integrate cleanly alongside the plugin-managed
   sections below.
 
   Sections managed by the plugin have version markers — HTML comments
@@ -19,7 +18,7 @@
 
 # AGENTS.md
 
-This file provides guidance to coding agents when working with code in this repository. It is the canonical instruction file for this project — the generated CLAUDE.md is a pointer here.
+This file provides guidance to coding agents when working with code in this repository. It is the only instruction file for this project — record new repository guidance here.
 
 ## Project Structure
 

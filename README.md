@@ -116,7 +116,7 @@ pi/ · claude/                     # cross-cutting harness-exclusive artifacts (
 
 ## Contributing
 
-See [AGENTS.md](./AGENTS.md) for development guidelines, the repository structure, and the release ritual — it is the canonical instruction file for every coding agent working here ([CLAUDE.md](./CLAUDE.md) is a thin pointer to it).
+See [AGENTS.md](./AGENTS.md) for development guidelines, the repository structure, and the release ritual — it is the canonical instruction file for every coding agent working here.
 
 ## License
 

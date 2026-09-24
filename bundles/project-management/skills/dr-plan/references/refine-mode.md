@@ -116,7 +116,7 @@ Store the choice as `migrate_structure` (boolean). Default is **No** if the user
 - If `migrate_structure` is true, plan the section mapping:
   - Old `## Implementation Notes` → drop (Retro covers its purpose; Refinement History covers decisions).
   - Old `**Estimated Time:**` on phases → drop.
-  - Missing `## Definition of Done` → add; infer commands from `AGENTS.md` / `CLAUDE.md` / `package.json` / etc. (See create-mode.md Phase 5.)
+  - Missing `## Definition of Done` → add; infer commands from `AGENTS.md` / `package.json` / etc. (See create-mode.md Phase 5.)
   - Missing `#### Phase Exit Gate` per phase → add with `verifier-recommendation: no` as safe default (no model-level risk evaluation without extra signal). Because the default is `no`, the gate renders no verification task and the plan needs no `## Inline Verification Rubric` section — the two stay consistent by default. **If a refinement ever gives a phase `verifier-recommendation: yes`, the section becomes required**: generate it from `references/verification-rubric.md` (everything above that file's `## Report` heading, headings demoted one level), never retype it. A gate whose inline branch points at a section that isn't there sends a falling-back agent nowhere.
   - Missing `## Completion` + `## Retro` → add.
   - Missing `Execution Policy` subsection under `Open Questions & Decisions` → add with `Verification Policy [OPEN] Current: Adaptive (default)`.

@@ -1,6 +1,6 @@
 # Section Versioning Reference
 
-This document explains how plugin-managed sections in `AGENTS.md` are version-tracked, and how `/dr-init` uses these versions to detect and update outdated content. (Before 3.0.0 the sections lived in a generated CLAUDE.md — a plugin marker found there with no marker-bearing AGENTS.md identifies a legacy project; State B offers the conversion.)
+This document explains how plugin-managed sections in `AGENTS.md` are version-tracked, and how `/dr-init` uses these versions to detect and update outdated content.
 
 Read this when handling State B (already-initialized) or when maintaining the template.
 
@@ -61,7 +61,7 @@ When the user approves updates in State B:
 
 2. **Missing sections:** Use `Edit` to insert the section from the template immediately before the `<!-- End of plugin-managed section -->` marker. If that marker doesn't exist in the user's file, append the section at the end.
 
-3. **Preserve everything else:** Content outside the specific sections being updated is never touched. The user's customizations, additions, and project-specific content remain untouched. The CLAUDE.md pointer is not version-tracked — State B only recreates it when missing.
+3. **Preserve everything else:** Content outside the specific sections being updated is never touched. The user's customizations, additions, and project-specific content remain untouched.
 
 ## Adding a New Versioned Section (Maintainer Note)
 

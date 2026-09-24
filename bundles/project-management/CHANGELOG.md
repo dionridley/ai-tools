@@ -5,6 +5,39 @@ All notable changes to the Project Management Plugin will be documented in this 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.0.0] - 2026-09-24
+
+AGENTS.md becomes the plugin's only instruction file (plan 015). Claude Code v2.1.277 reads AGENTS.md natively, but only when no CLAUDE.md exists in the working directory or above it. So the CLAUDE.md pointer this plugin generated since 3.0.0 now *blocks* AGENTS.md instead of forwarding to it. **Migration:** run `/dr-init`. If a CLAUDE.md exists, it previews the change, asks once, moves the content to the end of AGENTS.md and deletes CLAUDE.md. Answering no stops the run with nothing changed. **Requires Claude Code v2.1.277+.** Sessions that can't read AGENTS.md directly (Bedrock, Vertex, Foundry, or telemetry disabled) get no project instructions from this plugin.
+
+### Removed
+
+- **CLAUDE.md generation**, meaning `templates/CLAUDE-pointer.md` and the pointer that State A created.
+- **The State C pointer note** that was appended to an existing CLAUDE.md, along with State C's CLAUDE.md-only case.
+- **The pre-3.0.0 Legacy Conversion sub-flow** in State B, including its **Skip** option that kept the CLAUDE.md layout. Pre-3.0.0 CLAUDE.md files now go through the move below.
+- **Every `/init` recommendation**, from the template header, the State A tip, SKILL.md and the README. `/init` still writes CLAUDE.md, which would recreate the file that blocks AGENTS.md. The advice is now to ask your coding agent to add project documentation to AGENTS.md.
+- **CLAUDE.md as a `/dr-plan` Definition-of-Done source.** The precedence list now starts at AGENTS.md.
+
+### Changed
+
+- **BREAKING: `/dr-init` classifies projects on AGENTS.md alone.** A: missing or empty. B: plugin marker present. C: content, no marker. An AGENTS.md created by the CLAUDE.md move is always C, and State A now refuses to write over an AGENTS.md that has content.
+- **BREAKING: a root CLAUDE.md triggers a mandatory yes/no move before anything else runs**, including the `_claude/` rename offer.
+- **Template header and intro wording.** "the generated CLAUDE.md is a pointer here" became "record new repository guidance here", and the `/init` advice became "Ask your coding agent…". No versioned section changed, so no section version bump.
+- **State B repairs that stale 3.x wording on every run**, so projects whose CLAUDE.md was deleted by hand are fixed too. The repairs are shown in the diff preview and applied under the same Apply.
+
+### Added
+
+- **`skills/dr-init/references/claude-md-migration.md`**, which covers:
+  - The drop/move rules: plugin-generated pointer text, marker comments and plugin sections are dropped, and everything else moves verbatim.
+  - "If unsure, move it."
+  - An exact-match `## Stale-text repairs` section, each repair with a single-line Grep `Detect` pattern, shared with State B.
+  - A Grep for the provenance comment before `rm`.
+  - Handling for a CLAUDE.md that is identical to AGENTS.md, or a symlink to it.
+- **Warnings for `.claude/CLAUDE.md` and `CLAUDE.local.md`**, which also block AGENTS.md. They are warned about but never moved: `CLAUDE.local.md` is personal and usually gitignored.
+- **`Bash(rm CLAUDE.md)` in `/dr-init`'s `allowed-tools`.** It is the one approved deletion, run exactly as written. Verified to run without a permission prompt in default permission mode.
+- **A Stale plugin text line in State B's reports**, so "nothing found" is distinguishable from "not checked".
+
+Live-tested on Claude Code 2.1.280 (Sonnet 5, medium effort) in scratch projects covering these cases: the pointer with user content (No and Yes), a CLAUDE.md-only project, stale 3.x text with no CLAUDE.md, and a fresh folder. Three instruction gaps surfaced and were closed before release. Repair detection relied on reading, the confirm-before-delete step was skippable, and a move-created AGENTS.md was routed to State A.
+
 ## [3.4.0] - 2026-08-02
 
 Plan-verifier context reduction, a report-shape change, and a correctness fix to generated gate text (plan 014). Origin: a verifier run takes 8–20 minutes per phase, and the obvious explanations were wrong. Tool execution is ~40 ms; the agent already batches independent calls unprompted. The cost is per-turn model work over a plan that is re-sent in full on every turn.
