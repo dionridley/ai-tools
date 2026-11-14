@@ -376,6 +376,15 @@ When a PR URL is provided:
 
 The agent is a deliberate iteration surface. Common tuning dimensions: skepticism level (how readily `UNVERIFIED` is chosen over `PASS`), evidence thresholds (what counts as direct evidence vs. inference), and the scope boundary (keeping it out of architecture advice). Contributions welcome via PR.
 
+#### Which model it runs on
+
+Since 4.1.0 the verifier is **pinned to Opus** (`model: opus` in the agent frontmatter) instead of inheriting the session model. Two rules, in priority order:
+
+1. **Never above Opus.** A session on a pricier model such as Fable gets an Opus verifier. This is enforced by the frontmatter, so it also covers plans generated before 4.1.0.
+2. **Match a smaller session.** A session on Sonnet or Haiku is told, at each spawn site, to pass its own model as the Agent tool's `model` override, so the verifier matches it. This is an instruction, not an enforcement — if the caller skips it, the verifier runs on Opus. Plans generated before 4.1.0 don't carry the instruction.
+
+Detection per model tier has not been measured: the regression baseline below was recorded with the verifier inheriting the session model, and that session's model was not recorded.
+
 #### What it loads, and what it may look at
 
 Since 3.4.0 the verifier **preloads the target phase plus four named top-matter sections** — `Metadata`, `Definition of Done`, `Success Criteria`, `Execution Policy` — rather than the whole plan. On a 92KB plan that is ~18% of the file instead of 100%, and the difference is re-sent on every turn, so it compounds.

@@ -5,6 +5,19 @@ All notable changes to the Project Management Plugin will be documented in this 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.1.0] - 2026-11-14
+
+The plan verifier no longer inherits the session model. On a Fable session it was running on Fable, which is the expensive case this release closes.
+
+### Changed
+
+- **`plan-verifier` is pinned to Opus** via `model: opus` in the agent frontmatter. A session on a pricier model (Fable) now gets an Opus verifier. This applies to existing plans too, since it lives in the agent, not the plan.
+- **Sonnet and Haiku sessions pass their own model to the verifier.** The delegated-spawn instruction in the plan template, `/dr-plan` create and question-resolution modes, and `/dr-ship --verify` preflight now tells the caller to pass its model as the Agent tool's `model` override when it is on Sonnet or Haiku, and to leave `model` unset otherwise. This is instruction-based: a missed override falls back to Opus. Plans generated before this release don't carry the instruction and verify on Opus.
+
+The verifier regression harness was run once per fixture on Opus and once on Sonnet (2026-11-14, `CLAUDE_EFFORT=medium`, Claude Code 2.1.325). Neither model scored below the recorded per-fixture detection floor, with no false positives. That is a single run each under different conditions from the baseline (`xhigh`, 2.1.220, session model not recorded), so it is a spot check, not a per-model comparison.
+
+Model routing was checked live on Claude Code: a fresh Fable session spawning the verifier with no `model` got Opus, and a spawn passing `model: sonnet` got Sonnet.
+
 ## [4.0.0] - 2026-09-24
 
 AGENTS.md becomes the plugin's only instruction file (plan 015). Claude Code v2.1.277 reads AGENTS.md natively, but only when no CLAUDE.md exists in the working directory or above it. So the CLAUDE.md pointer this plugin generated since 3.0.0 now *blocks* AGENTS.md instead of forwarding to it. **Migration:** run `/dr-init`. If a CLAUDE.md exists, it previews the change, asks once, moves the content to the end of AGENTS.md and deletes CLAUDE.md. Answering no stops the run with nothing changed. **Requires Claude Code v2.1.277+.** Sessions that can't read AGENTS.md directly (Bedrock, Vertex, Foundry, or telemetry disabled) get no project instructions from this plugin.
