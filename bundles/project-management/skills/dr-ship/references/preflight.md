@@ -48,7 +48,7 @@ Do **not** display the audit as its own prose — the results feed the Ship Repo
 
 Run independent verification of the final phase. Three branches, in order:
 
-1. **Delegated (preferred)** — if the harness supports subagents, `plan-verifier` is registered, and the session does not withhold delegation: spawn it via the Agent tool with `subagent_type="project-management:plan-verifier"`, passing the plan file path and the final phase number, then wait for its report.
+1. **Delegated (preferred)** — if the harness supports subagents, `plan-verifier` is registered, and the session does not withhold delegation: spawn it via the Agent tool with `subagent_type="project-management:plan-verifier"`, passing the plan file path and the final phase number, then wait for its report. The agent is pinned to Opus, so it never runs on a pricier session model such as Fable — leave `model` unset. The one exception: if this session is itself on Sonnet or Haiku, pass that same model as `model` so the verifier matches it.
 2. **Inline fallback** — otherwise verify the final phase yourself against `../dr-plan/references/verification-rubric.md` (in the sibling `dr-plan` skill, relative to this skill's root), recording a verdict per item.
 
    **Do not write an `[INLINE FALLBACK …]` tag here.** The rubric instructs a *Phase Exit Gate* caller to tag its gate task; that instruction does not apply to `/dr-ship`, for two reasons. Preflight is **read-only** (see the top of this file) — it writes nothing before the gate approves. And the tag would be false: a gate task records how *that phase* was verified, not how `/dr-ship` verified it afterwards. Report the branch in the Ship Report's `Verifier` row, which exists for exactly this.

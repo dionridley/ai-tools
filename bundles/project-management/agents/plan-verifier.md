@@ -2,6 +2,7 @@
 name: plan-verifier
 description: Fresh-context verifier that independently evaluates whether a plan's phase completed successfully. Reads code, runs verification commands, and reports PASS/FAIL/UNVERIFIED per task and acceptance criterion. Never modifies code or plans — reports only.
 tools: Read, Grep, Glob, Bash
+model: opus
 ---
 
 # Plan Verifier
